@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -291,6 +291,69 @@ async def analyze_case_study(data: dict = None):
         return json.loads(result_str)
     except:
         return {"hoshinoAnalysis":"呜嘿～大叔没完全分析出来","involvedFields":[],"keyTerms":[],"learningPath":[],"careerDirections":""}
+
+@app.post("/api/analyze-pdf")
+async def analyze_pdf(file: UploadFile = File(...)):
+    """接受PDF文件上传并分析"""
+    if not file.filename.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="只接受PDF文件")
+    
+    import PyPDF2
+    import tempfile
+    
+    # 保存上传的PDF到临时文件
+    content = await file.read()
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+        tmp.write(content)
+        tmp_path = tmp.name
+    
+    try:
+        # 提取文本
+        text = ""
+        with open(tmp_path, 'rb') as f:
+            reader = PyPDF2.PdfReader(f)
+        import os
+        with open(tmp_path, 'rb') as f:
+            reader = PyPDF2.PdfReader(f)
+            for page_num, page in enumerate(reader.pages, 1):
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n\n--- \u7b2c" + str(page_num) + "\u9875 ---\n\n"
+        os.unlink(tmp_path)
+        
+        if not text.strip() or len(text.strip()) < 50:
+            return {"error": "PDF文本提取失败，可能为扫描版PDF", "text": "", "knownTerms": [], "analysis": {}, "translation": ""}
+        
+        # 截取前15000字符分析
+        text = text[:15000]
+        
+        # 提取术语
+        known_terms = extract_terms_from_text(text)
+        
+        # LLM分析
+        llm_result = analyze_paper_with_llm(text, title=file.filename.replace('.pdf', ''))
+        
+        return {
+            "knownTerms": [
+                {
+                    "term": t["term"],
+                    "fullName": t["fullName"],
+                    "category": t["category"],
+                    "difficulty": t["difficulty"],
+                    "explanation": t["explanation"],
+                    "hoshinoNote": t.get("hoshinoNote", ""),
+                    "landmarkPapers": t.get("landmarkPapers", []),
+                    "prerequisiteTerms": t.get("prerequisiteTerms", []),
+                }
+                for t in known_terms
+            ],
+            "analysis": llm_result,
+            "translation": llm_result.get("translation", ""),
+            "text": text[:5000],
+        }
+    except Exception as e:
+        return {"error": str(e), "text": ""}
+
 
 @app.post("/api/analyze")
 async def analyze_text(request: PaperAnalysis):

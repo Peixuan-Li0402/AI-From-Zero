@@ -46,6 +46,9 @@
         <button id="btnExample" class="btn secondary">💡 试试示例</button>
         <span id="loadingStatus" class="loading-status" hidden>⏳ 大叔正在读论文…っす</span>
       </div>
+            <label for="pdfUpload" class="btn secondary" style="cursor:pointer">📄 上传PDF</label>
+            <input type="file" id="pdfUpload" accept=".pdf" style="display:none">
+            <span id="pdfName" style="font-size:12px;color:var(--muted)"></span>
     </div>
 
     <!-- 分析结果区域 -->
@@ -308,6 +311,38 @@ let _lastKnownTerms = [];
 let _lastTranslation = "";
 
 function renderAnalysis(data, rawText) {
+
+// PDF upload handler
+var pdfData = null;
+var pdfFileName = "";
+document.getElementById("pdfUpload").addEventListener("change", async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  pdfFileName = file.name;
+  document.getElementById("pdfName").textContent = "\uD83D\uDCC4 " + file.name;
+  document.getElementById("loadingStatus").hidden = false;
+  document.getElementById("btnAnalyze").disabled = true;
+  addChatMessage("\uD83D\uDCC4 \u5927\u53d4\u6b63\u5728\u8BFBPDF\u2026\u3063\u3059");
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const resp = await fetch(API_BASE + "/api/analyze-pdf", { method: "POST", body: formData });
+    const data = await resp.json();
+    if (data.error) { addChatMessage("\uD83D\uDE05 " + data.error); return; }
+    pdfData = data;
+    document.getElementById("analysisResults").hidden = false;
+    document.getElementById("paperSummary").textContent = data.analysis.summary || "（暂无摘要）";
+    document.getElementById("hoshinoComment").innerHTML = data.analysis.hoshinoNote
+      ? '<span class="hoshino-icon">\uD83D\uDC3E</span> ' + data.analysis.hoshinoNote : "";
+    renderAnalysis(data, data.text || "");
+    addChatMessage("\uD83D\uDCC4 \u8BFB\u5B8CPDF\u4E86\u3063\u3059\uff01\u627E\u5230 " + data.knownTerms.length + " \u4E2A\u672F\u8BED\u3002");
+  } catch (err) { addChatMessage("\uD83D\uDE35 PDF\u5206\u6790\u51FA\u9519\uFF1A" + err.message); }
+  finally {
+    document.getElementById("loadingStatus").hidden = true;
+    document.getElementById("btnAnalyze").disabled = false;
+  }
+});
+
   const { knownTerms, analysis, translation } = data;
   _lastRawText = rawText;
   _lastKnownTerms = knownTerms;
