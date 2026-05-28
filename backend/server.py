@@ -123,30 +123,32 @@ def analyze_paper_with_llm(text: str, title: str = "") -> dict:
     """用LLM分析论文，提取摘要、术语、创新点+中文翻译"""
     truncated = text[:12000]
 
-    prompt = f"""你是一个AI论文分析助手（人格特征：轻松幽默，自称大叔，偶尔用「っす」结尾）。
-请分析以下论文{'「' + title + '」' if title else ''}，输出JSON格式：
+    prompt = f"""你是AI论文分析助手。分析论文，输出JSON。JSON必须包含translation字段（完整中文翻译，必须逐句翻译，不能省略）。
 
 {{
-  "summary": "2-3句话概括论文核心内容",
-  "tags": ["标签1", "标签2"],
-  "keyTerms": ["术语1", "术语2", ...],
-  "innovations": ["创新点1", "创新点2"],
-  "translation": "将论文原文翻译成流畅的中文，保持学术准确性但读起来自然",
-  "hoshinoNote": "用星野大叔的口吻（慵懒、带〜っす、自称大叔）写一段论文点评"
+  "summary": "2-3句话中文概括论文核心内容",
+  "tags": ["标签1"],
+  "keyTerms": ["术语1"],
+  "innovations": ["创新点1"],
+  "translation": "完整中文翻译（必须！如果原文是英文则全部翻译成中文；如果原文已经是中文则写：原文已是中文）",
+  "hoshinoNote": "用星野大叔的口吻（慵懒、带〜っす、自称大叔）写一段点评"
 }}
 
-论文内容：
-{truncated[:8000]}
+论文：{truncated[:6000]}
 
-只返回JSON，不要其他内容。"""
+只输出JSON，不要其他文字。"""
 
     result = call_kimi(
         "你是一个论文分析助手。始终输出有效JSON。",
         prompt,
         temperature=0.2,
     )
+    import re
+    # Strip markdown code blocks if present
+    json_str = re.sub(r'^```json\s*', '', result.strip())
+    json_str = re.sub(r'\s*```$', '', json_str)
     try:
-        return json.loads(result)
+        return json.loads(json_str)
     except json.JSONDecodeError:
         return {
             "summary": "（LLM解析失败，请检查内容）",
@@ -325,7 +327,7 @@ async def analyze_pdf(file: UploadFile = File(...)):
             return {"error": "PDF文本提取失败，可能为扫描版PDF", "text": "", "knownTerms": [], "analysis": {}, "translation": ""}
         
         # 截取前15000字符分析
-        text = text[:15000]
+        text = text[:10000]
         
         # 提取术语
         known_terms = extract_terms_from_text(text)
@@ -349,7 +351,7 @@ async def analyze_pdf(file: UploadFile = File(...)):
             ],
             "analysis": llm_result,
             "translation": llm_result.get("translation", ""),
-            "text": text[:5000],
+            "text": text[:8000],
         }
     except Exception as e:
         return {"error": str(e), "text": ""}

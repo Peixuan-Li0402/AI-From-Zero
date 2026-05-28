@@ -46,7 +46,7 @@
         <button id="btnExample" class="btn secondary">💡 试试示例</button>
         <span id="loadingStatus" class="loading-status" hidden>⏳ 大叔正在读论文…っす</span>
       </div>
-            <label for="pdfUpload" class="btn secondary" style="cursor:pointer">📄 上传PDF</label>
+            <label for="pdfUpload" class="btn secondary" style="cursor:pointer" title="PDF分析约需10-30秒">📄 上传PDF</label>
             <input type="file" id="pdfUpload" accept=".pdf" style="display:none">
             <span id="pdfName" style="font-size:12px;color:var(--muted)"></span>
     </div>
@@ -286,6 +286,7 @@ $("btnAnalyze").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     });
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     if (data.error) {
@@ -321,12 +322,14 @@ document.getElementById("pdfUpload").addEventListener("change", async function(e
   pdfFileName = file.name;
   document.getElementById("pdfName").textContent = "\uD83D\uDCC4 " + file.name;
   document.getElementById("loadingStatus").hidden = false;
+  document.getElementById("loadingStatus").textContent = "23F3 63D053D6PDF65875B574E2D2026";
   document.getElementById("btnAnalyze").disabled = true;
   addChatMessage("\uD83D\uDCC4 \u5927\u53d4\u6b63\u5728\u8BFBPDF\u2026\u3063\u3059");
   try {
     const formData = new FormData();
     formData.append("file", file);
     const resp = await fetch(API_BASE + "/api/analyze-pdf", { method: "POST", body: formData });
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
     if (data.error) { addChatMessage("\uD83D\uDE05 " + data.error); return; }
     pdfData = data;
@@ -467,6 +470,7 @@ function renderTermSidebar(knownTerms) {
 async function showTermDetail(termName) {
   try {
     const resp = await fetch(`${API_BASE}/api/terms/${encodeURIComponent(termName)}`);
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     const mastered = getMastered().includes(data.term);
@@ -569,6 +573,7 @@ async function loadLearnPath(interest = "") {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ interest }),
     });
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     const container = $("learnResults");
@@ -626,6 +631,7 @@ async function expandPapers() {
       method: "POST",
       headers: {"Content-Type": "application/json"},
     });
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
     const papers = data.papers || [];
     const container = document.getElementById("expandedPapers");
@@ -647,6 +653,7 @@ async function expandPapers() {
 async function loadDetailedExplain(termName) {
   try {
     const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain");
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
     const detail = data.detailedExplanation || "";
     if (detail && detail.length > 50) {
@@ -663,6 +670,7 @@ async function loadDetailedExplain(termName) {
 async function loadAcademicExplain(termName) {
   try {
     const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain-academic");
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
     const detail = data.academicExplanation || "";
     if (detail && detail.length > 50) {
@@ -684,6 +692,7 @@ async function loadAcademicExplain(termName) {
 async function loadTermKB() {
   try {
     const resp = await fetch(`${API_BASE}/api/terms`);
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     const container = $("kbCategories");
@@ -789,6 +798,7 @@ $("btnAnalyzeCase").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     });
+    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     $("caseResults").hidden = false;
