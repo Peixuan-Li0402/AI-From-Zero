@@ -9,7 +9,6 @@
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"
     onload="renderMathInElement(document.body, {delimiters:[{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false}]});"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -42,22 +41,11 @@
         </div>
       </div>
       <textarea id="paperText" placeholder="粘贴论文原文（摘要/引言/方法等）&#10;&#10;也可以先试试示例文本……" rows="8"></textarea>
-          <div class="pdf-drop-zone" id="pdfDropZone">
-            <div class="pdf-drop-inner">
-              <span class="pdf-drop-icon">📄</span>
-              <span class="pdf-drop-text">拖拽PDF到此处，或点击选择文件</span>
-              <span class="pdf-drop-hint">浏览器端提取文字，无需上传到服务器</span>
-            </div>
-            <input type="file" id="pdfUpload2" accept=".pdf" style="display:none">
-          </div>
       <div class="paper-actions">
         <button id="btnAnalyze" class="btn primary">🔍 开始分析</button>
         <button id="btnExample" class="btn secondary">💡 试试示例</button>
         <span id="loadingStatus" class="loading-status" hidden>⏳ 大叔正在读论文…っす</span>
       </div>
-            <label for="pdfUpload" class="btn secondary" style="cursor:pointer" title="PDF分析约需10-30秒">📄 上传PDF</label>
-            <input type="file" id="pdfUpload" accept=".pdf" style="display:none">
-            <span id="pdfName" style="font-size:12px;color:var(--muted)"></span>
     </div>
 
     <!-- 分析结果区域 -->
@@ -295,7 +283,6 @@ $("btnAnalyze").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     });
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     if (data.error) {
@@ -321,118 +308,6 @@ let _lastKnownTerms = [];
 let _lastTranslation = "";
 
 function renderAnalysis(data, rawText) {
-
-// PDF drag-and-drop: client-side text extraction
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-// Prevent browser from opening PDF on drag
-document.addEventListener("dragover", function(e) {
-  if (e.dataTransfer.types.includes("Files")) e.preventDefault();
-});
-document.addEventListener("drop", function(e) {
-  e.preventDefault();
-  // Check if dropped on our drop zone
-  var target = e.target;
-  while (target) {
-    if (target.id === "pdfDropZone") return; // handled by drop zone listener
-    target = target.parentElement;
-  }
-});
-
-var pdfDropZone = document.getElementById("pdfDropZone");
-var pdfUpload2 = document.getElementById("pdfUpload2");
-
-pdfDropZone.addEventListener("click", function() { pdfUpload2.click(); });
-
-pdfDropZone.addEventListener("dragover", function(e) {
-  e.preventDefault();
-  pdfDropZone.classList.add("drag-over");
-});
-pdfDropZone.addEventListener("dragleave", function() {
-  pdfDropZone.classList.remove("drag-over");
-});
-pdfDropZone.addEventListener("drop", function(e) {
-  e.preventDefault();
-  pdfDropZone.classList.remove("drag-over");
-  var file = e.dataTransfer.files[0];
-  if (file && file.type === "application/pdf") handlePdfFile(file);
-});
-
-pdfUpload2.addEventListener("change", function(e) {
-  var file = e.target.files[0];
-  if (file) handlePdfFile(file);
-});
-
-async function handlePdfFile(file) {
-  document.getElementById("loadingStatus").hidden = false;
-  document.getElementById("loadingStatus").textContent = "\u23f3 \u6b63\u5728\u8bfb\u53d6PDF\u6587\u5b57\u2026";
-  document.getElementById("btnAnalyze").disabled = true;
-  addChatMessage("\uD83D\uDCC4 \u6b63\u5728\u63d0\u53d6PDF\u6587\u5b57\u2026");
-  
-  try {
-    var arrayBuffer = await file.arrayBuffer();
-    var pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-    var fullText = "";
-    for (var i = 1; i <= pdf.numPages; i++) {
-      var page = await pdf.getPage(i);
-      var content = await page.getTextContent();
-      var pageText = content.items.map(function(item) { return item.str; }).join(" ");
-      fullText += pageText + "\n\n";
-    }
-    
-    document.getElementById("loadingStatus").textContent = "\u23f3 \u6b63\u5728\u5206\u6790\u672f\u8bed\u2026";
-    document.getElementById("paperText").value = fullText;
-    
-    if (fullText.length > 50) {
-      addChatMessage("\u2705 PDF\u6587\u5b57\u63d0\u53d6\u6210\u529f\uff01" + fullText.length + "\u5b57\u7b26\uff0c\u70b9\u201c\u5f00\u59cb\u5206\u6790\u201d\u8fdb\u884c\u5206\u6790\u3002");
-      // Auto-analyze if text is substantial
-      if (fullText.length > 100) {
-        document.getElementById("btnAnalyze").click();
-      }
-    } else {
-      addChatMessage("\u26a0\ufe0f PDF\u63d0\u53d6\u51fa\u7684\u6587\u5b57\u592a\u5c11\uff0c\u53ef\u80fd\u662f\u626b\u63cf\u4ef6\u3002\u8bd5\u8bd5\u76f4\u63a5\u7c98\u8d34\u6587\u5b57\u3002");
-    }
-  } catch (err) {
-    addChatMessage("\uD83D\uDE35 PDF\u8bfb\u53d6\u5931\u8d25\uff1a" + err.message + "\u3002\u8bf5\u8bd5\u76f4\u63a5\u7c98\u8d34\u6587\u5b57\u3002");
-  } finally {
-    document.getElementById("loadingStatus").hidden = true;
-    document.getElementById("btnAnalyze").disabled = false;
-  }
-}
-
-// PDF upload handler
-var pdfData = null;
-var pdfFileName = "";
-document.getElementById("pdfUpload").addEventListener("change", async function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  pdfFileName = file.name;
-  document.getElementById("pdfName").textContent = "\uD83D\uDCC4 " + file.name;
-  document.getElementById("loadingStatus").hidden = false;
-  document.getElementById("loadingStatus").textContent = "23F3 63D053D6PDF65875B574E2D2026";
-  document.getElementById("btnAnalyze").disabled = true;
-  addChatMessage("\uD83D\uDCC4 \u5927\u53d4\u6b63\u5728\u8BFBPDF\u2026\u3063\u3059");
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    const resp = await fetch(API_BASE + "/api/analyze-pdf", { method: "POST", body: formData });
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
-    const data = await resp.json();
-    if (data.error) { addChatMessage("\uD83D\uDE05 " + data.error); return; }
-    pdfData = data;
-    document.getElementById("analysisResults").hidden = false;
-    document.getElementById("paperSummary").textContent = data.analysis.summary || "（暂无摘要）";
-    document.getElementById("hoshinoComment").innerHTML = data.analysis.hoshinoNote
-      ? '<span class="hoshino-icon">\uD83D\uDC3E</span> ' + data.analysis.hoshinoNote : "";
-    renderAnalysis(data, data.text || "");
-    addChatMessage("\uD83D\uDCC4 \u8BFB\u5B8CPDF\u4E86\u3063\u3059\uff01\u627E\u5230 " + data.knownTerms.length + " \u4E2A\u672F\u8BED\u3002");
-  } catch (err) { addChatMessage("\uD83D\uDE35 PDF\u5206\u6790\u51FA\u9519\uFF1A" + err.message); }
-  finally {
-    document.getElementById("loadingStatus").hidden = true;
-    document.getElementById("btnAnalyze").disabled = false;
-  }
-});
-
   const { knownTerms, analysis, translation } = data;
   _lastRawText = rawText;
   _lastKnownTerms = knownTerms;
@@ -557,7 +432,6 @@ function renderTermSidebar(knownTerms) {
 async function showTermDetail(termName) {
   try {
     const resp = await fetch(`${API_BASE}/api/terms/${encodeURIComponent(termName)}`);
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     const mastered = getMastered().includes(data.term);
@@ -660,7 +534,6 @@ async function loadLearnPath(interest = "") {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ interest }),
     });
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     const container = $("learnResults");
@@ -718,7 +591,6 @@ async function expandPapers() {
       method: "POST",
       headers: {"Content-Type": "application/json"},
     });
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
     const papers = data.papers || [];
     const container = document.getElementById("expandedPapers");
@@ -740,7 +612,6 @@ async function expandPapers() {
 async function loadDetailedExplain(termName) {
   try {
     const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain");
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
     const detail = data.detailedExplanation || "";
     if (detail && detail.length > 50) {
@@ -757,7 +628,6 @@ async function loadDetailedExplain(termName) {
 async function loadAcademicExplain(termName) {
   try {
     const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain-academic");
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
     const detail = data.academicExplanation || "";
     if (detail && detail.length > 50) {
@@ -779,7 +649,6 @@ async function loadAcademicExplain(termName) {
 async function loadTermKB() {
   try {
     const resp = await fetch(`${API_BASE}/api/terms`);
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     const container = $("kbCategories");
@@ -885,7 +754,6 @@ $("btnAnalyzeCase").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     });
-    document.getElementById("loadingStatus").textContent = "23F3 6B63572852066790672F8BED2026";
     const data = await resp.json();
 
     $("caseResults").hidden = false;
