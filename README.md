@@ -65,7 +65,7 @@ cd backend
 python server.py
 
 # 打开浏览器访问
-http://localhost:8080
+http://YOUR_IP:8080（将 YOUR_IP 替换为你的实际IP地址）
 ```
 
 > ⚠️ 注意：API Key 需要自行申请，项目仓库中不包含任何 API Key。

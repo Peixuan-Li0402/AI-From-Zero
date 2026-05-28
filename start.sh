@@ -17,6 +17,6 @@ pip list 2>/dev/null | grep -q fastapi || {
 }
 
 echo "🐾 启动 AI From Zero 服务..."
-echo "📖 访问: http://localhost:8080"
+echo "📖 访问: http://YOUR_IP:8080"
 echo ""
 python3 server.py

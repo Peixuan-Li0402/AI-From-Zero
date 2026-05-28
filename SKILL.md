@@ -51,7 +51,7 @@ cd ~/.openclaw/workspace/ai-from-zero/backend
 python3 server.py
 ```
 
-访问 `http://localhost:8080` 即可使用。
+访问 `http://YOUR_IP:8080` 即可使用。
 
 ## 接入 OpenClaw
 
@@ -80,7 +80,7 @@ python3 server.py
 tools:
   - name: ai-from-zero
     description: "AI 论文阅读与学习辅助工具"
-    url: "http://localhost:8080"
+    url: "http://YOUR_IP:8080"
     endpoints:
       - path: "/api/analyze"
         method: "POST"
