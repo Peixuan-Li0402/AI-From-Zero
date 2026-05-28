@@ -40,17 +40,35 @@
 
 ## 快速开始
 
+### 前置要求
+- Python 3.10+
+- 一个 Kimi API Key（也可以替换成其他大模型API）
+
+### 安装与运行
+
 ```bash
+# 克隆项目
+git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git
+cd AI-From-Zero
+
 # 安装后端依赖
-cd backend
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
+
+# 配置 API Key（二选一）
+# 方式A：直接修改 backend/server.py 中的 KIMI_API_KEY
+# 方式B：设置环境变量
+#   Windows: set KIMI_API_KEY=your_key_here
+#   Linux/Mac: export KIMI_API_KEY=your_key_here
 
 # 启动服务
+cd backend
 python server.py
 
 # 打开浏览器访问
 http://localhost:8080
 ```
+
+> ⚠️ 注意：API Key 需要自行申请，项目仓库中不包含任何 API Key。
 
 ## 项目结构
 

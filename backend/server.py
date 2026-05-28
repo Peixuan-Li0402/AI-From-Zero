@@ -33,10 +33,7 @@ terms_index = {t["term"].lower(): t for t in term_kb["terms"]}
 terms_index.update({a.lower(): t for t in term_kb["terms"] for a in t.get("aliases", [])})
 
 # ── KIMI API ──
-KIMI_API_KEY = os.environ.get(
-    "KIMI_API_KEY",
-    "sk-6PS9yQUuvtRSmK1EgnnbwA2xsx7yVSjwM19EVmYm9YwwwXgJ",
-)
+KIMI_API_KEY = os.environ.get("KIMI_API_KEY", "REPLACE_WITH_YOUR_KEY")
 KIMI_API_URL = "https://api.moonshot.cn/v1/chat/completions"
 
 
