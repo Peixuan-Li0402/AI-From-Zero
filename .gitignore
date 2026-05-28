@@ -1,0 +1,11 @@
+backend/venv/
+__pycache__/
+*.pyc
+.DS_Store
+frontend/index.html.bak*
+frontend/*.bak
+backend/server.py.bak
+backend/server.py.now
+/tmp/
+*.log
+node_modules/

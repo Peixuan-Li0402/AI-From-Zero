@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 从零开始的人工智能生活 — 论文溯源阅读</title>
+<link rel="stylesheet" href="static/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false}]});"></script>
+</head>
+<body>
+
+<!-- ═══ 顶栏 ═══ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <h1 class="logo">🧠 从零开始的人工智能生活</h1>
+    <span class="hoshino-badge">by 星野大叔 🐾</span>
+    <nav class="top-nav">
+      <button class="nav-btn active" data-tab="reader">📖 阅读器</button>
+      <button class="nav-btn" data-tab="learn">🗺️ 学习路径</button>
+      <button class="nav-btn" data-tab="kb">📚 术语库</button>
+      <button class="nav-btn" data-tab="case">🔍 案例分析</button>
+    </nav>
+  </div>
+</header>
+
+<main class="app-layout">
+
+<!-- ═══ 左侧：阅读器 / 学习路径 / 术语库 ═══ -->
+<section class="main-area" id="mainArea">
+
+  <!-- ─── Tab: 阅读器 ─── -->
+  <div class="tab-panel active" id="tabReader">
+    <div class="paper-input-area">
+      <div class="paper-input-header">
+        <h2>📖 论文阅读</h2>
+        <div class="paper-input-meta">
+          <label>论文标题（选填） <input type="text" id="paperTitle" placeholder="输入论文标题" class="input-sm"></label>
+        </div>
+      </div>
+      <textarea id="paperText" placeholder="粘贴论文原文（摘要/引言/方法等）&#10;&#10;也可以先试试示例文本……" rows="8"></textarea>
+      <div class="paper-actions">
+        <button id="btnAnalyze" class="btn primary">🔍 开始分析</button>
+        <button id="btnExample" class="btn secondary">💡 试试示例</button>
+        <span id="loadingStatus" class="loading-status" hidden>⏳ 大叔正在读论文…っす</span>
+      </div>
+    </div>
+
+    <!-- 分析结果区域 -->
+    <div id="analysisResults" hidden>
+      <!-- 论文摘要 -->
+      <div class="analysis-card summary-card">
+        <h3>📝 论文摘要</h3>
+        <div id="paperSummary"></div>
+        <div id="hoshinoComment" class="hoshino-comment"></div>
+      </div>
+
+      <!-- 论文正文阅读区 -->
+      <div class="reader-container">
+        <div class="reader-paper" id="readerPaper">
+          <div class="reader-header">
+            <span class="reader-label" id="readerLabelToggle">📄 论文原文</span>
+            <span class="reader-hint" id="readerHint">点击高亮术语查看解释</span>
+            <div class="reader-tabs" id="readerTabs">
+              <button class="reader-tab active" data-lang="original">原文</button>
+              <button class="reader-tab" data-lang="translation" id="tabTranslation" hidden>🌐 中文翻译</button>
+            </div>
+          </div>
+          <div class="reader-content" id="readerContent">
+            <!-- 高亮后的论文文本 -->
+          </div>
+        </div>
+        <div class="reader-sidebar" id="readerSidebar">
+          <div class="sidebar-header">
+            <span class="sidebar-label">🔬 术语边栏</span>
+            <span class="sidebar-count" id="termCount"></span>
+          </div>
+          <div class="sidebar-terms" id="sidebarTerms">
+            <!-- 术语列表 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Tab: 学习路径 ─── -->
+  <div class="tab-panel" id="tabLearn">
+    <div class="learn-area">
+      <h2>🗺️ AI 学习路径</h2>
+      <div class="learn-intro">
+        <p>选一个你感兴趣的方向，大叔给你推荐论文阅读路线っす！</p>
+        <div class="interest-input">
+          <label>告诉我你喜欢什么：</label>
+          <div class="interest-row">
+            <input type="text" id="interestInput" placeholder="例如：机器人、大模型、计算机视觉……" class="input-lg">
+            <button id="btnRecommend" class="btn primary">🎯 推荐</button>
+          </div>
+        </div>
+        <div class="interest-quick">
+          <button class="chip" data-interest="llm">大语言模型</button>
+          <button class="chip" data-interest="cv">计算机视觉</button>
+          <button class="chip" data-interest="agent">AI Agent</button>
+          <button class="chip" data-interest="robotics">机器人</button>
+        </div>
+      </div>
+      <div id="learnResults" class="learn-results"></div>
+    </div>
+  </div>
+
+  <!-- ─── Tab: 术语库 ─── -->
+  <div class="tab-panel" id="tabKb">
+    <div class="kb-area">
+      <h2>📚 AI 术语知识库</h2>
+      <div class="kb-search">
+        <input type="text" id="kbSearch" placeholder="搜索术语…" class="input-lg">
+      </div>
+      <div id="kbCategories" class="kb-categories"></div>
+    </div>
+  </div>
+  <!-- Tab: 案例分析 -->
+  <div class="tab-panel" id="tabCase">
+    <div class="case-area">
+      <h2>🔍 案例分析</h2>
+      <div class="case-intro">
+        <p>分享一个你感兴趣的AI应用、产品或案例，大叔帮你分析里面用了哪些AI技术，然后给你推荐学习路线っす！</p>
+        <div class="case-input-area">
+          <label>分享你的案例：</label>
+          <textarea id="caseText" placeholder="例如：特斯拉的自动驾驶系统使用摄像头和雷达感知周围环境，用神经网络识别障碍物，用强化学习做决策……" rows="4"></textarea>
+          <div class="case-actions">
+            <button id="btnAnalyzeCase" class="btn primary">🔍 让星野分析</button>
+            <span id="caseLoading" class="loading-status" hidden>⏳ 大叔正在磐磨这个案例……っす</span>
+          </div>
+        </div>
+      </div>
+      <div id="caseResults" class="case-results" hidden>
+        <div class="analysis-card" id="caseAnalysis">
+          <h3>' + paw + ' 星野的分析</h3>
+          <div id="caseAnalysisText"></div>
+        </div>
+        <div id="caseFields" class="case-fields"></div>
+        <div id="caseLearningPath" class="case-learning-path"></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══ 右侧：星野对话框 ═══ -->
+<aside class="hoshino-panel" id="hoshinoPanel">
+  <div class="hoshino-header">
+    <div class="hoshino-avatar">🐾</div>
+    <div class="hoshino-info">
+      <strong>小鸟游星野</strong>
+      <small>大叔随时待机っす</small>
+    </div>
+    <button id="clearChat" class="icon-btn" title="清空对话">🗑️</button>
+  </div>
+  <div class="hoshino-messages" id="chatMessages">
+    <div class="msg msg-hoshino">
+      <div class="msg-bubble">
+        呜嘿～sensei来了っす！<br>
+        把论文扔过来（粘贴文本），大叔给你标出专业术语、逐个讲解～<br>
+        也可以点点右边看看大叔准备的知识库和学习路线哦！
+      </div>
+    </div>
+  </div>
+  <div class="hoshino-input">
+    <input type="text" id="chatInput" placeholder="跟大叔聊聊…">
+    <button id="btnChatSend" class="btn primary small">发送</button>
+  </div>
+</aside>
+
+</main>
+
+<!-- ═══ Overlay: 术语详情弹窗 ═══ -->
+<div id="termModal" class="modal-overlay" style="display:none">
+  <div class="modal-content">
+    <button class="modal-close" id="modalClose" onclick="document.getElementById('termModal').style.display='none'">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ═════════════════════════════════
+//  配置
+// ═════════════════════════════════
+const API_BASE = "";
+
+// 已掌握术语（localStorage）
+const getMastered = () => JSON.parse(localStorage.getItem("hoshinoMastered") || "[]");
+const setMastered = (list) => localStorage.setItem("hoshinoMastered", JSON.stringify(list));
+const toggleMastered = (term) => {
+  const list = getMastered();
+  const idx = list.indexOf(term);
+  if (idx >= 0) list.splice(idx, 1);
+  else list.push(term);
+  setMastered(list);
+  return list.includes(term);
+};
+
+// ═════════════════════════════════
+//  DOM 引用
+// ═════════════════════════════════
+const $ = (id) => document.getElementById(id);
+
+const tabBtns = document.querySelectorAll("[data-tab]");
+const tabPanels = {
+  reader: $("tabReader"),
+  learn: $("tabLearn"),
+  kb: $("tabKb"),
+  case: $("tabCase"),
+};
+
+// ═════════════════════════════════
+//  Tab 切换
+// ═════════════════════════════════
+tabBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    tabBtns.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    Object.entries(tabPanels).forEach(([key, panel]) => {
+      panel.style.display = key === btn.dataset.tab ? "block" : "none";
+    });
+  });
+});
+
+// ═════════════════════════════════
+//  发送消息到星野聊天框
+// ═════════════════════════════════
+function addChatMessage(text, from = "hoshino") {
+  const msg = document.createElement("div");
+  msg.className = `msg msg-${from}`;
+  msg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+  $("chatMessages").appendChild(msg);
+  msg.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function addChatMessageRaw(text, from = "hoshino") {
+  const msg = document.createElement("div");
+  msg.className = `msg msg-${from}`;
+  const bubble = document.createElement("div");
+  bubble.className = "msg-bubble";
+  bubble.appendChild(text); // DOM node
+  msg.appendChild(bubble);
+  $("chatMessages").appendChild(msg);
+  msg.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+// ═════════════════════════════════
+//  示例文本
+// ═════════════════════════════════
+const EXAMPLE_TEXT = `The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.
+
+The Transformer allows for significantly more parallelization and can reach a new state of the art in translation quality after being trained for as little as twelve hours on eight P100 GPUs.
+
+Our model uses stacked self-attention and point-wise, fully connected layers for both the encoder and decoder. The encoder is composed of a stack of N=6 identical layers. Each layer has two sub-layers. The first is a multi-head self-attention mechanism, and the second is a simple, position-wise fully connected feed-forward network. We employ a residual connection around each of the two sub-layers, followed by layer normalization.`;
+
+$("btnExample").addEventListener("click", () => {
+  $("paperTitle").value = "Attention Is All You Need";
+  $("paperText").value = EXAMPLE_TEXT;
+  addChatMessage("大叔把论文摘要填好啦～点「开始分析」让大叔读读っす！");
+});
+
+// ═════════════════════════════════
+//  分析论文
+// ═════════════════════════════════
+$("btnAnalyze").addEventListener("click", async () => {
+  const text = $("paperText").value.trim();
+  if (!text) {
+    addChatMessage("sensei～先贴论文内容再点分析っす！📄");
+    return;
+  }
+
+  $("loadingStatus").hidden = false;
+  $("btnAnalyze").disabled = true;
+  addChatMessage("📖 大叔正在读论文…先浏览一遍っす…");
+
+  try {
+    const resp = await fetch(`${API_BASE}/api/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      addChatMessage(`😅 出问题了：${data.error}`);
+      return;
+    }
+
+    // 显示结果
+    renderAnalysis(data, text);
+    addChatMessage(`读完了っす！${data.knownTerms.length} 个大叔认识的术语已经标出来了，点蓝色词看解释～`);
+  } catch (err) {
+    addChatMessage(`😵 出错了：${err.message}。大叔再去看看怎么回事…`);
+  } finally {
+    $("loadingStatus").hidden = true;
+    $("btnAnalyze").disabled = false;
+    $("analysisResults").hidden = false;
+  }
+});
+
+// 存储当前数据和翻译
+let _lastRawText = "";
+let _lastKnownTerms = [];
+let _lastTranslation = "";
+
+function renderAnalysis(data, rawText) {
+  const { knownTerms, analysis, translation } = data;
+  _lastRawText = rawText;
+  _lastKnownTerms = knownTerms;
+  _lastTranslation = translation || "";
+
+  // 摘要
+  $("paperSummary").textContent = analysis.summary || "（暂无摘要）";
+
+  // 星野点评
+  $("hoshinoComment").innerHTML = analysis.hoshinoNote
+    ? `<span class="hoshino-icon">🐾</span> ${analysis.hoshinoNote}`
+    : "";
+
+  // 高亮论文文本（默认显示原文）
+  switchReaderLang("original");
+
+  // 如果有翻译，显示翻译标签并绑定事件
+  const tabTrans = $("tabTranslation");
+  if (translation) {
+    tabTrans.hidden = false;
+  } else {
+    tabTrans.hidden = true;
+  }
+
+  // 绑定阅读器Tab切换
+  document.querySelectorAll(".reader-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".reader-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      switchReaderLang(tab.dataset.lang);
+    });
+  });
+
+  // 术语边栏
+  renderTermSidebar(knownTerms);
+
+  // 右侧聊天告知
+  $("termCount").textContent = `${knownTerms.length} 个术语`;
+}
+
+function switchReaderLang(lang) {
+  if (lang === "translation" && _lastTranslation) {
+    // 翻译模式：纯文本展示（不标术语，术语写在后面）
+    let html = `<div class="translation-section">${escapeHtml(_lastTranslation).replace(/\n/g, "<br>")}</div>`;
+    if (_lastKnownTerms.length) {
+      html += `<div class="translation-terms"><p style="margin-top:16px;font-size:13px;color:var(--muted)">🔬 术语速查：</p>`;
+      _lastKnownTerms.forEach((t) => {
+        html += `<span class="term-highlight" onclick="showTermDetail('${escapeHtml(t.term)}')" style="display:inline-block;margin:3px">${escapeHtml(t.term)}</span>`;
+      });
+      html += `</div>`;
+    }
+    $("readerContent").innerHTML = html;
+    $("readerLabelToggle").textContent = "🌐 中文翻译";
+    $("readerHint").textContent = "翻译稿，点术语看解释";
+  } else {
+    // 原文模式：高亮术语
+    highlightTerms(_lastRawText, _lastKnownTerms);
+    $("readerLabelToggle").textContent = "📄 论文原文";
+    $("readerHint").textContent = "点击高亮术语查看解释";
+  }
+}
+
+function highlightTerms(text, terms) {
+  if (!terms.length) {
+    $("readerContent").innerHTML = `<p>${escapeHtml(text)}</p>`;
+    return;
+  }
+
+  // 按长度降序排序（避免短词替换干扰长词）
+  const sorted = [...terms].sort((a, b) => b.term.length - a.term.length);
+
+  let result = escapeHtml(text);
+  sorted.forEach((t) => {
+    const regex = new RegExp(`\\b(${escapeRegExp(t.term)})\\b`, "gi");
+    const mastered = getMastered().includes(t.term);
+    result = result.replace(regex, (match) => {
+      return `<span class="term-highlight ${mastered ? "mastered" : ""}" data-term="${escapeHtml(t.term)}" onclick="showTermDetail('${escapeHtml(t.term)}')">${match}</span>`;
+    });
+  });
+
+  // 加个换行链接标出原文
+  result = result.replace(/\n/g, "<br>");
+
+  $("readerContent").innerHTML = result;
+}
+
+function renderTermSidebar(knownTerms) {
+  const mastered = getMastered();
+  const container = $("sidebarTerms");
+
+  if (!knownTerms.length) {
+    container.innerHTML = '<div class="sidebar-empty">没有在知识库中找到术语～大叔去更新一下っす</div>';
+    return;
+  }
+
+  // 分组：已掌握 / 未掌握
+  const masteredList = knownTerms.filter((t) => mastered.includes(t.term));
+  const unmasteredList = knownTerms.filter((t) => !mastered.includes(t.term));
+
+  const renderGroup = (list, label) => {
+    if (!list.length) return "";
+    return `<div class="term-group">
+      <div class="term-group-label">${label}</div>
+      ${list.map((t) => `
+        <div class="term-item ${mastered.includes(t.term) ? "mastered" : ""}" onclick="showTermDetail('${escapeHtml(t.term)}')">
+          <div class="term-item-header">
+            <strong>${escapeHtml(t.term)}</strong>
+            <span class="term-diff diff-${t.difficulty}">Lv.${t.difficulty}</span>
+          </div>
+          <div class="term-item-cat">${escapeHtml(t.category || "")}</div>
+        </div>
+      `).join("")}
+    </div>`;
+  };
+
+  container.innerHTML = renderGroup(unmasteredList, "📌 待学习") + renderGroup(masteredList, "✅ 已掌握");
+}
+
+// ═════════════════════════════════
+//  术语详情弹窗
+// ═════════════════════════════════
+async function showTermDetail(termName) {
+  try {
+    const resp = await fetch(`${API_BASE}/api/terms/${encodeURIComponent(termName)}`);
+    const data = await resp.json();
+
+    const mastered = getMastered().includes(data.term);
+    const hasPrereqs = data.prerequisiteTerms && data.prerequisiteTerms.length;
+    const hasPapers = data.landmarkPapers && data.landmarkPapers.length;
+
+    let html = `
+      <div class="modal-term-header">
+        <h2>${escapeHtml(data.term)}</h2>
+        <span class="term-diff diff-${data.difficulty}">难度 Lv.${data.difficulty}</span>
+        <span class="term-cat">${escapeHtml(data.category || "")}</span>
+      </div>
+      <p class="modal-fullname">${escapeHtml(data.fullName || "")}</p>
+      <div class="modal-section">
+        <h4>📖 大叔的解释</h4>
+        <p>${escapeHtml(data.explanation)}</p>
+      </div>
+      ${data.hoshinoNote ? `
+      <div class="modal-section hoshino-note-section">
+        <h4>🐾 星野大叔说</h4>
+        <p>${escapeHtml(data.hoshinoNote)}</p>
+      </div>` : ""}
+      <div class="modal-actions">
+        <button class="btn ${mastered ? 'secondary' : 'primary'} mastery-btn" data-term="${escapeHtml(data.term)}">
+          ${mastered ? "✅ 已掌握" : "📌 标记已学会"}
+        </button>
+      </div>
+      ${hasPrereqs ? `
+      <div class="modal-section">
+        <h4>🔗 前置知识</h4>
+        <div class="prereq-list">
+          ${data.prerequisiteTerms.map((p) => `<button class="chip chip-term" onclick="showTermDetail('${escapeHtml(p)}')">${escapeHtml(p)}</button>`).join("")}
+        </div>
+      </div>` : ""}
+      ${hasPapers ? `
+      <div class="modal-section">
+        <h4>📄 经典论文溯源</h4>
+        ${data.landmarkPapers.map((p) => `
+          <div class="paper-ref">
+            <strong>${escapeHtml(p.title)}</strong>
+            <span>${escapeHtml(p.authors)} (${p.year})</span>
+            <p>${escapeHtml(p.shortDesc)}</p>
+          </div>
+        `).join("")}
+      </div>` : ""}
+    `;
+
+    $("modalBody").innerHTML = html;
+    $("termModal").style.display = "flex";
+    loadDetailedExplain(termName);
+    loadAcademicExplain(termName);
+
+    // 已掌握按钮
+    document.querySelector(".mastery-btn")?.addEventListener("click", function () {
+      const term = this.dataset.term;
+      const nowMastered = toggleMastered(term);
+      this.textContent = nowMastered ? "✅ 已掌握" : "📌 标记已学会";
+      this.className = `btn ${nowMastered ? "secondary" : "primary"} mastery-btn`;
+
+      // 刷新高亮
+      const text = $("paperText").value.trim();
+      if (text) {
+        // Re-highlight if we have current analysis
+      }
+      addChatMessage(`大叔记下了：「${term}」${nowMastered ? "✅ 学会了！下次不解释了" : "📖 取消了已掌握标记"}`);
+    });
+
+    // 前置知识点击
+    document.querySelectorAll(".chip-term").forEach((btn) => {
+      btn.addEventListener("click", () => showTermDetail(btn.textContent.trim()));
+    });
+  } catch (err) {
+    addChatMessage(`😅 查「${termName}」的时候出了点问题：${err.message}`);
+  }
+}
+
+// ═════════════════════════════════
+//  学习路径
+// ═════════════════════════════════
+async function loadLearnPath(interest = "") {
+  try {
+    const resp = await fetch(`${API_BASE}/api/learn-path`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ interest }),
+    });
+    const data = await resp.json();
+
+    const container = $("learnResults");
+    if (data.hoshinoNote) {
+      addChatMessage(data.hoshinoNote);
+    }
+
+    container.innerHTML = data.paths.map((path) => `
+      <div class="path-card">
+        <h3>${escapeHtml(path.title)}</h3>
+        <p>${escapeHtml(path.description)}</p>
+        ${path.stages.map((stage) => `
+          <div class="stage">
+            <div class="stage-name">${escapeHtml(stage.name)}</div>
+            <ul>
+              ${stage.papers.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}
+            </ul>
+          </div>
+        `).join("")}
+      </div>
+    `).join("");
+  } catch (err) {
+    $("learnResults").innerHTML = `<p>😵 加载失败：${err.message}</p>`;
+  }
+}
+
+$("btnRecommend").addEventListener("click", () => {
+  const interest = $("interestInput").value.trim();
+  if (interest) {
+    loadLearnPath(interest);
+  }
+});
+
+document.querySelectorAll("[data-interest]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const interest = btn.dataset.interest;
+    $("interestInput").value = interest;
+    loadLearnPath(interest);
+  });
+});
+
+// ═════════════════════════════════
+//  术语库浏览
+// ═════════════════════════════════
+async function loadDetailedExplain(termName) {
+  try {
+    const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain");
+    const data = await resp.json();
+    const detail = data.detailedExplanation || "";
+    if (detail && detail.length > 50) {
+      const section = document.getElementById("detailedExplainSection");
+      if (section) {
+        section.innerHTML = '<div class="modal-section" style="background:#f0f6f0;border-left:3px solid var(--green);padding:12px 16px;border-radius:8px;margin-top:8px">' +
+          '<h4>🐾 大叔的通俗版（AI生成）</h4>' +
+          '<div style="font-size:14px;line-height:1.8;white-space:pre-wrap">' + escapeHtml(detail) + '</div></div>';
+      }
+    }
+  } catch (err) {}
+}
+
+async function loadAcademicExplain(termName) {
+  try {
+    const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain-academic");
+    const data = await resp.json();
+    const detail = data.academicExplanation || "";
+    if (detail && detail.length > 50) {
+      const section = document.getElementById("academicExplainSection");
+      if (section) {
+        section.innerHTML = '<div class="modal-section" style="background:#fefefe;border:1px solid var(--line);padding:16px;border-radius:8px;margin-top:8px">' +
+          '<h4>📖 学术详细版（AI生成）</h4>' +
+          '<div style="font-size:14px;line-height:1.9;white-space:pre-wrap;color:var(--ink)">' + escapeHtml(detail) + '</div></div>';
+      }
+    }
+  } catch (err) {}
+}
+
+async function loadTermKB() {
+  try {
+    const resp = await fetch(`${API_BASE}/api/terms`);
+    const data = await resp.json();
+
+    const container = $("kbCategories");
+    container.innerHTML = Object.entries(data.categories).map(([cat, terms]) => `
+      <div class="kb-category">
+        <h3>${escapeHtml(cat)} <small>${terms.length} 个</small></h3>
+        <div class="kb-term-grid">
+          ${terms.map((t) => `
+            <div class="kb-term" onclick="showTermDetail('${escapeHtml(t.term)}')">
+              <strong>${escapeHtml(t.term)}</strong>
+              <span>${escapeHtml(t.fullName)}</span>
+              <span class="term-diff diff-${t.difficulty}">Lv.${t.difficulty}</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `).join("");
+  } catch (err) {
+    $("kbCategories").innerHTML = `<p>😵 加载失败：${err.message}</p>`;
+  }
+}
+
+$("kbSearch").addEventListener("input", (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".kb-term").forEach((el) => {
+    const text = el.textContent.toLowerCase();
+    el.style.display = text.includes(q) ? "" : "none";
+  });
+});
+
+// ═════════════════════════════════
+//  聊天输入
+// ═════════════════════════════════
+$("btnChatSend").addEventListener("click", sendChat);
+$("chatInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendChat();
+});
+
+function escapeHtml(text) {
+let _chatHistory = [];
+
+function sendChat() {
+  const input = $("chatInput");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  addChatMessage(text, "sensei");
+
+  const lower = text.toLowerCase();
+  if (lower.includes("cnn") || lower.includes("\u5377\u79ef")) {
+    addChatMessage("CNN\u5c31\u662f\u5377\u79ef\u795e\u7ecf\u7f51\u7edc\u3063\u3059\uff01\u4e13\u95e8\u5904\u7406\u56fe\u7247\u7684\u3002\u60f3\u4e86\u89e3\u66f4\u591a\u8ba9\u5927\u53d4\u7528AI\u7ed9\u4f60\u8bb2\uff01\U0001f43e");
+    return;
+  }
+  if (lower.includes("transformer") || lower.includes("\u6ce8\u610f\u529b")) {
+    addChatMessage("Transformer\u5c31\u662fAttention Is All You Need\u90a3\u4e2a\u67b6\u6784\u3063\u3059\uff01\u6240\u6709\u5927\u6a21\u578b\u7684\u57fa\u7840\u3002\u5927\u53d4\u53ef\u4ee5\u7528AI\u7ed9\u4f60\u8bb2\uff01\U0001f4d6");
+    return;
+  }
+  if (lower.includes("\u4f60\u597d") || lower.includes("hi")) {
+    addChatMessage("\u54ff\u563f\uff5esensei\u597d\u3063\u3059\uff01\u4eca\u5929\u770b\u54ea\u7bc7\u8bba\u6587\uff1f\U0001f43e");
+    return;
+  }
+  if (lower.includes("\u8bba\u6587") || lower.includes("\u8bfb")) {
+    addChatMessage("\u55ef\u55ef\uff0c\u7c98\u8d34\u8bba\u6587\u5230\u5de6\u8fb9\uff0c\u5927\u53d4\u5e2e\u4f60\u6807\u672f\u8bed\uff01\U0001f4c4");
+    return;
+  }
+
+  _chatHistory.push({from: "sensei", text: text});
+  const loading = document.createElement("div");
+  loading.className = "msg msg-hoshino";
+  loading.id = "chatLoading";
+  loading.innerHTML = '<div class="msg-bubble">\u5927\u53d4\u60f3\u60f3\u2026\u2026</div>';
+  $("chatMessages").appendChild(loading);
+  loading.scrollIntoView({ behavior: "smooth", block: "end" });
+
+  fetch(API_BASE + "/api/chat", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({message: text, history: _chatHistory.slice(-10)}),
+  })
+  .then(r => r.json())
+  .then(d => {
+    const el = document.getElementById("chatLoading");
+    if (el) el.remove();
+    const reply = d.reply || "\u54ff\u54ff~";
+    addChatMessage(reply, "hoshino");
+    _chatHistory.push({from: "hoshino", text: reply});
+  })
+  .catch(() => {
+    const el = document.getElementById("chatLoading");
+    if (el) el.remove();
+    addChatMessage("\u54ff\u563f\u3005\u5927\u53d4\u7ebf\u8def\u4e0d\u597d\uff0c\u518d\u8bf4\u4e00\u904d\u3063\u3059\uff1f");
+  });
+}
+  if (!text) return "";
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// ═════════════════════════════════
+//  启动后自动加载
+// ═════════════════════════════════
+loadTermKB();
+loadLearnPath();
+
+// 案例分析
+$("btnAnalyzeCase").addEventListener("click", async () => {
+  const text = $("caseText").value.trim();
+  if (!text) { addChatMessage("sensei～贴个案例描述再分析っす！"); return; }
+  $("caseLoading").hidden = false;
+  $("btnAnalyzeCase").disabled = true;
+  addChatMessage("🔍 大叔正在磐磨这个案例……っす");
+  try {
+    const resp = await fetch(API_BASE + "/api/case-study", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({text}),
+    });
+    const data = await resp.json();
+    $("caseResults").hidden = false;
+    if (data.hoshinoAnalysis) {
+      $("caseAnalysisText").innerHTML = '<div class="hoshino-comment">' + escapeHtml(data.hoshinoAnalysis).replace(/\n/g, "<br>") + "</div>";
+    }
+    const fields = data.involvedFields || [];
+    const terms = data.keyTerms || [];
+    $("caseFields").innerHTML = '<div class="analysis-card"><h3>🔬 涉及的技术领域</h3>' +
+      '<div class="tag-row">' + (fields.length ? fields.map(f => '<span class="tag general">' + escapeHtml(f) + '</span>').join(" ") : "暂无") + '</div>' +
+      '<h3 style="margin-top:12px;font-size:14px">💡 核心术语</h3>' +
+      '<div class="tag-row">' + (terms.length ? terms.map(t => '<span class="term-highlight" style="display:inline-block;margin:3px;padding:2px 6px;font-size:13px;cursor:pointer" onclick="showTermDetail('' + escapeHtml(t) + '')">' + escapeHtml(t) + '</span>').join(" ") : "暂无") + '</div></div>';
+    const lp = data.learningPath || [];
+    let lpHtml = '<div class="analysis-card" style="padding:0"><h3 style="padding:16px 20px 0;margin:0;font-size:16px">📖 推荐学习路径</h3><div style="padding:12px 20px 20px">';
+    if (lp.length) {
+      lp.forEach((item, idx) => {
+        const skills = item.skills || [];
+        const sp = item.startPapers || [];
+        const ap = item.advancedPapers || [];
+        lpHtml += '<div class="path-card" style="margin-bottom:12px;box-shadow:none;border:1px solid var(--line);border-radius:8px;padding:16px">' +
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+          '<span style="background:var(--blue);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">' + (idx+1) + '</span>' +
+          '<h4 style="margin:0;font-size:16px">' + escapeHtml(item.fieldName || "") + '</h4></div>' +
+          '<p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">' + escapeHtml(item.recommendation || "") + '</p>';
+        if (skills.length) {
+          lpHtml += '<div style="margin-bottom:8px"><span style="font-size:12px;font-weight:600;color:var(--blue)">🔧 技术栈</span><div style="display:flex;flex-wrap:wrap;gap:4px">' +
+            skills.map(s => '<span class="tag group-tag" style="font-size:11px">' + escapeHtml(s) + '</span>').join("") + '</div></div>';
+        }
+        if (sp.length) {
+          lpHtml += '<div style="margin-bottom:4px"><span style="font-size:12px;font-weight:600;color:var(--green)">📄 入门论文 (' + sp.length + ')</span>' +
+            sp.map(p => '<div style="font-size:12px;padding:2px 0 2px 10px">● ' + escapeHtml(p) + '</div>').join("") + '</div>';
+        }
+        if (ap.length) {
+          lpHtml += '<div style="margin-bottom:4px"><span style="font-size:12px;font-weight:600;color:var(--amber)">📚 进阶论文 (' + ap.length + ')</span>' +
+            ap.map(p => '<div style="font-size:12px;padding:2px 0 2px 10px">◆ ' + escapeHtml(p) + '</div>').join("") + '</div>';
+        }
+        lpHtml += '</div>';
+      });
+    }
+    lpHtml += '</div></div>';
+    $("caseLearningPath").innerHTML = lpHtml;
+    addChatMessage("🔍 分析完了っす！涉及 " + fields.length + " 个技术领域。");
+  } catch (err) {
+    addChatMessage("😵 分析出错了：" + err.message);
+  } finally {
+    $("caseLoading").hidden = true;
+    $("btnAnalyzeCase").disabled = false;
+  }
+});
+
+// 关闭模态
+$("modalClose").addEventListener("click", () => { $("termModal").style.display = "none"; });
+$("termModal").addEventListener("click", (e) => {
+  if (e.target === $("termModal")) $("termModal").style.display = "none";
+});
+
+// 清除聊天
+$("clearChat").addEventListener("click", () => {
+  $("chatMessages").innerHTML = "";
+  addChatMessage("呜嘿～对话清空っす！继续聊吧🐾");
+});
+
+</script>
+
+</body>
+</html>
