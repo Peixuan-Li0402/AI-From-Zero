@@ -1,11 +1,16 @@
 backend/venv/
 __pycache__/
 *.pyc
+.env
+.env.*
+!.env.example
 .DS_Store
 frontend/index.html.bak*
 frontend/*.bak
+frontend/*.step*
 backend/server.py.bak
 backend/server.py.now
 /tmp/
 *.log
 node_modules/
+data/

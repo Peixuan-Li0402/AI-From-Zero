@@ -1,19 +1,21 @@
 #!/bin/bash
 # AI From Zero — 启动脚本
-# 使用前请设置环境变量 KIMI_API_KEY，或直接修改下方 KEY
+# KIMI_API_KEY 可选；未设置时会启用本地术语匹配降级模式。
 
 cd "$(dirname "$0")/backend"
 
-# API Key 配置（二选一）
-# 1. 设置环境变量: export KIMI_API_KEY=your_key
-# 2. 直接修改下面这行:
-KEY="${KIMI_API_KEY:-REPLACE_WITH_YOUR_KEY}"
+if [ -f "../.env" ]; then
+    set -a
+    . "../.env"
+    set +a
+fi
 
-if [ "$KEY" = "REPLACE_WITH_YOUR_KEY" ]; then
-    echo "⚠️  请先设置 KIMI_API_KEY 环境变量"
-    echo "   export KIMI_API_KEY=your_key_here"
-    echo "   或者编辑 start.sh 直接填入 Key"
-    exit 1
+LLM_PROVIDER="${LLM_PROVIDER:-kimi}"
+if [ -z "${LLM_API_KEY:-}" ] && [ -z "${KIMI_API_KEY:-}" ] && [ "$LLM_PROVIDER" != "ollama" ]; then
+    echo "⚠️  未设置 LLM_API_KEY，将使用本地术语匹配模式"
+    echo "   如需完整 LLM 分析，请打开网页点「配置模型」，或运行: export LLM_API_KEY=your_key_here"
+else
+    echo "✅ 已配置 LLM provider: $LLM_PROVIDER，将启用完整 LLM 分析"
 fi
 
 # 检查 Python
@@ -29,6 +31,6 @@ pip list 2>/dev/null | grep -q fastapi || {
 }
 
 echo "🐾 启动 AI From Zero 服务..."
-echo "📖 访问: http://YOUR_IP:8080（将 YOUR_IP 替换为你的实际IP）"
+echo "📖 访问: http://localhost:${APP_PORT:-8080}"
 echo ""
-KIMI_API_KEY="$KEY" python3 server.py
+python3 server.py

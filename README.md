@@ -1,94 +1,120 @@
-# 🧠 从零开始的人工智能生活 — AI 论文溯源阅读助手
+# AI-From-Zero
 
-> 由**小鸟游星野（Takanashi Hoshino）** 陪伴你读完第一篇AI论文。
+AI 论文溯源阅读助手：面向刚入门 AI 的高中生/大一新生，帮助你把论文里的专业术语、经典论文来源、学习路径和伴学问答串起来。
 
-## 痛点
+## 当前能力
 
-刚进AI专业的高中生/大一新生，面对海量论文和专业名词时：
-1. **名词链断层** — 读 Attention Is All You Need，里面提到 CNN/RNN 你全不知道，要反查半天
-2. **方向迷茫** — AI 分那么多方向（LLM/CV/Robotics/Agent...），不知道从哪学起
-3. **学用脱节** — 学的内容和论文成果之间隔着一层雾，不知道学了有什么用
+- 文本/PDF 分析：粘贴论文或上传可复制文字的 PDF，自动匹配本地术语库并高亮显示。
+- PDF 全文阅读：按页提取文本，不再固定截断 8000/10000 字；超长 PDF 会提示 LLM 分析上限。
+- 通用模型配置：网页内可配置 OpenAI-compatible API，支持 Kimi、OpenAI、OpenRouter、DeepSeek、Ollama 和自定义 endpoint。
+- 双语术语库：820 条计算机、软件工程和 AI 术语，保留中英文名称、别名、解释和论文元数据。
+- AI 伴学：右侧聊天框接入 `/api/chat`，能结合当前论文、已识别术语、当前打开术语和学习状态回答。
+- 本地降级：未配置 API Key 时，文本分析、PDF 分析和伴学都会回退到本地术语库。
 
-## 解决方案
+## 快速开始（Windows）
 
-一个接入星野语音的桌面组件/网页工具：
-
-| 功能 | 说明 |
-|---|---|
-| 📖 论文智能阅读 | 上传论文 → 标出专业名词 → 侧栏实时解释 |
-| 🔗 溯源式学习 | 不懂的概念→给出原始论文引用→点进去继续读 |
-| ✅ 已掌握标记 | 学会的概念下次不再解释 |
-| 🗺️ 学习路径 | 按方向整理好的论文阅读路线 |
-| 🎯 志趣推荐 | 告诉星野你喜欢啥 → 推荐适合的论文和技术路线 |
-
-## 技术架构
-
-```
-用户上传论文/输入URL
-      ↓
-  Python 后端 (FastAPI)
-      ├── PDF/HTML 文本提取
-      ├── LLM Agent (Kimi/DeepSeek) → 术语提取+解释
-      └── 术语知识库查询
-      ↓
-  HTML 前端阅读界面
-      ├── 论文原文/译文
-      ├── 术语侧栏（高亮标注+解释+溯源链接）
-      ├── 已掌握标记系统
-      └── 星野对话窗口
+```powershell
+cd C:\Users\lenovo\Documents\AI-FROM-ZERO
+python -m pip install -r backend/requirements.txt
+.\start_windows.ps1
 ```
 
-## 快速开始
+打开浏览器访问：
 
-### 前置要求
-- Python 3.10+
-- 一个 Kimi API Key（也可以替换成其他大模型API）
+```text
+http://localhost:8080
+```
 
-### 安装与运行
+首次启动如果没有配置模型，点击页面顶部“配置模型”即可填写供应商、API 地址、模型和 Key。Key 只会保存到本地 `.env`，不会提交到仓库。
+
+## 快速开始（通用 / OpenClaw）
 
 ```bash
-# 克隆项目
 git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git
 cd AI-From-Zero
-
-# 安装后端依赖
-pip install -r backend/requirements.txt
-
-# 配置 API Key（二选一）
-# 方式A：直接修改 backend/server.py 中的 KIMI_API_KEY
-# 方式B：设置环境变量
-#   Windows: set KIMI_API_KEY=your_key_here
-#   Linux/Mac: export KIMI_API_KEY=your_key_here
-
-# 启动服务
-cd backend
-python server.py
-
-# 打开浏览器访问
-http://YOUR_IP:8080（将 YOUR_IP 替换为你的实际IP地址）
+python -m pip install -r backend/requirements.txt
+./start.sh
 ```
 
-> ⚠️ 注意：API Key 需要自行申请，项目仓库中不包含任何 API Key。
+如果 OpenClaw 或你的 shell 已经暴露了 API Key，可以自动生成本地 `.env`：
+
+```bash
+python tools/bootstrap_openclaw_env.py
+```
+
+脚本只读取显式环境变量：`OPENAI_API_KEY`、`OPENROUTER_API_KEY`、`DEEPSEEK_API_KEY`、`KIMI_API_KEY`、`LLM_API_KEY`。它不会读取 OpenClaw 私有配置文件。
+
+## 配置
+
+配置优先读取环境变量，其次读取项目根目录 `.env`。旧的 `KIMI_*` 变量仍然兼容。
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `LLM_PROVIDER` | `kimi` | `kimi`、`openai`、`openrouter`、`deepseek`、`ollama`、`custom` |
+| `LLM_API_KEY` | 空 | OpenAI-compatible API Key；Ollama 可为空 |
+| `LLM_API_URL` | Kimi chat/completions | OpenAI-compatible chat completions 地址 |
+| `LLM_MODEL` | `moonshot-v1-128k` | 模型名 |
+| `LLM_TIMEOUT` | `60` | 请求超时时间，单位秒 |
+| `APP_HOST` | `127.0.0.1` | 默认只监听本机 |
+| `APP_PORT` | `8080` | 服务端口 |
+
+## API
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/` | GET | 前端页面 |
+| `/api/health` | GET | 服务状态、术语库数量、LLM provider/model、配置写入状态 |
+| `/api/config` | GET | 当前模型配置状态，Key 只脱敏显示 |
+| `/api/config/providers` | GET | 供应商预设 |
+| `/api/config/test` | POST | 测试临时模型配置 |
+| `/api/config/save` | POST | 保存本地 `.env`，仅允许本机调用 |
+| `/api/analyze` | POST | 分析论文文本 |
+| `/api/analyze-pdf` | POST | 上传并分析 PDF，返回 `pages/pageCount/textLength/truncated/extractionWarnings` |
+| `/api/chat` | POST | 右侧 AI 伴学 |
+| `/api/terms` | GET | 获取术语分类列表和双语字段 |
+| `/api/terms/{name}` | GET | 获取单个术语详情 |
+| `/api/terms/{name}/papers` | POST | 展开相关论文 |
+| `/api/terms/{name}/explain` | GET | 通俗解释 |
+| `/api/terms/{name}/explain-academic` | GET | 学术解释 |
+| `/api/learn-path` | POST | 获取学习路径 |
+| `/api/case-study` | POST | 分析 AI 应用案例 |
+
+分析类接口会返回 `llmStatus`：
+
+- `ok`：LLM 调用成功。
+- `missing_key`：未配置模型 Key，已使用本地术语库降级。
+- `error`：LLM 或文件解析失败，接口会尽量返回可用的本地结果。
+
+## 开发检查
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python tools/check_term_kb.py
+python -m pytest
+```
+
+服务启动后可以跑 API 冒烟检查：
+
+```powershell
+python tools/check_api_smoke.py --base-url http://127.0.0.1:8080
+```
 
 ## 项目结构
 
-```
-ai-from-zero/
-├── backend/          # Python 后端
-│   ├── server.py     # FastAPI 服务
-│   ├── paper_reader.py   # 论文解析
-│   ├── term_extractor.py # 术语提取+LLM
-│   └── requirements.txt
-├── frontend/         # 前端页面
-│   ├── index.html    # 主界面
-│   ├── reader.html   # 阅读界面
-│   └── style.css
-├── knowledge/        # AI 术语知识库
-│   ├── term_kb.json  # 结构化术语数据
-│   └── paper_graph.json  # 论文引用关系
-└── data/             # 运行时数据
+```text
+backend/app/          # 配置、路由、LLM、PDF、术语、伴学、学习路径
+frontend/             # 静态前端
+knowledge/            # 双语术语库与学习路径
+tests/                # FastAPI 接口测试
+tools/                # 术语检查、扩充、OpenClaw bootstrap、API 冒烟
 ```
 
-## 开源协议
+## 已知边界
+
+- 扫描版 PDF 暂不支持 OCR，会返回明确错误。
+- 伴学第一版不做账号、长期记忆、复杂 RAG 或流式输出。
+- `.env` 是本地开发文件，真实 Key 不进入版本控制。
+
+## License
 
 MIT
