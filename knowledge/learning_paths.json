@@ -1,0 +1,200 @@
+{
+  "llm": {
+    "title": "大语言模型方向（25+篇经典论文）",
+    "description": "从词嵌入到Transformer到大模型，LLM技术演进全路线",
+    "stages": [
+      {
+        "name": "第一阶段：词表示与序列建模（基础）",
+        "papers": [
+          "1. Word2Vec (Mikolov 2013)",
+          "2. GloVe (Pennington 2014)",
+          "3. Seq2Seq (Sutskever 2014)",
+          "4. LSTM (Hochreiter 1997)",
+          "5. GRU (Cho 2014)",
+          "6. Attention (Bahdanau 2014)"
+        ]
+      },
+      {
+        "name": "第二阶段：Transformer革命",
+        "papers": [
+          "7. Attention Is All You Need (Vaswani 2017)",
+          "8. BERT (Devlin 2018)",
+          "9. GPT-1 (Radford 2018)",
+          "10. GPT-2 (Radford 2019)",
+          "11. XLNet (Yang 2019)",
+          "12. RoBERTa (Liu 2019)",
+          "13. ALBERT (Lan 2019)",
+          "14. T5 (Raffel 2019)",
+          "15. BART (Lewis 2019)"
+        ]
+      },
+      {
+        "name": "第三阶段：大语言模型时代",
+        "papers": [
+          "16. GPT-3 (Brown 2020)",
+          "17. Scaling Laws (Kaplan 2020)",
+          "18. Chinchilla (Hoffmann 2022)",
+          "19. InstructGPT (Ouyang 2022)",
+          "20. Chain-of-Thought (Wei 2022)",
+          "21. LLaMA (Touvron 2023)",
+          "22. DeepSeek-R1 (DeepSeek 2025)",
+          "23. Mistral 7B (Jiang 2023)",
+          "24. Mixtral 8x7B (Mistral 2024)",
+          "25. GPT-4 (OpenAI 2023)"
+        ]
+      },
+      {
+        "name": "第四阶段：前沿技术",
+        "papers": [
+          "26. DPO (Rafailov 2023)",
+          "27. Mamba (Gu & Dao 2023)",
+          "28. Flash Attention (Dao 2022)",
+          "29. RAG (Lewis 2020)",
+          "30. ReAct (Yao 2022)",
+          "31. LoRA (Hu 2021)"
+        ]
+      }
+    ]
+  },
+  "cv": {
+    "title": "计算机视觉方向（25+篇经典论文）",
+    "description": "从经典CNN到视觉Transformer",
+    "stages": [
+      {
+        "name": "第一阶段：CNN基础架构",
+        "papers": [
+          "1. LeNet-5 (LeCun 1998)",
+          "2. AlexNet (Krizhevsky 2012)",
+          "3. VGGNet (Simonyan 2014)",
+          "4. GoogLeNet (Szegedy 2014)",
+          "5. ResNet (He 2015)",
+          "6. DenseNet (Huang 2017)",
+          "7. SENet (Hu 2017)"
+        ]
+      },
+      {
+        "name": "第二阶段：目标检测与分割",
+        "papers": [
+          "8. Faster R-CNN (Ren 2015)",
+          "9. YOLO (Redmon 2016)",
+          "10. SSD (Liu 2016)",
+          "11. Mask R-CNN (He 2017)",
+          "12. RetinaNet (Lin 2017)",
+          "13. U-Net (Ronneberger 2015)",
+          "14. DeepLab (Chen 2017)",
+          "15. FCN (Long 2015)"
+        ]
+      },
+      {
+        "name": "第三阶段：视觉Transformer与生成",
+        "papers": [
+          "16. ViT (Dosovitskiy 2020)",
+          "17. MAE (He 2021)",
+          "18. DETR (Carion 2020)",
+          "19. CLIP (Radford 2021)",
+          "20. NeRF (Mildenhall 2020)",
+          "21. 3D Gaussian Splatting (Kerbl 2023)",
+          "22. SAM (Kirillov 2023)",
+          "23. Stable Diffusion (Rombach 2022)",
+          "24. ControlNet (Zhang 2023)"
+        ]
+      }
+    ]
+  },
+  "agent": {
+    "title": "AI Agent方向（25+篇经典论文）",
+    "description": "从对话到行动，构建自主智能体",
+    "stages": [
+      {
+        "name": "第一阶段：Agent基础与推理",
+        "papers": [
+          "1. ReAct (Yao 2022)",
+          "2. Chain-of-Thought (Wei 2022)",
+          "3. Tree of Thoughts (Yao 2023)",
+          "4. Reflexion (Shinn 2023)"
+        ]
+      },
+      {
+        "name": "第二阶段：工具使用与环境交互",
+        "papers": [
+          "5. Toolformer (Schick 2023)",
+          "6. Function Calling (OpenAI 2023)",
+          "7. WebGPT (Nakano 2021)",
+          "8. SayCan (Ahn 2022)",
+          "9. PaLM-E (Driess 2023)"
+        ]
+      },
+      {
+        "name": "第三阶段：多Agent系统",
+        "papers": [
+          "10. Generative Agents (Park 2023)",
+          "11. AutoGPT (2023)",
+          "12. ChatDev (Qian 2023)",
+          "13. AutoGen (Wu 2023)",
+          "14. AgentVerse (Chen 2023)",
+          "15. Camel (Li 2023)",
+          "16. MCP (Anthropic 2024)",
+          "17. A2A (Google 2025)"
+        ]
+      },
+      {
+        "name": "第四阶段：前沿Agent实践",
+        "papers": [
+          "18. Voyager (Wang 2023)",
+          "19. RAG (Lewis 2020)",
+          "20. GraphRAG (Edge 2024)",
+          "21. SWE-agent (Yang 2024)",
+          "22. OpenDevin (OpenDevin 2024)"
+        ]
+      }
+    ]
+  },
+  "robotics": {
+    "title": "机器人+具身AI方向（25+篇经典论文）",
+    "description": "从感知到控制，机器人技术与AI的深度融合",
+    "stages": [
+      {
+        "name": "第一阶段：感知基础",
+        "papers": [
+          "1. AlexNet/ResNet",
+          "2. PointNet (Qi 2017)",
+          "3. PointNet++ (Qi 2017)",
+          "4. VoxelNet (Zhou 2018)",
+          "5. ORB-SLAM (Mur-Artal 2015)",
+          "6. DSO (Engel 2016)"
+        ]
+      },
+      {
+        "name": "第二阶段：控制与规划",
+        "papers": [
+          "7. DQN (Mnih 2015)",
+          "8. PPO (Schulman 2017)",
+          "9. SAC (Haarnoja 2018)",
+          "10. DDPG (Lillicrap 2015)",
+          "11. TD3 (Fujimoto 2018)"
+        ]
+      },
+      {
+        "name": "第三阶段：机器人学习",
+        "papers": [
+          "12. RT-1 (Brohan 2022)",
+          "13. RT-2 (Brohan 2023)",
+          "14. SayCan (Ahn 2022)",
+          "15. PaLM-E (Driess 2023)",
+          "16. Octo (Team 2023)",
+          "17. ACT (Zhao 2023)"
+        ]
+      },
+      {
+        "name": "第四阶段：前沿交叉",
+        "papers": [
+          "18. World Model (Ha 2018)",
+          "19. Dreamer (Hafner 2020)",
+          "20. MPC",
+          "21. GATO (Reed 2022)",
+          "22. Voyager (Wang 2023)"
+        ]
+      }
+    ]
+  }
+}

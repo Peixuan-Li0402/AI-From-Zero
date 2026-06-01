@@ -17,6 +17,7 @@
   <div class="topbar-inner">
     <h1 class="logo">🧠 从零开始的人工智能生活</h1>
     <span class="hoshino-badge">by 星野大叔 🐾</span>
+    <button id="btnConfig" class="config-btn" title="配置模型">模型未配置</button>
     <nav class="top-nav">
       <button class="nav-btn active" data-tab="reader">📖 阅读器</button>
       <button class="nav-btn" data-tab="learn">🗺️ 学习路径</button>
@@ -41,6 +42,15 @@
         </div>
       </div>
       <textarea id="paperText" placeholder="粘贴论文原文（摘要/引言/方法等）&#10;&#10;也可以先试试示例文本……" rows="8"></textarea>
+      <div class="paper-upload-row">
+        <label class="file-upload">
+          <input type="file" id="pdfFile" accept="application/pdf">
+          <span>📎 选择 PDF</span>
+        </label>
+        <button id="btnAnalyzePdf" class="btn secondary" disabled>分析 PDF</button>
+        <span id="pdfFileName" class="file-name">未选择文件</span>
+        <span id="pdfStatus" class="file-status">支持可复制文字的 PDF</span>
+      </div>
       <div class="paper-actions">
         <button id="btnAnalyze" class="btn primary">🔍 开始分析</button>
         <button id="btnExample" class="btn secondary">💡 试试示例</button>
@@ -182,11 +192,47 @@
   </div>
 </div>
 
+<!-- ═══ Overlay: 模型配置 ═══ -->
+<div id="configModal" class="modal-overlay" style="display:none">
+  <div class="modal-content config-modal">
+    <button class="modal-close" id="configClose">×</button>
+    <div class="modal-term-header">
+      <h2>配置模型</h2>
+      <span id="configState" class="term-cat">本地配置</span>
+    </div>
+    <div class="config-grid">
+      <label>供应商
+        <select id="configProvider" class="input-lg"></select>
+      </label>
+      <label>模型
+        <input id="configModel" class="input-lg" placeholder="例如 moonshot-v1-128k / gpt-4o-mini">
+      </label>
+      <label>API 地址
+        <input id="configApiUrl" class="input-lg" placeholder="OpenAI-compatible chat/completions URL">
+      </label>
+      <label>API Key
+        <input id="configApiKey" class="input-lg" type="password" placeholder="只保存到本地 .env">
+      </label>
+      <label>超时（秒）
+        <input id="configTimeout" class="input-lg" type="number" min="5" max="300" value="60">
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button id="btnConfigTest" class="btn secondary">测试连接</button>
+      <button id="btnConfigSave" class="btn primary">保存到本地</button>
+      <span id="configMessage" class="file-status"></span>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═════════════════════════════════
 //  配置
 // ═════════════════════════════════
 const API_BASE = "";
+let _providers = [];
+let _chatHistory = [];
+let _currentConfig = null;
 
 // 已掌握术语（localStorage）
 const getMastered = () => JSON.parse(localStorage.getItem("hoshinoMastered") || "[]");
@@ -232,7 +278,7 @@ tabBtns.forEach((btn) => {
 function addChatMessage(text, from = "hoshino") {
   const msg = document.createElement("div");
   msg.className = `msg msg-${from}`;
-  msg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+  msg.innerHTML = `<div class="msg-bubble">${from === "sensei" ? escapeHtml(text) : text}</div>`;
   $("chatMessages").appendChild(msg);
   msg.scrollIntoView({ behavior: "smooth", block: "end" });
 }
@@ -247,6 +293,116 @@ function addChatMessageRaw(text, from = "hoshino") {
   $("chatMessages").appendChild(msg);
   msg.scrollIntoView({ behavior: "smooth", block: "end" });
 }
+
+async function loadConfig() {
+  try {
+    const [configResp, providersResp] = await Promise.all([
+      fetch(`${API_BASE}/api/config`),
+      fetch(`${API_BASE}/api/config/providers`),
+    ]);
+    _currentConfig = await configResp.json();
+    const providerData = await providersResp.json();
+    _providers = providerData.providers || [];
+    renderConfigButton();
+    renderConfigForm();
+  } catch (err) {
+    $("btnConfig").textContent = "模型状态未知";
+  }
+}
+
+function renderConfigButton() {
+  const btn = $("btnConfig");
+  if (!_currentConfig) return;
+  btn.textContent = _currentConfig.llmConfigured
+    ? `${_currentConfig.provider} · ${_currentConfig.model}`
+    : "配置模型";
+  btn.className = `config-btn ${_currentConfig.llmConfigured ? "ready" : "missing"}`;
+}
+
+function renderConfigForm() {
+  if (!_providers.length || !_currentConfig) return;
+  $("configProvider").innerHTML = _providers.map((p) =>
+    `<option value="${escapeAttr(p.id)}">${escapeHtml(p.label)}</option>`
+  ).join("");
+  $("configProvider").value = _currentConfig.provider || "kimi";
+  $("configModel").value = _currentConfig.model || "";
+  $("configApiUrl").value = _currentConfig.apiUrl || "";
+  $("configApiKey").value = "";
+  $("configApiKey").placeholder = _currentConfig.maskedKey || "只保存到本地 .env";
+  $("configTimeout").value = _currentConfig.timeout || 60;
+  $("configState").textContent = _currentConfig.llmConfigured ? "已配置" : "未配置";
+}
+
+function applyProviderPreset() {
+  const provider = _providers.find((p) => p.id === $("configProvider").value);
+  if (!provider) return;
+  $("configApiUrl").value = provider.api_url || "";
+  $("configModel").value = provider.model || "";
+  if (!provider.requires_key) $("configApiKey").placeholder = "本地模型通常不需要 Key";
+}
+
+function openConfigModal() {
+  renderConfigForm();
+  $("configMessage").textContent = "";
+  $("configModal").style.display = "flex";
+}
+
+function configPayload() {
+  return {
+    provider: $("configProvider").value,
+    apiKey: $("configApiKey").value.trim(),
+    apiUrl: $("configApiUrl").value.trim(),
+    model: $("configModel").value.trim(),
+    timeout: Number($("configTimeout").value || 60),
+  };
+}
+
+async function testConfig() {
+  $("configMessage").textContent = "正在测试连接…";
+  const resp = await fetch(`${API_BASE}/api/config/test`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(configPayload()),
+  });
+  const data = await resp.json();
+  $("configMessage").textContent = data.message || (data.ok ? "连接成功" : "连接失败");
+  $("configMessage").className = `file-status ${data.ok ? "ready" : "error"}`;
+}
+
+async function saveConfig() {
+  $("configMessage").textContent = "正在保存…";
+  const resp = await fetch(`${API_BASE}/api/config/save`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(configPayload()),
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    $("configMessage").textContent = data.detail || "保存失败";
+    $("configMessage").className = "file-status error";
+    return;
+  }
+  _currentConfig = data;
+  renderConfigButton();
+  renderConfigForm();
+  $("configMessage").textContent = "已保存到本地 .env";
+  $("configMessage").className = "file-status ready";
+}
+
+$("btnConfig").addEventListener("click", openConfigModal);
+$("configClose").addEventListener("click", () => { $("configModal").style.display = "none"; });
+$("configModal").addEventListener("click", (e) => {
+  if (e.target === $("configModal")) $("configModal").style.display = "none";
+});
+$("configProvider").addEventListener("change", applyProviderPreset);
+$("btnConfigTest").addEventListener("click", () => testConfig().catch((err) => {
+  $("configMessage").textContent = err.message;
+  $("configMessage").className = "file-status error";
+}));
+$("btnConfigSave").addEventListener("click", () => saveConfig().catch((err) => {
+  $("configMessage").textContent = err.message;
+  $("configMessage").className = "file-status error";
+}));
 
 // ═════════════════════════════════
 //  示例文本
@@ -263,6 +419,20 @@ $("btnExample").addEventListener("click", () => {
   addChatMessage("大叔把论文摘要填好啦～点「开始分析」让大叔读读っす！");
 });
 
+$("pdfFile").addEventListener("change", () => {
+  const file = $("pdfFile").files[0];
+  const isPdf = !!file && (file.type === "application/pdf" || /\.pdf$/i.test(file.name));
+  $("btnAnalyzePdf").disabled = !isPdf;
+  $("pdfFileName").textContent = file ? file.name : "未选择文件";
+  if (!file) {
+    setPdfStatus("支持可复制文字的 PDF");
+  } else if (!isPdf) {
+    setPdfStatus("请选择 PDF 文件", "error");
+  } else {
+    setPdfStatus("已选择，可开始分析", "ready");
+  }
+});
+
 // ═════════════════════════════════
 //  分析论文
 // ═════════════════════════════════
@@ -276,31 +446,84 @@ $("btnAnalyze").addEventListener("click", async () => {
   $("loadingStatus").hidden = false;
   $("btnAnalyze").disabled = true;
   addChatMessage("📖 大叔正在读论文…先浏览一遍っす…");
+  let rendered = false;
 
   try {
     const resp = await fetch(`${API_BASE}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, title: $("paperTitle").value.trim() }),
     });
     const data = await resp.json();
 
-    if (data.error) {
-      addChatMessage(`😅 出问题了：${data.error}`);
+    if (!resp.ok || data.error) {
+      addChatMessage(`😅 出问题了：${data.error || data.detail || "分析失败"}`);
       return;
     }
 
     // 显示结果
     renderAnalysis(data, text);
+    rendered = true;
     addChatMessage(`读完了っす！${data.knownTerms.length} 个大叔认识的术语已经标出来了，点蓝色词看解释～`);
   } catch (err) {
     addChatMessage(`😵 出错了：${err.message}。大叔再去看看怎么回事…`);
   } finally {
     $("loadingStatus").hidden = true;
     $("btnAnalyze").disabled = false;
-    $("analysisResults").hidden = false;
+    if (rendered) $("analysisResults").hidden = false;
   }
 });
+
+async function analyzePdfFile() {
+  const file = $("pdfFile").files[0];
+  if (!file) {
+    addChatMessage("sensei～先选一个 PDF 再分析っす！");
+    return;
+  }
+
+  $("loadingStatus").hidden = false;
+  $("btnAnalyzePdf").disabled = true;
+  $("btnAnalyze").disabled = true;
+  setPdfStatus("正在读取 PDF 文本…", "loading");
+  addChatMessage(`📎 大叔正在读取 PDF：${escapeHtml(file.name)}…`);
+  let rendered = false;
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const resp = await fetch(`${API_BASE}/api/analyze-pdf`, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await resp.json();
+
+    if (!resp.ok || data.error) {
+      const message = data.error || data.detail || "请确认这是可复制文字的 PDF";
+      setPdfStatus(message, "error");
+      addChatMessage(`😅 PDF 读取失败：${message}`);
+      return;
+    }
+
+    const extractedText = data.text || "";
+    $("paperTitle").value = file.name.replace(/\.pdf$/i, "");
+    $("paperText").value = extractedText;
+    renderAnalysis(data, extractedText);
+    rendered = true;
+    const pageText = data.pageCount ? `${data.pageCount} 页，` : "";
+    setPdfStatus(`读取完成，${pageText}提取 ${extractedText.length} 个字符`, "ready");
+    addChatMessage(`PDF 读完了っす！${(data.knownTerms || []).length} 个术语已经标出来了～`);
+  } catch (err) {
+    setPdfStatus("PDF 分析出错，请稍后重试", "error");
+    addChatMessage(`😵 PDF 分析出错了：${err.message}`);
+  } finally {
+    $("loadingStatus").hidden = true;
+    $("btnAnalyze").disabled = false;
+    $("btnAnalyzePdf").disabled = !$("pdfFile").files[0];
+    if (rendered) $("analysisResults").hidden = false;
+  }
+}
+
+$("btnAnalyzePdf").addEventListener("click", analyzePdfFile);
 
 // 存储当前数据和翻译
 let _lastRawText = "";
@@ -308,7 +531,9 @@ let _lastKnownTerms = [];
 let _lastTranslation = "";
 
 function renderAnalysis(data, rawText) {
-  const { knownTerms, analysis, translation } = data;
+  const knownTerms = data.knownTerms || [];
+  const analysis = data.analysis || {};
+  const translation = data.translation || "";
   _lastRawText = rawText;
   _lastKnownTerms = knownTerms;
   _lastTranslation = translation || "";
@@ -317,9 +542,22 @@ function renderAnalysis(data, rawText) {
   $("paperSummary").textContent = analysis.summary || "（暂无摘要）";
 
   // 星野点评
-  $("hoshinoComment").innerHTML = analysis.hoshinoNote
+  const llmStatus = data.llmStatus || analysis.llmStatus || "ok";
+  const llmMessage = data.llmMessage || analysis.llmMessage || "";
+  const statusText = llmStatus === "missing_key"
+    ? "未配置模型：已展示本地术语匹配，配置 API Key 后可生成摘要、翻译和详细讲解。"
+    : (llmStatus === "error" ? `LLM 暂时不可用：${llmMessage || "已展示本地术语匹配。"}` : "");
+  const pdfMeta = data.pageCount
+    ? `PDF 已提取 ${data.pageCount} 页、${data.textLength || rawText.length} 个字符${data.truncated ? "；超长内容已分块分析，部分内容未送入 LLM" : ""}。`
+    : "";
+  const warnings = (data.extractionWarnings || []).join(" ");
+  const noteHtml = analysis.hoshinoNote
     ? `<span class="hoshino-icon">🐾</span> ${analysis.hoshinoNote}`
     : "";
+  const statusHtml = [statusText, pdfMeta, warnings].filter(Boolean)
+    .map((text) => `<div class="llm-notice">${escapeHtml(text)}</div>`)
+    .join("");
+  $("hoshinoComment").innerHTML = noteHtml + statusHtml;
 
   // 高亮论文文本（默认显示原文）
   switchReaderLang("original");
@@ -355,7 +593,8 @@ function switchReaderLang(lang) {
     if (_lastKnownTerms.length) {
       html += `<div class="translation-terms"><p style="margin-top:16px;font-size:13px;color:var(--muted)">🔬 术语速查：</p>`;
       _lastKnownTerms.forEach((t) => {
-        html += `<span class="term-highlight" onclick="showTermDetail('${escapeHtml(t.term)}')" style="display:inline-block;margin:3px">${escapeHtml(t.term)}</span>`;
+        const mastered = getMastered().includes(t.term);
+        html += `<span class="term-highlight ${mastered ? "mastered" : ""}" data-open-term="${escapeAttr(t.term)}" style="display:inline-block;margin:3px">${escapeHtml(t.term)}</span>`;
       });
       html += `</div>`;
     }
@@ -376,22 +615,34 @@ function highlightTerms(text, terms) {
     return;
   }
 
-  // 按长度降序排序（避免短词替换干扰长词）
-  const sorted = [...terms].sort((a, b) => b.term.length - a.term.length);
+  const mastered = getMastered();
+  const matchers = buildTermMatchers(terms);
+  let html = "";
+  let plain = "";
+  let i = 0;
 
-  let result = escapeHtml(text);
-  sorted.forEach((t) => {
-    const regex = new RegExp(`\\b(${escapeRegExp(t.term)})\\b`, "gi");
-    const mastered = getMastered().includes(t.term);
-    result = result.replace(regex, (match) => {
-      return `<span class="term-highlight ${mastered ? "mastered" : ""}" data-term="${escapeHtml(t.term)}" onclick="showTermDetail('${escapeHtml(t.term)}')">${match}</span>`;
-    });
-  });
+  const flushPlain = () => {
+    if (!plain) return;
+    html += escapeHtml(plain).replace(/\n/g, "<br>");
+    plain = "";
+  };
 
-  // 加个换行链接标出原文
-  result = result.replace(/\n/g, "<br>");
+  while (i < text.length) {
+    const match = matchers.find((item) => canMatchAt(text, item.alias, i));
+    if (!match) {
+      plain += text[i];
+      i += 1;
+      continue;
+    }
+    flushPlain();
+    const matchedText = text.slice(i, i + match.alias.length);
+    const isMastered = mastered.includes(match.term);
+    html += `<span class="term-highlight ${isMastered ? "mastered" : ""}" data-open-term="${escapeAttr(match.term)}">${escapeHtml(matchedText)}</span>`;
+    i += match.alias.length;
+  }
 
-  $("readerContent").innerHTML = result;
+  flushPlain();
+  $("readerContent").innerHTML = html;
 }
 
 function renderTermSidebar(knownTerms) {
@@ -412,7 +663,7 @@ function renderTermSidebar(knownTerms) {
     return `<div class="term-group">
       <div class="term-group-label">${label}</div>
       ${list.map((t) => `
-        <div class="term-item ${mastered.includes(t.term) ? "mastered" : ""}" onclick="showTermDetail('${escapeHtml(t.term)}')">
+        <div class="term-item ${mastered.includes(t.term) ? "mastered" : ""}" data-open-term="${escapeAttr(t.term)}">
           <div class="term-item-header">
             <strong>${escapeHtml(t.term)}</strong>
             <span class="term-diff diff-${t.difficulty}">Lv.${t.difficulty}</span>
@@ -433,10 +684,42 @@ async function showTermDetail(termName) {
   try {
     const resp = await fetch(`${API_BASE}/api/terms/${encodeURIComponent(termName)}`);
     const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error(data.detail || "术语不存在");
+    }
 
     const mastered = getMastered().includes(data.term);
     const hasPrereqs = data.prerequisiteTerms && data.prerequisiteTerms.length;
     const hasPapers = data.landmarkPapers && data.landmarkPapers.length;
+    _currentPaperTerm = data.term;
+
+    const prereqHtml = hasPrereqs ? `
+      <div class="modal-section">
+        <h4>🔗 前置知识</h4>
+        <div class="prereq-list">
+          ${data.prerequisiteTerms.map((p) => `<button class="chip chip-term" data-open-term="${escapeAttr(p)}">${escapeHtml(p)}</button>`).join("")}
+        </div>
+      </div>` : `
+      <div class="modal-section">
+        <h4>🔗 前置知识</h4>
+        <p class="empty-note">这个术语暂时没有必需的前置知识。</p>
+      </div>`;
+
+    const papersHtml = hasPapers ? `
+      <div class="modal-section">
+        <h4>📄 经典论文溯源</h4>
+        ${data.landmarkPapers.map((p) => `
+          <div class="paper-ref">
+            <strong>${escapeHtml(p.title)}</strong>
+            <span>${escapeHtml(p.authors)} (${escapeHtml(String(p.year || ""))})</span>
+            <p>${escapeHtml(p.shortDesc)}</p>
+          </div>
+        `).join("")}
+      </div>` : `
+      <div class="modal-section">
+        <h4>📄 经典论文溯源</h4>
+        <p class="empty-note">知识库里暂时还没有记录经典论文。</p>
+      </div>`;
 
     let html = `
       <div class="modal-term-header">
@@ -444,10 +727,11 @@ async function showTermDetail(termName) {
         <span class="term-diff diff-${data.difficulty}">难度 Lv.${data.difficulty}</span>
         <span class="term-cat">${escapeHtml(data.category || "")}</span>
       </div>
-      <p class="modal-fullname">${escapeHtml(data.fullName || "")}</p>
+      <p class="modal-fullname">${escapeHtml(data.fullNameZh || data.fullName || "")}${data.termEn ? ` · ${escapeHtml(data.termEn)}` : ""}</p>
       <div class="modal-section">
         <h4>📖 大叔的解释</h4>
-        <p>${escapeHtml(data.explanation)}</p>
+        <p>${escapeHtml(data.explanationZh || data.explanation)}</p>
+        ${data.explanationEn ? `<p class="english-note">${escapeHtml(data.explanationEn)}</p>` : ""}
       </div>
       ${data.hoshinoNote ? `
       <div class="modal-section hoshino-note-section">
@@ -459,10 +743,7 @@ async function showTermDetail(termName) {
           ${mastered ? "✅ 已掌握" : "📌 标记已学会"}
         </button>
       </div>
-      ${hasPrereqs ? `
-      <div class="modal-section">
-        <h4>🔗 前置知识</h4>
-        <div class="prereq-list">
+      ${prereqHtml}
       <div class="modal-section">
         <button class="btn secondary small" id="btnExpandPapers" onclick="expandPapers()" style="margin-bottom:8px">📚 展开更多相关论文 →</button>
       </div>
@@ -479,20 +760,7 @@ async function showTermDetail(termName) {
           <p style="color:var(--muted);font-size:13px">正在生成详细学术解释……⏳</p>
         </div>
       </div>
-          ${data.prerequisiteTerms.map((p) => `<button class="chip chip-term" onclick="showTermDetail('${escapeHtml(p)}')">${escapeHtml(p)}</button>`).join("")}
-        </div>
-      </div>` : ""}
-      ${hasPapers ? `
-      <div class="modal-section">
-        <h4>📄 经典论文溯源</h4>
-        ${data.landmarkPapers.map((p) => `
-          <div class="paper-ref">
-            <strong>${escapeHtml(p.title)}</strong>
-            <span>${escapeHtml(p.authors)} (${p.year})</span>
-            <p>${escapeHtml(p.shortDesc)}</p>
-          </div>
-        `).join("")}
-      </div>` : ""}
+      ${papersHtml}
     `;
 
     $("modalBody").innerHTML = html;
@@ -507,18 +775,12 @@ async function showTermDetail(termName) {
       this.textContent = nowMastered ? "✅ 已掌握" : "📌 标记已学会";
       this.className = `btn ${nowMastered ? "secondary" : "primary"} mastery-btn`;
 
-      // 刷新高亮
-      const text = $("paperText").value.trim();
-      if (text) {
-        // Re-highlight if we have current analysis
-      }
+      const activeLang = document.querySelector(".reader-tab.active")?.dataset.lang || "original";
+      if (_lastRawText) switchReaderLang(activeLang);
+      renderTermSidebar(_lastKnownTerms);
       addChatMessage(`大叔记下了：「${term}」${nowMastered ? "✅ 学会了！下次不解释了" : "📖 取消了已掌握标记"}`);
     });
 
-    // 前置知识点击
-    document.querySelectorAll(".chip-term").forEach((btn) => {
-      btn.addEventListener("click", () => showTermDetail(btn.textContent.trim()));
-    });
   } catch (err) {
     addChatMessage(`😅 查「${termName}」的时候出了点问题：${err.message}`);
   }
@@ -592,6 +854,7 @@ async function expandPapers() {
       headers: {"Content-Type": "application/json"},
     });
     const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "论文加载失败");
     const papers = data.papers || [];
     const container = document.getElementById("expandedPapers");
     if (container && papers.length) {
@@ -633,14 +896,14 @@ async function loadAcademicExplain(termName) {
     if (detail && detail.length > 50) {
       const section = document.getElementById("academicExplainSection");
       if (section) {
-                if (typeof renderMathInElement !== 'undefined') {
+        section.innerHTML = '<div class="modal-section" style="background:#fefefe;border:1px solid var(--line);padding:16px;border-radius:8px;margin-top:8px">' +
+          '<h4>'+String.fromCodePoint(0x1f4d6)+' 学术详细版（AI生成）</h4>' +
+          '<div style="font-size:14px;line-height:1.9;white-space:pre-wrap;color:var(--ink)">' + escapeHtml(detail) + '</div></div>';
+        if (typeof renderMathInElement !== 'undefined') {
           setTimeout(function() {
             renderMathInElement(section, {delimiters:[{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false}]});
           }, 50);
         }
-        section.innerHTML = '<div class="modal-section" style="background:#fefefe;border:1px solid var(--line);padding:16px;border-radius:8px;margin-top:8px">' +
-          '<h4>'+String.fromCodePoint(0x1f4d6)+' 学术详细版（AI生成）</h4>' +
-          '<div style="font-size:14px;line-height:1.9;white-space:pre-wrap;color:var(--ink)">' + escapeHtml(detail) + '</div></div>';
       }
     }
   } catch (err) {}
@@ -657,9 +920,9 @@ async function loadTermKB() {
         <h3>${escapeHtml(cat)} <small>${terms.length} 个</small></h3>
         <div class="kb-term-grid">
           ${terms.map((t) => `
-            <div class="kb-term" onclick="showTermDetail('${escapeHtml(t.term)}')">
+            <div class="kb-term" data-open-term="${escapeAttr(t.term)}">
               <strong>${escapeHtml(t.term)}</strong>
-              <span>${escapeHtml(t.fullName)}</span>
+              <span>${escapeHtml(t.termZh || t.fullName || "")}${t.termEn && t.termEn !== t.term ? ` · ${escapeHtml(t.termEn)}` : ""}</span>
               <span class="term-diff diff-${t.difficulty}">Lv.${t.difficulty}</span>
             </div>
           `).join("")}
@@ -687,30 +950,41 @@ $("chatInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendChat();
 });
 
-function sendChat() {
+async function sendChat() {
   const input = $("chatInput");
   const text = input.value.trim();
   if (!text) return;
   input.value = "";
 
   addChatMessage(text, "sensei");
+  _chatHistory.push({ role: "user", content: text });
+  $("btnChatSend").disabled = true;
 
-  // 简单的关键词回复
-  const lower = text.toLowerCase();
-  if (lower.includes("你好") || lower.includes("hi") || lower.includes("hello")) {
-    addChatMessage("呜嘿～sensei好っす！今天想读哪篇论文？大叔已经准备好了～🐾");
-  } else if (lower.includes("谢谢") || lower.includes("thank")) {
-    addChatMessage("不客气っす～有不懂的随时问大叔！");
-  } else if (lower.includes("卷积") || lower.includes("cnn")) {
-    addChatMessage("CNN就是卷积神经网络っす！专门用来处理图片的～它在图片上滑一个小窗口提取特征，一层层叠上去就能认出猫啊狗啊的。要点开边栏里CNN的详情看看不？📖");
-  } else if (lower.includes("transformer") || lower.includes("注意力")) {
-    addChatMessage("Transformer就是「Attention Is All You Need」那篇搞出来的架构っす！完全靠注意力机制，不用RNN也不用CNN。现在是所有大模型（ChatGPT、Claude、Gemini）的基础っす！");
-  } else if (lower.includes("论文") || lower.includes("读")) {
-    addChatMessage("嗯嗯，粘贴论文正文到左边，大叔帮你标术语っす！📄");
-  } else if (lower.includes("学习") || lower.includes("入门") || lower.includes("方向")) {
-    addChatMessage("点上面的「学习路径」标签看看っす～大叔整理了几条路线：LLM、CV、Agent、机器人。选一个感兴趣的！🗺️");
-  } else {
-    addChatMessage(`嗯…「${text}」大叔想想…<br>如果你问的是某个AI术语，可以在右边术语库搜一下，或者在论文阅读里标出来っす！`);
+  try {
+    const resp = await fetch(`${API_BASE}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        paperText: _lastRawText,
+        paperSummary: $("paperSummary").textContent || "",
+        knownTerms: _lastKnownTerms,
+        currentTerm: _currentPaperTerm || "",
+        masteredTerms: getMastered(),
+        history: _chatHistory.slice(-8),
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "伴学接口暂时不可用");
+    const prefix = data.llmStatus === "missing_key"
+      ? `<div class="llm-mini">本地模式</div>`
+      : (data.llmStatus === "error" ? `<div class="llm-mini error">模型暂不可用，已降级</div>` : "");
+    addChatMessage(prefix + escapeHtml(data.reply || "大叔暂时没想好怎么回答。").replace(/\n/g, "<br>"));
+    _chatHistory.push({ role: "assistant", content: data.reply || "" });
+  } catch (err) {
+    addChatMessage(`伴学接口出错了：${escapeHtml(err.message)}<br>先试试问一个已高亮的术语，或者检查模型配置。`);
+  } finally {
+    $("btnChatSend").disabled = false;
   }
 }
 
@@ -724,13 +998,66 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function escapeAttr(text) {
+  return escapeHtml(text).replace(/"/g, "&quot;");
+}
+
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function setPdfStatus(text, state = "muted") {
+  const el = $("pdfStatus");
+  if (!el) return;
+  el.textContent = text;
+  el.className = `file-status ${state}`;
+}
+
+function isAsciiAlias(value) {
+  return /^[A-Za-z0-9_+.#-]+$/.test(value);
+}
+
+function isWordChar(value) {
+  return /^[A-Za-z0-9_]$/.test(value || "");
+}
+
+function canMatchAt(text, alias, index) {
+  const chunk = text.slice(index, index + alias.length);
+  if (chunk.toLowerCase() !== alias.toLowerCase()) return false;
+  if (isAsciiAlias(alias)) {
+    if (isWordChar(text[index - 1]) || isWordChar(text[index + alias.length])) return false;
+  }
+  return true;
+}
+
+function buildTermMatchers(terms) {
+  const seen = new Set();
+  const items = [];
+  terms.forEach((term) => {
+    const names = [term.term, ...(term.aliases || [])];
+    names.forEach((alias) => {
+      if (!alias || String(alias).trim().length < 2) return;
+      const clean = String(alias).trim();
+      const key = `${term.term.toLowerCase()}::${clean.toLowerCase()}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      items.push({ term: term.term, alias: clean });
+    });
+  });
+  return items.sort((a, b) => b.alias.length - a.alias.length || a.alias.localeCompare(b.alias));
+}
+
+document.addEventListener("click", (event) => {
+  const target = event.target instanceof Element ? event.target : event.target.parentElement;
+  const el = target?.closest("[data-open-term]");
+  if (!el) return;
+  showTermDetail(el.dataset.openTerm || el.textContent.trim());
+});
+
 // ═════════════════════════════════
 //  启动后自动加载
 // ═════════════════════════════════
+loadConfig();
 loadTermKB();
 loadLearnPath();
 
@@ -769,7 +1096,7 @@ $("btnAnalyzeCase").addEventListener("click", async () => {
     $("caseFields").innerHTML = '<div class="analysis-card"><h3>🔬 涉及的技术领域</h3>' +
       '<div class="tag-row">' + (fields.length ? fields.map(f => '<span class="tag general">' + escapeHtml(f) + '</span>').join(" ") : "暂无") + '</div>' +
       '<h3 style="margin-top:12px">💡 核心术语</h3>' +
-      '<div class="tag-row">' + (terms.length ? terms.map(t => '<span class="term-highlight" style="display:inline-block;margin:3px;padding:2px 6px;cursor:pointer" onclick="showTermDetail(\'' + escapeHtml(t) + '\')">' + escapeHtml(t) + '</span>').join(" ") : "暂无") + '</div></div>';
+      '<div class="tag-row">' + (terms.length ? terms.map(t => '<span class="term-highlight" data-open-term="' + escapeAttr(t) + '" style="display:inline-block;margin:3px;padding:2px 6px;cursor:pointer">' + escapeHtml(t) + '</span>').join(" ") : "暂无") + '</div></div>';
 
     // 学习路径推荐
     const lp = data.learningPath || [];
@@ -798,6 +1125,7 @@ $("termModal").addEventListener("click", (e) => {
 // 清除聊天
 $("clearChat").addEventListener("click", () => {
   $("chatMessages").innerHTML = "";
+  _chatHistory = [];
   addChatMessage("呜嘿～对话清空っす！继续聊吧🐾");
 });
 

@@ -1,130 +1,103 @@
-# 🧠 AI From Zero — OpenClaw Skill
+# AI From Zero — OpenClaw Skill
 
-从零开始的人工智能生活：AI 论文溯源阅读助手，由星野大叔陪伴。
+AI-From-Zero 是一个本地 AI 论文溯源阅读助手，适合接入 OpenClaw 作为 Web 工具或 Custom Skill。
 
-## 概述
+## 能力入口
 
-这个 Skill 让 OpenClaw 用户获得一个完整的 AI 论文阅读与学习辅助工具，包含：
+- 文本分析：`POST /api/analyze`，输入论文正文，返回术语、高亮数据、摘要、翻译和 `llmStatus`。
+- PDF 分析：`POST /api/analyze-pdf`，按页提取可复制文字 PDF，返回全文、页数、字符数、分块分析状态和术语结果。
+- AI 伴学：`POST /api/chat`，结合当前论文、当前术语、已掌握术语和最近对话回答问题。
+- 模型配置：`GET /api/config`、`GET /api/config/providers`、`POST /api/config/test`、`POST /api/config/save`。
+- 术语库：`GET /api/terms`、`GET /api/terms/{name}`，返回双语术语字段和解释。
+- 相关论文：`POST /api/terms/{name}/papers`。
+- 学习路径：`POST /api/learn-path`。
+- 案例分析：`POST /api/case-study`。
 
-- **论文智能阅读** — 粘贴论文 → AI 分析摘要 + 术语高亮 + 中文翻译
-- **301 个 AI 术语知识库** — 专业名词解释 + 溯源论文 + 难易分级
-- **术语通俗/学术解释** — 点术语 → AI 生成详细讲解
-- **学习路径推荐** — 4 个方向（LLM/CV/Agent/机器人），各 22-31 篇经典论文
-- **案例分析** — 贴真实案例 → AI 识别技术领域 + 推荐学习路径
-- **星野大叔聊天** — 关键词即时回复 + LLM 对话双模式
+## 启动
 
-## 技术架构
+Windows PowerShell：
 
+```powershell
+cd C:\Users\lenovo\Documents\AI-FROM-ZERO
+python -m pip install -r backend/requirements.txt
+.\start_windows.ps1
 ```
-用户浏览器 (Web UI)
-      ↕ HTTP
-FastAPI 服务器 (Python)
-      ↕ API
-Kimi / 其他 LLM API
-```
 
-## 安装与配置
-
-### 前置要求
-
-- Python 3.10+
-- 一个 LLM API Key（支持 Kimi、DeepSeek、OpenAI 等）
-
-### 安装步骤
+通用命令：
 
 ```bash
-# 1. 克隆到 OpenClaw 工作区
-git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git ~/.openclaw/workspace/ai-from-zero
-
-# 2. 安装 Python 依赖
-pip install -r ~/.openclaw/workspace/ai-from-zero/backend/requirements.txt
-
-# 3. 配置 API Key
-#    编辑 ~/.openclaw/workspace/ai-from-zero/backend/server.py
-#    找到 KIMI_API_KEY 配置项，替换为你的 Key
+cd AI-From-Zero
+python -m pip install -r backend/requirements.txt
+./start.sh
 ```
 
-### 启动
+访问地址默认是：
+
+```text
+http://localhost:8080
+```
+
+## OpenClaw 配置建议
+
+如果 OpenClaw 启动环境里已经有模型 Key，先运行：
 
 ```bash
-cd ~/.openclaw/workspace/ai-from-zero/backend
-python3 server.py
+python tools/bootstrap_openclaw_env.py
 ```
 
-访问 `http://YOUR_IP:8080` 即可使用。
+脚本只读取这些显式环境变量：`OPENAI_API_KEY`、`OPENROUTER_API_KEY`、`DEEPSEEK_API_KEY`、`KIMI_API_KEY`、`LLM_API_KEY`。它不会读取或复制 OpenClaw 私有配置文件里的密钥。
 
-## 接入 OpenClaw
+也可以在网页顶部点“配置模型”，手动填写 OpenAI-compatible endpoint：
 
-### 方式一：作为 Web 工具（推荐）
+```env
+LLM_PROVIDER=kimi
+LLM_API_KEY=
+LLM_API_URL=https://api.moonshot.cn/v1/chat/completions
+LLM_MODEL=moonshot-v1-128k
+LLM_TIMEOUT=60
+APP_HOST=127.0.0.1
+APP_PORT=8080
+```
 
-启动服务器后，OpenClaw 可以通过 HTTP 调用所有 API 端点。
-
-**核心 API 端点：**
-
-| 端点 | 方法 | 说明 |
-|---|---|---|
-| `/api/analyze` | POST | 分析论文文本，返回摘要+术语+翻译 |
-| `/api/terms` | GET | 获取全部术语列表 |
-| `/api/terms/{name}` | GET | 查询单个术语详情 |
-| `/api/terms/{name}/explain` | GET | 获取术语通俗解释（AI 生成） |
-| `/api/terms/{name}/explain-academic` | GET | 获取术语学术解释（AI 生成） |
-| `/api/learn-path` | POST | 获取学习路径推荐 |
-| `/api/case-study` | POST | 分析案例，返回技术领域+学习路径 |
-| `/api/chat` | POST | 星野大叔聊天 |
-
-### 方式二：作为 OpenClaw Tool
-
-在 OpenClaw 配置中添加以下 tool：
+## Tool 配置示例
 
 ```yaml
 tools:
   - name: ai-from-zero
-    description: "AI 论文阅读与学习辅助工具"
-    url: "http://YOUR_IP:8080"
+    description: "AI 论文阅读、术语溯源与伴学工具"
+    url: "http://localhost:8080"
     endpoints:
+      - path: "/api/health"
+        method: "GET"
+      - path: "/api/config"
+        method: "GET"
       - path: "/api/analyze"
         method: "POST"
-        description: "分析论文，提取术语和摘要"
-      - path: "/api/terms/{name}/explain"
+      - path: "/api/analyze-pdf"
+        method: "POST"
+      - path: "/api/chat"
+        method: "POST"
+      - path: "/api/terms"
         method: "GET"
-        description: "获取术语的详细解释"
+      - path: "/api/terms/{name}"
+        method: "GET"
+      - path: "/api/terms/{name}/papers"
+        method: "POST"
       - path: "/api/learn-path"
         method: "POST"
-        description: "获取学习路径推荐"
       - path: "/api/case-study"
         method: "POST"
-        description: "分析案例中的AI技术"
 ```
 
-### 方式三：作为 Custom Skill
+## 冒烟检查
 
-将本项目目录放入 OpenClaw 的 `skills/` 目录，OpenClaw 会自动识别 SKILL.md。
+```bash
+python tools/check_term_kb.py
+python tools/check_api_smoke.py --base-url http://127.0.0.1:8080
+```
 
-## 术语知识库
+## 注意
 
-包含 **301 个 AI 核心术语**，按 14 个分类组织：
-
-- 训练范式 (40)、训练技巧 (34)、数学基础 (34)、核心概念 (29)
-- 基础架构 (28)、当前热点 (24)、计算机视觉 (24)、工程实践 (21)
-- 评估指标 (18)、预训练模型 (17)、生成模型 (16)、高级方向 (6)
-- 机器人 (6)、基础模型 (4)
-
-每个术语包含：通俗解释、星野吐槽、前置知识引用、经典论文溯源。
-
-## 自定义配置
-
-### 更换 LLM 模型
-
-编辑 `backend/server.py`，修改 `call_kimi()` 函数中的 API 地址和模型名即可切换为 DeepSeek、OpenAI 等。
-
-### 添加更多术语
-
-编辑 `knowledge/term_kb.json`，按格式添加新的术语条目。
-
-### 调整学习路径
-
-编辑 `backend/server.py` 中的 `paths` 字典，添加或修改学习方向。
-
-## 开源协议
-
-MIT
+- 未配置 Key 时，文本分析、PDF 分析和伴学都会使用本地术语库降级。
+- 扫描版 PDF 暂不支持 OCR。
+- 术语库已升级为双语字段；旧字段仍保留，便于前端和旧调用兼容。
