@@ -234,3 +234,47 @@ def test_paper_search_and_evidence(client):
     })
     assert evidence.status_code == 200
     assert evidence.json()["snippets"]
+
+
+def test_demo_cases_and_message_bridge(client):
+    cases = client.get("/api/demo-cases")
+    assert cases.status_code == 200
+    payload = cases.json()
+    assert len(payload["cases"]) >= 3
+    assert payload["cases"][0]["paper"]["resourceStatus"] in {"pdf", "abstract", "link"}
+
+    loaded = client.post("/api/demo-cases/transformer/load")
+    assert loaded.status_code == 200
+    loaded_data = loaded.json()
+    assert loaded_data["case"]["id"] == "transformer"
+    assert loaded_data["text"]
+
+    status = client.get("/api/integrations/status")
+    assert status.status_code == 200
+    status_data = status.json()
+    assert {item["channel"] for item in status_data["channels"]} == {"wechat", "qq"}
+    assert "WECHAT_WEBHOOK_URL" not in str(status_data)
+
+    inbound = client.post("/api/integrations/messages/inbound", json={
+        "channel": "local",
+        "text": "解释 Transformer",
+        "sender": "pytest",
+    })
+    assert inbound.status_code == 200
+    assert inbound.json()["action"] == "term_explain"
+    assert "Transformer" in inbound.json()["reply"]
+
+    learn = client.post("/api/integrations/messages/inbound", json={
+        "channel": "qq",
+        "text": "下一篇 llm",
+        "sender": "pytest",
+    })
+    assert learn.status_code == 200
+    assert learn.json()["action"] == "learning_path"
+
+    send = client.post("/api/integrations/messages/send", json={
+        "channel": "wechat",
+        "text": "hello",
+    })
+    assert send.status_code == 200
+    assert send.json()["status"] == "not_configured"

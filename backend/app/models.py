@@ -57,3 +57,18 @@ class PaperLoadRequest(BaseModel):
     pdfUrl: str = ""
     abstract: str = ""
     shortDesc: str = ""
+
+
+class IntegrationInboundRequest(BaseModel):
+    channel: str = "local"
+    text: str = ""
+    sender: str = ""
+    token: str = ""
+    metadata: dict = Field(default_factory=dict)
+
+
+class IntegrationSendRequest(BaseModel):
+    channel: str = "wechat"
+    text: str = ""
+    markdown: bool = False
+    token: str = ""

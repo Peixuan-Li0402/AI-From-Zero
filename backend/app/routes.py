@@ -4,6 +4,8 @@ from fastapi.responses import HTMLResponse
 from .analysis import PDF_LLM_CHAR_LIMIT, analyze_case_study_text, build_analysis_response, build_pdf_analysis_response
 from .chat import chat_with_context
 from .config import FRONTEND_DIR, PROVIDER_PRESETS, provider_by_id, save_env_updates, settings
+from .demo_cases import list_demo_cases, load_demo_case
+from .integrations import integration_status, process_inbound_message, send_message
 from .learning import get_learning_paths
 from .llm import test_llm_config
 from .models import (
@@ -15,6 +17,8 @@ from .models import (
     MasteryUpdateRequest,
     PaperLoadRequest,
     PaperAnalysis,
+    IntegrationInboundRequest,
+    IntegrationSendRequest,
 )
 from .papers import evidence_snippets, load_paper_for_reader, search_papers
 from .pdf import extract_pdf_pages
@@ -55,7 +59,7 @@ async def health():
         "llmModel": settings.llm_model,
         "model": settings.llm_model,
         "configWritable": settings.config_writable,
-        "hoshino": "大叔还在～っす",
+        "hoshino": "AI-From-Zero ready",
     }
 
 
@@ -240,6 +244,40 @@ async def learning_session(data: LearningSessionRequest):
 async def learning_mastery(data: MasteryUpdateRequest):
     try:
         return update_mastery(data.term, data.mastered)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/api/demo-cases")
+async def demo_cases():
+    return list_demo_cases()
+
+
+@router.post("/api/demo-cases/{case_id}/load")
+async def demo_case_load(case_id: str):
+    try:
+        return load_demo_case(case_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/api/integrations/status")
+async def integrations_status():
+    return integration_status()
+
+
+@router.post("/api/integrations/messages/inbound")
+async def integrations_inbound(data: IntegrationInboundRequest):
+    try:
+        return process_inbound_message(data.channel, data.text, sender=data.sender, token=data.token, metadata=data.metadata)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/api/integrations/messages/send")
+async def integrations_send(data: IntegrationSendRequest):
+    try:
+        return send_message(data.channel, data.text, token=data.token, markdown=data.markdown)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

@@ -159,6 +159,9 @@ class Settings:
         self.kimi_api_url = self.llm_api_url
         self.kimi_model = self.llm_model
         self.kimi_timeout = self.llm_timeout
+        self.wechat_webhook_url = _get_env("WECHAT_WEBHOOK_URL", "")
+        self.qq_bot_webhook_url = _get_env("QQ_BOT_WEBHOOK_URL", "")
+        self.message_bridge_token = _get_env("MESSAGE_BRIDGE_TOKEN", "")
 
     @property
     def llm_configured(self) -> bool:
@@ -177,6 +180,14 @@ class Settings:
         if len(key) <= 8:
             return "*" * len(key)
         return f"{key[:4]}...{key[-4:]}"
+
+    @staticmethod
+    def mask_secret(value: str) -> str:
+        if not value:
+            return ""
+        if len(value) <= 12:
+            return "*" * len(value)
+        return f"{value[:6]}...{value[-6:]}"
 
 
 def quote_env_value(value: str) -> str:

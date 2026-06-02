@@ -1,36 +1,69 @@
-#!/bin/bash
-# AI From Zero — 启动脚本
-# KIMI_API_KEY 可选；未设置时会启用本地术语匹配降级模式。
+#!/usr/bin/env bash
+set -euo pipefail
 
-cd "$(dirname "$0")/backend"
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BACKEND_DIR="$ROOT_DIR/backend"
+ENV_FILE="$ROOT_DIR/.env"
+VENV_DIR="$ROOT_DIR/.venv"
+PYTHON_BIN="$VENV_DIR/bin/python"
+REQUIREMENTS="$ROOT_DIR/requirements.txt"
 
-if [ -f "../.env" ]; then
-    set -a
-    . "../.env"
-    set +a
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  . "$ENV_FILE"
+  set +a
 fi
 
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "Python 3.10+ was not found. Install Python and run this script again."
+  exit 1
+fi
+
+if [ ! -x "$PYTHON_BIN" ]; then
+  echo "Creating local virtual environment: .venv"
+  python3 -m venv "$VENV_DIR"
+fi
+
+echo "Installing project dependencies..."
+"$PYTHON_BIN" -m pip install --upgrade pip
+"$PYTHON_BIN" -m pip install -r "$REQUIREMENTS"
+
+APP_PORT="${APP_PORT:-8080}"
+APP_HOST="${APP_HOST:-127.0.0.1}"
 LLM_PROVIDER="${LLM_PROVIDER:-kimi}"
+
+if "$PYTHON_BIN" - "$APP_HOST" "$APP_PORT" <<'PY'
+import socket
+import sys
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+check_host = "0.0.0.0" if host == "0.0.0.0" else "127.0.0.1"
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.settimeout(0.4)
+try:
+    in_use = sock.connect_ex((check_host, port)) == 0
+finally:
+    sock.close()
+sys.exit(0 if in_use else 1)
+PY
+then
+  echo "Port $APP_PORT is already in use. Change APP_PORT in .env or stop the other service."
+  exit 1
+fi
+
 if [ -z "${LLM_API_KEY:-}" ] && [ -z "${KIMI_API_KEY:-}" ] && [ "$LLM_PROVIDER" != "ollama" ]; then
-    echo "⚠️  未设置 LLM_API_KEY，将使用本地术语匹配模式"
-    echo "   如需完整 LLM 分析，请打开网页点「配置模型」，或运行: export LLM_API_KEY=your_key_here"
+  echo "LLM key is not configured. The app will start in local mode."
+  echo "Open the web app and use Configure Model, or set LLM_API_KEY in .env."
 else
-    echo "✅ 已配置 LLM provider: $LLM_PROVIDER，将启用完整 LLM 分析"
+  echo "LLM provider configured: $LLM_PROVIDER"
 fi
 
-# 检查 Python
-if ! command -v python3 &> /dev/null; then
-    echo "❌ 需要 Python 3.10+"
-    exit 1
+echo "Starting AI-From-Zero..."
+echo "Local URL: http://127.0.0.1:$APP_PORT"
+if [ "$APP_HOST" = "0.0.0.0" ]; then
+  echo "LAN mode is enabled. Use this only on trusted networks."
 fi
 
-# 检查依赖
-pip list 2>/dev/null | grep -q fastapi || {
-    echo "📦 正在安装依赖..."
-    pip install -r requirements.txt -q
-}
-
-echo "🐾 启动 AI From Zero 服务..."
-echo "📖 访问: http://localhost:${APP_PORT:-8080}"
-echo ""
-python3 server.py
+"$PYTHON_BIN" "$BACKEND_DIR/server.py"

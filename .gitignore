@@ -1,10 +1,15 @@
 backend/venv/
+.venv/
+venv/
 __pycache__/
 *.pyc
 .env
 .env.*
 !.env.example
 .DS_Store
+.codex-remote-attachments/
+competition_document.md
+*.bak
 frontend/index.html.bak*
 frontend/*.bak
 frontend/*.step*

@@ -41,6 +41,15 @@
           <label>论文标题（选填） <input type="text" id="paperTitle" placeholder="输入论文标题" class="input-sm"></label>
         </div>
       </div>
+      <section class="demo-case-strip">
+        <div class="demo-case-head">
+          <strong>竞赛演示案例</strong>
+          <span>一键载入论文，直接展示完整学习闭环。</span>
+        </div>
+        <div id="demoCases" class="demo-case-grid">
+          <p class="empty-note">正在加载演示案例...</p>
+        </div>
+      </section>
       <textarea id="paperText" placeholder="粘贴论文原文，或上传 PDF" rows="8"></textarea>
       <div id="paperLoadOverlay" class="paper-load-overlay" hidden>
         <div class="paper-load-spinner"></div>
@@ -263,6 +272,7 @@ const API_BASE = "";
 let _providers = [];
 let _chatHistory = [];
 let _currentConfig = null;
+let _demoCases = [];
 const termDetailCache = new Map();
 const termExplainCache = new Map();
 const termAcademicCache = new Map();
@@ -441,6 +451,60 @@ $("btnConfigSave").addEventListener("click", () => saveConfig().catch((err) => {
 // ═════════════════════════════════
 //  示例文本
 // ═════════════════════════════════
+async function loadDemoCases() {
+  const container = $("demoCases");
+  if (!container) return;
+  try {
+    const resp = await fetch(`${API_BASE}/api/demo-cases`);
+    const data = await resp.json();
+    _demoCases = data.cases || [];
+    container.innerHTML = _demoCases.length ? _demoCases.map((item) => `
+      <button class="demo-case-card" data-demo-case="${escapeAttr(item.id)}">
+        <span>${escapeHtml(item.track || "Demo")}</span>
+        <strong>${escapeHtml(item.label || item.title || "")}</strong>
+        <small>${escapeHtml(item.goal || "")}</small>
+      </button>
+    `).join("") : `<p class="empty-note">暂无演示案例</p>`;
+  } catch (err) {
+    container.innerHTML = `<p class="empty-note">演示案例加载失败：${escapeHtml(err.message)}</p>`;
+  }
+}
+
+async function loadDemoCase(caseId, button = null) {
+  const originalText = button ? button.textContent : "";
+  switchTopTab("reader");
+  $("analysisResults").hidden = true;
+  $("learningDashboard").hidden = true;
+  setPaperLoadAnimation(true, "载入演示案例", "读取论文资源", 20);
+  if (button) {
+    button.disabled = true;
+    button.textContent = "载入中...";
+  }
+  try {
+    const resp = await fetch(`${API_BASE}/api/demo-cases/${encodeURIComponent(caseId)}/load`, { method: "POST" });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "演示案例载入失败");
+    const paper = data.paper || {};
+    $("paperTitle").value = paper.title || data.case?.label || "Demo paper";
+    $("paperText").value = data.text || paper.readerText || "";
+    const modeText = data.mode === "pdf_text" ? `PDF 已载入：${data.pageCount || 0} 页` : "摘要导读已载入";
+    addChatMessage(`${escapeHtml(data.case?.label || "演示案例")}<br>${escapeHtml(modeText)}`);
+    if (($("paperText").value || "").length >= 50) {
+      setPaperLoadAnimation(true, "分析演示案例", "识别术语 / 生成推荐", 82);
+      await analyzePaper({ quiet: true, source: `demo-${caseId}` });
+    }
+    setPaperLoadAnimation(false);
+  } catch (err) {
+    setPaperLoadAnimation(false);
+    addChatMessage(`演示案例载入失败：${escapeHtml(err.message)}`);
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+}
+
 const EXAMPLE_TEXT = `The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.
 
 The Transformer allows for significantly more parallelization and can reach a new state of the art in translation quality after being trained for as little as twelve hours on eight P100 GPUs.
@@ -1592,6 +1656,12 @@ document.addEventListener("click", (event) => {
     sendChat();
     return;
   }
+  const demoBtn = target?.closest("[data-demo-case]");
+  if (demoBtn) {
+    event.preventDefault();
+    loadDemoCase(demoBtn.dataset.demoCase || "", demoBtn);
+    return;
+  }
   const startPaperBtn = target?.closest("[data-start-paper]");
   if (startPaperBtn) {
     event.preventDefault();
@@ -1614,6 +1684,7 @@ document.addEventListener("click", (event) => {
 //  启动后自动加载
 // ═════════════════════════════════
 loadConfig();
+loadDemoCases();
 loadTermKB();
 loadLearnPath();
 

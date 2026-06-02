@@ -41,6 +41,7 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("health")
+    sub.add_parser("integrations")
 
     search = sub.add_parser("search-papers")
     search.add_argument("query")
@@ -62,10 +63,29 @@ def main() -> int:
     chat.add_argument("--summary", default="")
     chat.add_argument("--local-only", action="store_true")
 
+    demo = sub.add_parser("demo-cases")
+
+    demo_load = sub.add_parser("load-demo")
+    demo_load.add_argument("case_id")
+
+    message = sub.add_parser("message")
+    message.add_argument("text")
+    message.add_argument("--channel", default="local", choices=["local", "wechat", "qq"])
+    message.add_argument("--sender", default="openclaw")
+    message.add_argument("--token", default="")
+
+    send = sub.add_parser("send-message")
+    send.add_argument("text")
+    send.add_argument("--channel", default="wechat", choices=["wechat", "qq"])
+    send.add_argument("--token", default="")
+    send.add_argument("--markdown", action="store_true")
+
     args = parser.parse_args()
     try:
         if args.command == "health":
             print_json(request_json("GET", args.base_url, "/api/health"))
+        elif args.command == "integrations":
+            print_json(request_json("GET", args.base_url, "/api/integrations/status"))
         elif args.command == "search-papers":
             print_json(request_json(
                 "GET",
@@ -99,6 +119,24 @@ def main() -> int:
                     "paperSummary": args.summary,
                     "localOnly": args.local_only,
                 },
+            ))
+        elif args.command == "demo-cases":
+            print_json(request_json("GET", args.base_url, "/api/demo-cases"))
+        elif args.command == "load-demo":
+            print_json(request_json("POST", args.base_url, f"/api/demo-cases/{args.case_id}/load"))
+        elif args.command == "message":
+            print_json(request_json(
+                "POST",
+                args.base_url,
+                "/api/integrations/messages/inbound",
+                json={"channel": args.channel, "text": args.text, "sender": args.sender, "token": args.token},
+            ))
+        elif args.command == "send-message":
+            print_json(request_json(
+                "POST",
+                args.base_url,
+                "/api/integrations/messages/send",
+                json={"channel": args.channel, "text": args.text, "token": args.token, "markdown": args.markdown},
             ))
     except Exception as exc:
         print_json({"error": str(exc)})

@@ -1,15 +1,17 @@
 # AI-From-Zero - OpenClaw Skill
 
-AI-From-Zero 是一个本地 AI 论文溯源阅读助手，也可以作为 OpenClaw/Claw 的可执行 Skill 使用。它适合帮助用户分析论文文本、读取 PDF、解释术语、推荐可直接学习的下一篇论文，并通过 AI 伴学回答上下文问题。
+AI-From-Zero 可以作为 OpenClaw/Claw 的本地论文学习 Skill 使用。它适合完成论文文本分析、PDF 读取、术语解释、下一篇论文推荐、学习路径和上下文伴学问答。
 
-## 快速接入
+GitHub: https://github.com/Peixuan-Li0402/AI-From-Zero
 
-OpenClaw 推荐按这个顺序准备项目：
+## 准备项目
+
+推荐让 OpenClaw 按下面顺序准备：
 
 ```bash
 git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git
 cd AI-From-Zero
-python -m pip install -r backend/requirements.txt
+python -m pip install -r requirements.txt
 python tools/bootstrap_openclaw_env.py
 ./start.sh
 ```
@@ -17,8 +19,9 @@ python tools/bootstrap_openclaw_env.py
 Windows PowerShell：
 
 ```powershell
-cd C:\Users\lenovo\Documents\AI-FROM-ZERO
-python -m pip install -r backend/requirements.txt
+git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git
+cd AI-From-Zero
+python -m pip install -r requirements.txt
 python tools/bootstrap_openclaw_env.py
 .\start_windows.ps1
 ```
@@ -47,30 +50,13 @@ Windows PowerShell：
 Invoke-RestMethod http://127.0.0.1:8080/api/health
 ```
 
-`llmConfigured=true` 表示模型已经配置好。`llmConfigured=false` 时，项目仍可用本地术语库降级运行。
-
-## OpenClaw 直接调用
-
-服务启动后，OpenClaw 不一定要打开网页，也可以直接调用本地 Skill 工具：
-
-```bash
-python tools/openclaw_ai_from_zero.py health
-python tools/openclaw_ai_from_zero.py search-papers "Transformer attention" --limit 5
-python tools/openclaw_ai_from_zero.py load-paper "Attention Is All You Need"
-python tools/openclaw_ai_from_zero.py analyze-text --file paper.txt --title "My Paper"
-python tools/openclaw_ai_from_zero.py chat "用新手能懂的话解释这篇论文的方法" --paper-file paper.txt --local-only
-```
-
-推荐 OpenClaw 工作流：
-
-1. 先用 `search-papers` 或 `/api/learn-path` 找到推荐论文。
-2. 再用 `load-paper` 或 `/api/papers/load` 自动载入 PDF 文本；如果 PDF 不可提取，接口会返回摘要导读和来源链接。
-3. 把返回的 `text` 交给 `/api/analyze`，获得术语高亮、基础分析和学习推荐。
-4. 最后用 `/api/chat` 带着论文文本、术语和问题做伴学追问。
+`llmConfigured=true` 表示模型已配置。`llmConfigured=false` 时，项目仍可用本地术语库降级运行。
 
 ## 模型配置
 
-优先让 OpenClaw 或当前 shell 暴露以下任一环境变量，然后运行 bootstrap：
+OpenClaw 自动配置只读取显式环境变量，不读取或复制私有配置文件中的密钥。
+
+支持的环境变量：
 
 ```text
 OPENAI_API_KEY
@@ -80,17 +66,17 @@ KIMI_API_KEY
 LLM_API_KEY
 ```
 
+生成本地 `.env`：
+
 ```bash
 python tools/bootstrap_openclaw_env.py
 ```
 
-bootstrap 只读取显式环境变量，不读取或复制 OpenClaw 私有配置文件里的密钥。如果 `.env` 已经有 `LLM_API_KEY`，它不会覆盖。
-
-也可以手动创建 `.env`：
+也可以手动写 `.env`：
 
 ```env
 LLM_PROVIDER=kimi
-LLM_API_KEY=sk-your-key
+LLM_API_KEY=your_key_here
 LLM_API_URL=https://api.moonshot.cn/v1/chat/completions
 LLM_MODEL=moonshot-v1-128k
 LLM_TIMEOUT=60
@@ -98,41 +84,43 @@ APP_HOST=127.0.0.1
 APP_PORT=8080
 ```
 
-支持的供应商包括 Kimi、OpenAI、OpenRouter、DeepSeek、Ollama 和自定义 OpenAI-compatible endpoint。真实 Key 只保存在本地 `.env`，不要放进提示词、日志或 GitHub。
+如果 OpenClaw 和服务不在同一台机器上，把 `APP_HOST` 改成 `0.0.0.0`，并把工具 URL 改成服务机器的局域网地址。只在可信网络里这样做。
 
-## 能力入口
+## 命令行工具
 
-- 文本分析：`POST /api/analyze`，输入论文正文，返回术语、高亮数据、摘要、全文分块中文翻译、翻译覆盖率和 `llmStatus`。
-- PDF 分析：`POST /api/analyze-pdf`，按页提取可复制文字 PDF，修复常见英文粘连，返回全文、页数、字符数、分块分析状态和术语结果。
-- AI 伴学：`POST /api/chat`，结合当前论文、当前术语、已掌握术语和最近对话回答问题；无 Key 时走本地降级回答，也可传 `localOnly: true` 强制本地回答。
-- 学习舱：`POST /api/learning/session`，根据当前论文术语推荐下一篇可学习论文；前端只展示推荐论文入口，避免和术语库重复。
-- 论文增强：`GET /api/papers/search`、`POST /api/papers/load`、`POST /api/papers/evidence`，用于检索论文、自动载入 PDF/摘要到阅读器，以及抽取基于原文的证据片段。
-- 模型配置：`GET /api/config`、`GET /api/config/providers`、`POST /api/config/test`、`POST /api/config/save`。
-- 术语库：`GET /api/terms`、`GET /api/terms/{name}`，返回双语术语字段和解释。
-- 相关论文：`POST /api/terms/{name}/papers`。
-- 术语解释：`GET /api/terms/{name}/explain`、`GET /api/terms/{name}/explain-academic`。
-- 学习路径：`POST /api/learn-path`。
-- 案例分析：`POST /api/case-study`。
+服务启动后，OpenClaw 可以直接调用：
 
-分析类接口的 `llmStatus` 含义：
+```bash
+python tools/openclaw_ai_from_zero.py health
+python tools/openclaw_ai_from_zero.py integrations
+python tools/openclaw_ai_from_zero.py demo-cases
+python tools/openclaw_ai_from_zero.py load-demo transformer
+python tools/openclaw_ai_from_zero.py search-papers "Transformer attention" --limit 5
+python tools/openclaw_ai_from_zero.py load-paper "Attention Is All You Need"
+python tools/openclaw_ai_from_zero.py analyze-text --file paper.txt --title "My Paper"
+python tools/openclaw_ai_from_zero.py chat "解释这篇论文的方法" --paper-file paper.txt --local-only
+python tools/openclaw_ai_from_zero.py message "解释 Transformer" --channel local
+```
 
-- `ok`：LLM 调用成功。
-- `missing_key`：未配置模型 Key，已使用本地术语库降级。
-- `error`：LLM 或解析失败，接口会尽量返回本地结果。
+推荐工作流：
 
-## Tool 配置示例
+1. 用 `search-papers` 或 `/api/learn-path` 找到推荐论文。
+2. 用 `load-paper` 或 `/api/papers/load` 载入 PDF 原文；失败时使用摘要导读和来源链接。
+3. 把返回的 `text` 交给 `/api/analyze`，得到术语、高亮数据、摘要、翻译和学习建议。
+4. 用 `/api/chat` 带着论文文本、当前术语和用户问题继续伴学。
+5. 用 `/api/integrations/messages/inbound` 或 CLI `message` 模拟 QQ/微信消息；配置 Webhook 后用 `send-message` 推送结果。
 
-不同 OpenClaw 版本的注册格式可能不同。核心是把服务注册为本地 Web 工具：
+## HTTP 工具注册示例
+
+不同 OpenClaw 版本的注册格式可能不同，核心是把本地服务暴露为 Web 工具：
 
 ```yaml
 tools:
   - name: ai-from-zero
-    description: "AI 论文阅读、术语溯源与伴学工具"
+    description: "AI paper learning, terminology tracing, and guided reading"
     url: "http://127.0.0.1:8080"
     endpoints:
       - path: "/api/health"
-        method: "GET"
-      - path: "/api/config"
         method: "GET"
       - path: "/api/analyze"
         method: "POST"
@@ -140,11 +128,17 @@ tools:
         method: "POST"
       - path: "/api/chat"
         method: "POST"
-      - path: "/api/learning/profile"
+      - path: "/api/demo-cases"
         method: "GET"
-      - path: "/api/learning/session"
+      - path: "/api/demo-cases/{case_id}/load"
         method: "POST"
-      - path: "/api/learning/mastery"
+      - path: "/api/integrations/status"
+        method: "GET"
+      - path: "/api/integrations/messages/inbound"
+        method: "POST"
+      - path: "/api/integrations/messages/send"
+        method: "POST"
+      - path: "/api/learning/session"
         method: "POST"
       - path: "/api/papers/search"
         method: "GET"
@@ -158,39 +152,52 @@ tools:
         method: "GET"
       - path: "/api/terms/{name}/papers"
         method: "POST"
-      - path: "/api/terms/{name}/explain"
-        method: "GET"
-      - path: "/api/terms/{name}/explain-academic"
-        method: "GET"
       - path: "/api/learn-path"
-        method: "POST"
-      - path: "/api/case-study"
         method: "POST"
 ```
 
-如果 OpenClaw 和 AI-From-Zero 不在同一台机器上，把 `.env` 中的 `APP_HOST` 改成 `0.0.0.0`，并把工具 URL 改成服务机器的局域网地址。
+## 核心接口
 
-## 冒烟检查
+- `GET /api/health`：检查服务、术语库和模型配置。
+- `POST /api/analyze`：分析论文文本，返回术语、结构、摘要和翻译状态。
+- `POST /api/analyze-pdf`：读取可复制文字 PDF，返回全文、页数、术语和分析结果。
+- `POST /api/chat`：带论文上下文的 AI 伴学；无 Key 时本地降级。
+- `GET /api/terms`、`GET /api/terms/{name}`：双语术语库。
+- `POST /api/terms/{name}/papers`：术语相关论文。
+- `POST /api/learning/session`：学习会话和下一篇论文推荐。
+- `POST /api/learn-path`：学习路径。
+- `GET /api/papers/search`、`POST /api/papers/load`、`POST /api/papers/evidence`：论文检索、载入和证据片段。
+- `GET /api/config`、`POST /api/config/save`：本地模型配置。
+- `GET /api/demo-cases`、`POST /api/demo-cases/{case_id}/load`：竞赛演示案例。
+- `GET /api/integrations/status`、`POST /api/integrations/messages/inbound`、`POST /api/integrations/messages/send`：QQ/微信桥接与本地消息模拟。
 
-服务启动前可以检查术语库：
+分析类接口中的 `llmStatus`：
+
+- `ok`：模型调用成功。
+- `missing_key`：没有 Key，使用本地降级。
+- `error`：模型或解析失败，尽量返回本地结果。
+
+## 自检命令
+
+启动前：
 
 ```bash
+python tools/check_release_readiness.py
 python tools/check_term_kb.py
 ```
 
-服务启动后检查 API：
+启动后：
 
 ```bash
 python tools/check_api_smoke.py --base-url http://127.0.0.1:8080
+python tools/check_release_readiness.py --base-url http://127.0.0.1:8080
 ```
 
 ## 常见处理
 
-- 没有 API Key：文本分析、PDF 分析和 AI 伴学会使用本地术语库降级，`llmStatus` 通常为 `missing_key`。
-- 学习画像：本地记录保存在 `data/learning_progress.json`，不会进入 GitHub。
-- 论文增强：外部 OpenAlex/Semantic Scholar 不可用时会保留本地术语库结果。
-- 页面显示本地模式：检查 `.env` 或 `/api/config`，确认 `LLM_API_KEY`、`LLM_API_URL` 和 `LLM_MODEL` 是否正确。
-- bootstrap 找不到 Key：先让运行环境暴露 `OPENAI_API_KEY`、`OPENROUTER_API_KEY`、`DEEPSEEK_API_KEY`、`KIMI_API_KEY` 或 `LLM_API_KEY`。
+- 没有 API Key：仍可运行，术语高亮、基础分析和本地伴学可用。
+- 页面显示本地模式：检查 `.env` 或 `/api/config`。
+- 端口冲突：修改 `.env` 的 `APP_PORT`。
 - 扫描版 PDF：当前不支持 OCR，需要先转换成可复制文本。
-- 端口冲突：修改 `.env` 的 `APP_PORT` 后重启。
-- 局域网访问：只有在可信网络里才把 `APP_HOST` 改成 `0.0.0.0`。
+- 外部论文服务不可用：项目会降级到本地论文资源、摘要和来源链接。
+- 局域网访问：只在可信网络中把 `APP_HOST` 改为 `0.0.0.0`。

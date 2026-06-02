@@ -18,6 +18,16 @@ def main() -> int:
         config = client.get(f"{args.base_url}/api/config")
         checks.append(("config", config.status_code == 200 and "maskedKey" in config.json()))
 
+        integrations = client.get(f"{args.base_url}/api/integrations/status")
+        checks.append(("integrations", integrations.status_code == 200 and integrations.json().get("channels")))
+
+        demo_cases = client.get(f"{args.base_url}/api/demo-cases")
+        demo_payload = demo_cases.json() if demo_cases.status_code == 200 else {}
+        checks.append(("demo-cases", demo_cases.status_code == 200 and demo_payload.get("cases")))
+
+        demo_load = client.post(f"{args.base_url}/api/demo-cases/transformer/load")
+        checks.append(("demo-load", demo_load.status_code == 200 and demo_load.json().get("text")))
+
         text = "Transformer self-attention CNN RNN encoder decoder neural network model analysis text."
         analyze = client.post(f"{args.base_url}/api/analyze", json={"text": text})
         checks.append(("analyze", analyze.status_code == 200 and analyze.json().get("knownTerms")))
@@ -58,6 +68,19 @@ def main() -> int:
             "knownTerms": analyze.json().get("knownTerms", []),
         })
         checks.append(("evidence", evidence.status_code == 200 and evidence.json().get("snippets")))
+
+        inbound = client.post(f"{args.base_url}/api/integrations/messages/inbound", json={
+            "channel": "local",
+            "text": "解释 Transformer",
+            "sender": "smoke",
+        })
+        checks.append(("message-inbound", inbound.status_code == 200 and inbound.json().get("reply")))
+
+        outbound = client.post(f"{args.base_url}/api/integrations/messages/send", json={
+            "channel": "wechat",
+            "text": "AI-From-Zero smoke test",
+        })
+        checks.append(("message-send", outbound.status_code == 200 and outbound.json().get("status") in {"ok", "not_configured"}))
 
     failed = [name for name, ok in checks if not ok]
     if failed:

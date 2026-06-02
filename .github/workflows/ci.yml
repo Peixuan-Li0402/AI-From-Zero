@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Static release readiness checks
+        run: python tools/check_release_readiness.py --strict
+
+      - name: Run API tests
+        run: python -m pytest
+
+      - name: Start backend for smoke test
+        run: |
+          python backend/server.py > server.log 2>&1 &
+          python - <<'PY'
+          import time
+          import httpx
+
+          for _ in range(40):
+              try:
+                  response = httpx.get("http://127.0.0.1:8080/api/health", timeout=2)
+                  if response.status_code == 200 and response.json().get("status") == "ok":
+                      raise SystemExit(0)
+              except Exception:
+                  pass
+              time.sleep(0.5)
+
+          print(open("server.log", encoding="utf-8", errors="replace").read())
+          raise SystemExit("backend did not become healthy")
+          PY
+
+      - name: HTTP smoke test
+        run: |
+          python tools/check_api_smoke.py --base-url http://127.0.0.1:8080
+          python tools/check_release_readiness.py --strict --base-url http://127.0.0.1:8080

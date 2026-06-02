@@ -1,33 +1,41 @@
 # AI-From-Zero
 
-AI-From-Zero 是一个本地 AI 论文溯源阅读助手，面向刚入门 AI、计算机和软件工程论文阅读的学习者。它可以把论文里的专业术语、相关经典论文、学习路径和右侧 AI 伴学串起来，让用户从“看不懂一篇论文”逐步走到“知道术语从哪里来、下一步该学什么”。
+AI-From-Zero 是一个面向 AI 初学者的本地论文学习助手。它把论文原文、术语高亮、双语术语库、下一篇论文推荐、学习路径和 AI 伴学连成一个学习闭环，帮助同学从“读不懂一篇论文”逐步走到“知道概念来源、知道下一步读什么、能用自己的话解释出来”。
 
-## 现在可以做什么
+项目默认在本机运行，不需要账号系统，也不会把你的 API Key 提交到 GitHub。
 
-- 文本和 PDF 分析：粘贴论文正文，或上传可复制文字的 PDF，自动匹配本地双语术语库并高亮显示。
-- PDF 全文阅读：按页提取文本，并用多策略修复英文单词粘连；超长文档会明确提示 LLM 分析上限。
-- 中文翻译：模型已配置时，翻译走全文分块流程并返回覆盖率，不再只翻前几千字。
-- 双语术语库：内置约 820 条 AI、计算机系统、软件工程和工程实践术语，保留中英文名、别名、解释和论文元数据。
-- 模型配置：支持 OpenAI-compatible API，包括 Kimi、OpenAI、OpenRouter、DeepSeek、Ollama 和自定义 endpoint。
-- AI 伴学：右侧聊天框接入 `/api/chat`，可结合当前论文、已识别术语、当前打开术语和学习状态回答问题。
-- AI 学习舱：每次分析后在论文原文下方只保留“下一篇推荐论文”，优先提供 PDF/摘要/来源链接，并可一键载入阅读器继续学习。
-- 论文增强：提供章节/引用/参考文献结构化识别、本地经典论文映射、arXiv/OpenAlex/Semantic Scholar 轻量搜索、PDF 自动载入和基于原文的证据片段抽取。
-- 学习路径联动阅读器：学习路径里的推荐论文带来源链接或 PDF 地址，点击“开始学习”会自动载入论文全文或摘要导读。
-- 本地降级：不配置 API Key 也能启动，文本/PDF 分析和伴学会使用本地术语库给出基础结果。
+GitHub: https://github.com/Peixuan-Li0402/AI-From-Zero
 
-## 先选一种启动方式
+## 能力概览
 
-如果你只是想先看看项目，可以不配置 API Key，直接启动。页面会显示本地模式，术语高亮和基础解释仍然可用。
+无 API Key 也能使用：
+
+- 粘贴论文文本或上传可复制文字的 PDF。
+- 自动识别并高亮 AI、计算机系统、软件工程等领域术语。
+- 点击高亮术语查看双语解释、前置概念、概念链条和经典论文。
+- 生成基础论文分析、学习路径和下一篇推荐论文。
+- 使用本地术语库进行 AI 伴学降级回答。
+- 通过本地消息桥接模拟 QQ/微信提问，验证机器人连接流程。
+
+配置 API Key 后会增强：
+
+- 更完整的论文摘要、创新点、局限和阅读建议。
+- 分块中文翻译，尽量覆盖全文，并显示翻译覆盖状态。
+- 更自然的右侧 AI 伴学问答。
+- 术语通俗解释和学术解释按需生成。
+- 配置微信或 QQ Webhook 后，把导读结果推送到群聊或机器人桥。
+
+## 快速开始
 
 ### Windows
 
 ```powershell
-cd C:\Users\lenovo\Documents\AI-FROM-ZERO
-python -m pip install -r backend/requirements.txt
+git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git
+cd AI-From-Zero
 .\start_windows.ps1
 ```
 
-如果 PowerShell 提示脚本不能运行，使用这个备用命令：
+如果 PowerShell 拦截脚本，使用一次性绕过命令：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\start_windows.ps1
@@ -39,7 +47,7 @@ powershell -ExecutionPolicy Bypass -File .\start_windows.ps1
 http://127.0.0.1:8080
 ```
 
-验证服务状态：
+验证服务：
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8080/api/health
@@ -50,7 +58,6 @@ Invoke-RestMethod http://127.0.0.1:8080/api/health
 ```bash
 git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git
 cd AI-From-Zero
-python -m pip install -r backend/requirements.txt
 ./start.sh
 ```
 
@@ -60,25 +67,92 @@ python -m pip install -r backend/requirements.txt
 http://127.0.0.1:8080
 ```
 
-验证服务状态：
+验证服务：
 
 ```bash
 curl http://127.0.0.1:8080/api/health
 ```
 
-### OpenClaw / Claw
+### 通用手动启动
 
-OpenClaw 可以把这个项目当作一个本地 Web 工具来使用。推荐流程是：克隆仓库，生成本地 `.env`，启动服务，再让 OpenClaw 调用本地接口。
+如果你不想使用启动脚本，也可以手动安装依赖并启动：
 
 ```bash
-git clone https://github.com/Peixuan-Li0402/AI-From-Zero.git
-cd AI-From-Zero
-python -m pip install -r backend/requirements.txt
-python tools/bootstrap_openclaw_env.py
-./start.sh
+python -m pip install -r requirements.txt
+python backend/server.py
 ```
 
-`tools/bootstrap_openclaw_env.py` 只读取显式环境变量，不会读取或复制 OpenClaw 私有配置文件里的密钥。它会按顺序寻找这些变量：
+默认端口是 `8080`。如果端口被占用，可以在 `.env` 中设置：
+
+```env
+APP_PORT=8081
+```
+
+## 模型配置
+
+推荐三种方式，任选一种即可。
+
+### 方式一：网页配置
+
+启动项目后打开首页，点击页面顶部的“配置模型”，选择供应商、填写 API Key，测试连接后保存。Key 会写入本地 `.env`，不会通过接口明文回传。
+
+### 方式二：手动创建 `.env`
+
+可以复制 `.env.example` 为 `.env`，然后填写自己的配置：
+
+```env
+LLM_PROVIDER=kimi
+LLM_API_KEY=your_key_here
+LLM_API_URL=https://api.moonshot.cn/v1/chat/completions
+LLM_MODEL=moonshot-v1-128k
+LLM_TIMEOUT=60
+APP_HOST=127.0.0.1
+APP_PORT=8080
+```
+
+常见供应商示例：
+
+```env
+# OpenAI
+LLM_PROVIDER=openai
+LLM_API_KEY=your_key_here
+LLM_API_URL=https://api.openai.com/v1/chat/completions
+LLM_MODEL=gpt-4o-mini
+```
+
+```env
+# OpenRouter
+LLM_PROVIDER=openrouter
+LLM_API_KEY=your_key_here
+LLM_API_URL=https://openrouter.ai/api/v1/chat/completions
+LLM_MODEL=openai/gpt-4o-mini
+```
+
+```env
+# DeepSeek
+LLM_PROVIDER=deepseek
+LLM_API_KEY=your_key_here
+LLM_API_URL=https://api.deepseek.com/chat/completions
+LLM_MODEL=deepseek-chat
+```
+
+```env
+# Ollama local model
+LLM_PROVIDER=ollama
+LLM_API_KEY=
+LLM_API_URL=http://localhost:11434/v1/chat/completions
+LLM_MODEL=llama3.1
+```
+
+`APP_HOST=127.0.0.1` 更安全，只允许本机访问。只有需要局域网其他设备访问时，才改成：
+
+```env
+APP_HOST=0.0.0.0
+```
+
+### 方式三：OpenClaw 自动配置
+
+OpenClaw 或当前 shell 先暴露任意一个环境变量：
 
 ```text
 OPENAI_API_KEY
@@ -88,252 +162,111 @@ KIMI_API_KEY
 LLM_API_KEY
 ```
 
-如果脚本提示没有找到 Key，可以先在 OpenClaw 或当前 shell 里暴露其中一个变量，再重新运行 bootstrap。服务启动后访问：
-
-```text
-http://127.0.0.1:8080/api/health
-```
-
-如果返回里的 `llmConfigured` 是 `true`，说明模型配置已经生效；如果是 `false`，项目仍能以本地模式运行。
-
-OpenClaw 也可以直接调用项目 Skill 工具，不必打开网页：
-
-```bash
-python tools/openclaw_ai_from_zero.py health
-python tools/openclaw_ai_from_zero.py search-papers "Transformer attention" --limit 5
-python tools/openclaw_ai_from_zero.py load-paper "Attention Is All You Need"
-python tools/openclaw_ai_from_zero.py analyze-text --file paper.txt --title "My Paper"
-python tools/openclaw_ai_from_zero.py chat "带我读这篇论文" --paper-file paper.txt --local-only
-```
-
-## 配置模型
-
-模型配置有三种方式，选一种即可。
-
-### 方式 1：网页配置
-
-启动后打开首页，点击顶部“配置模型”。这里可以选择供应商，填写 API 地址、模型名和 Key。保存后会写入项目根目录的 `.env`。
-
-### 方式 2：手动写 `.env`
-
-复制 `.env.example` 为 `.env`，再按你的供应商修改。真实 Key 只放在本地 `.env`，不要提交到 GitHub。
-
-```env
-LLM_PROVIDER=kimi
-LLM_API_KEY=你的_API_KEY
-LLM_API_URL=https://api.moonshot.cn/v1/chat/completions
-LLM_MODEL=moonshot-v1-128k
-LLM_TIMEOUT=60
-APP_HOST=127.0.0.1
-APP_PORT=8080
-```
-
-### 方式 3：OpenClaw 自动生成
-
-让 OpenClaw 或 shell 暴露 `OPENAI_API_KEY`、`OPENROUTER_API_KEY`、`DEEPSEEK_API_KEY`、`KIMI_API_KEY` 或 `LLM_API_KEY`，然后运行：
+然后运行：
 
 ```bash
 python tools/bootstrap_openclaw_env.py
 ```
 
-如果当前 `.env` 已经有 `LLM_API_KEY`，脚本不会覆盖。
+这个脚本只读取显式环境变量，不读取或复制 OpenClaw 私有配置文件里的密钥。
 
-## 常用供应商示例
+## QQ / 微信桥接
 
-下面的 Key 都是占位符，请替换成你自己的真实 Key。
-
-### Kimi / Moonshot
+项目支持轻量消息桥接，适合比赛现场验证“本地部署 + QQ/微信连接”。真实 Webhook 只放在本地 `.env`：
 
 ```env
-LLM_PROVIDER=kimi
-LLM_API_KEY=sk-your-key
-LLM_API_URL=https://api.moonshot.cn/v1/chat/completions
-LLM_MODEL=moonshot-v1-128k
+WECHAT_WEBHOOK_URL=
+QQ_BOT_WEBHOOK_URL=
+MESSAGE_BRIDGE_TOKEN=
 ```
 
-### OpenAI
+没有真实平台凭证时，可以用本地模拟：
 
-```env
-LLM_PROVIDER=openai
-LLM_API_KEY=sk-your-key
-LLM_API_URL=https://api.openai.com/v1/chat/completions
-LLM_MODEL=gpt-4o-mini
+```bash
+python tools/openclaw_ai_from_zero.py integrations
+python tools/openclaw_ai_from_zero.py message "解释 Transformer" --channel local
+python tools/openclaw_ai_from_zero.py message "下一篇 llm" --channel qq
 ```
 
-### OpenRouter
+配好 Webhook 后，可以发送测试消息：
 
-```env
-LLM_PROVIDER=openrouter
-LLM_API_KEY=sk-or-your-key
-LLM_API_URL=https://openrouter.ai/api/v1/chat/completions
-LLM_MODEL=openai/gpt-4o-mini
+```bash
+python tools/openclaw_ai_from_zero.py send-message "AI-From-Zero 已连接" --channel wechat
+python tools/openclaw_ai_from_zero.py send-message "AI-From-Zero 已连接" --channel qq
 ```
 
-### DeepSeek
+## OpenClaw 使用方式
 
-```env
-LLM_PROVIDER=deepseek
-LLM_API_KEY=sk-your-key
-LLM_API_URL=https://api.deepseek.com/chat/completions
-LLM_MODEL=deepseek-chat
+启动服务后，OpenClaw 可以把它当成本地 Web 工具调用，也可以直接使用命令行辅助工具：
+
+```bash
+python tools/openclaw_ai_from_zero.py health
+python tools/openclaw_ai_from_zero.py search-papers "Transformer attention" --limit 5
+python tools/openclaw_ai_from_zero.py load-paper "Attention Is All You Need"
+python tools/openclaw_ai_from_zero.py demo-cases
+python tools/openclaw_ai_from_zero.py load-demo transformer
+python tools/openclaw_ai_from_zero.py analyze-text --file paper.txt --title "My Paper"
+python tools/openclaw_ai_from_zero.py chat "解释这篇论文的方法" --paper-file paper.txt --local-only
 ```
 
-### Ollama 本地模型
+推荐流程：
 
-Ollama 通常不需要真实 API Key，但为了兼容配置读取，可以填一个占位值。
+1. 用 `/api/learn-path` 或 `search-papers` 找到推荐论文。
+2. 用 `/api/papers/load` 或 `load-paper` 载入论文资源。
+3. 把返回的 `text` 交给 `/api/analyze` 做术语高亮和基础分析。
+4. 用 `/api/chat` 带着论文上下文继续追问。
 
-```env
-LLM_PROVIDER=ollama
-LLM_API_KEY=ollama
-LLM_API_URL=http://127.0.0.1:11434/v1/chat/completions
-LLM_MODEL=llama3.1
+## 发布自检
+
+项目提供一键自检，适合 clone 后或提交前运行：
+
+```bash
+python tools/check_release_readiness.py
 ```
 
-### 自定义 OpenAI-compatible endpoint
+服务启动后可以连同 API 一起检查：
 
-```env
-LLM_PROVIDER=custom
-LLM_API_KEY=sk-your-key
-LLM_API_URL=https://your-provider.example.com/v1/chat/completions
-LLM_MODEL=your-model-name
-```
-
-## 配置项说明
-
-配置优先读取环境变量，其次读取项目根目录 `.env`。旧的 `KIMI_*` 变量仍然兼容，但推荐使用统一的 `LLM_*`。
-
-| 变量 | 默认值 | 说明 |
-|---|---|---|
-| `LLM_PROVIDER` | `kimi` | `kimi`、`openai`、`openrouter`、`deepseek`、`ollama`、`custom` |
-| `LLM_API_KEY` | 空 | OpenAI-compatible API Key；Ollama 可用占位值 |
-| `LLM_API_URL` | Kimi chat completions | OpenAI-compatible chat completions 地址 |
-| `LLM_MODEL` | `moonshot-v1-128k` | 模型名 |
-| `LLM_TIMEOUT` | `60` | 请求超时时间，单位秒 |
-| `APP_HOST` | `127.0.0.1` | 默认只监听本机，更安全 |
-| `APP_PORT` | `8080` | 服务端口 |
-
-`APP_HOST=127.0.0.1` 表示只有本机可以访问。只有你明确需要局域网内其他设备访问时，才改成 `0.0.0.0`。
-
-## API 概览
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/` | GET | 前端页面 |
-| `/api/health` | GET | 服务状态、术语库数量、LLM provider/model、配置写入状态 |
-| `/api/config` | GET | 当前模型配置状态，Key 只脱敏显示 |
-| `/api/config/providers` | GET | 供应商预设 |
-| `/api/config/test` | POST | 测试临时模型配置 |
-| `/api/config/save` | POST | 保存本地 `.env`，仅允许本机调用 |
-| `/api/analyze` | POST | 分析论文文本，模型已配置时按全文分块生成中文翻译 |
-| `/api/analyze-pdf` | POST | 上传并分析 PDF，返回 `pages/pageCount/textLength/truncated/extractionWarnings` |
-| `/api/chat` | POST | 右侧 AI 伴学；请求中可传 `localOnly: true` 强制本地降级回答 |
-| `/api/learning/profile` | GET | 当前本地学习画像和阅读记录 |
-| `/api/learning/session` | POST | 把一次论文分析沉淀为阅读会话，并推荐下一篇可学习论文 |
-| `/api/learning/mastery` | POST | 标记或取消标记术语掌握状态 |
-| `/api/papers/search` | GET | 从本地经典映射、术语库和可选外部元数据源搜索论文 |
-| `/api/papers/load` | POST | 根据标题/链接/PDF/摘要载入论文；优先抽取 PDF 全文，失败时返回摘要导读 |
-| `/api/papers/evidence` | POST | 从当前论文文本中抽取和问题相关的证据片段 |
-| `/api/terms` | GET | 获取术语分类列表和双语字段 |
-| `/api/terms/{name}` | GET | 获取单个术语详情 |
-| `/api/terms/{name}/papers` | POST | 展开相关论文 |
-| `/api/terms/{name}/explain` | GET | 生成通俗解释 |
-| `/api/terms/{name}/explain-academic` | GET | 生成学术解释 |
-| `/api/learn-path` | POST | 获取学习路径 |
-| `/api/case-study` | POST | 分析 AI 应用案例 |
-
-分析类接口会返回 `llmStatus`：
-
-- `ok`：LLM 调用成功。
-- `missing_key`：未配置模型 Key，已使用本地术语库降级。
-- `error`：LLM 或文件解析失败，接口会尽量返回可用的本地结果。
-
-## 开发检查
-
-```powershell
-python -m pip install -r requirements-dev.txt
-python tools/check_term_kb.py
-python -m pytest
-```
-
-服务启动后可以跑 API 冒烟检查：
-
-```powershell
+```bash
+python tools/check_release_readiness.py --base-url http://127.0.0.1:8080
 python tools/check_api_smoke.py --base-url http://127.0.0.1:8080
 ```
 
-## OpenClaw 工具配置示例
+开发测试：
 
-不同 OpenClaw 版本的工具注册格式可能不同。核心思想是让它访问本地服务地址：
-
-```yaml
-tools:
-  - name: ai-from-zero
-    description: "AI 论文阅读、术语溯源与伴学工具"
-    url: "http://127.0.0.1:8080"
-    endpoints:
-      - path: "/api/health"
-        method: "GET"
-      - path: "/api/config"
-        method: "GET"
-      - path: "/api/analyze"
-        method: "POST"
-      - path: "/api/analyze-pdf"
-        method: "POST"
-      - path: "/api/chat"
-        method: "POST"
-      - path: "/api/learning/profile"
-        method: "GET"
-      - path: "/api/learning/session"
-        method: "POST"
-      - path: "/api/learning/mastery"
-        method: "POST"
-      - path: "/api/papers/search"
-        method: "GET"
-      - path: "/api/papers/load"
-        method: "POST"
-      - path: "/api/papers/evidence"
-        method: "POST"
-      - path: "/api/terms"
-        method: "GET"
-      - path: "/api/terms/{name}"
-        method: "GET"
-      - path: "/api/terms/{name}/papers"
-        method: "POST"
-      - path: "/api/learn-path"
-        method: "POST"
-      - path: "/api/case-study"
-        method: "POST"
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest
+python tools/check_term_kb.py
 ```
 
-如果 OpenClaw 和服务不在同一台机器上，需要把 `APP_HOST` 改成 `0.0.0.0`，并把工具里的 URL 改成服务所在机器的局域网地址。
+GitHub Actions 会自动运行这些核心检查，确保公开版本不会轻易退化。
+
+## 主要接口
+
+- `GET /api/health`：服务健康状态、术语数量、模型配置状态。
+- `GET /api/config`、`POST /api/config/save`：本地模型配置。
+- `POST /api/analyze`：分析论文文本。
+- `POST /api/analyze-pdf`：读取并分析 PDF。
+- `POST /api/chat`：AI 伴学问答。
+- `GET /api/demo-cases`、`POST /api/demo-cases/{case_id}/load`：固定演示案例。
+- `GET /api/integrations/status`、`POST /api/integrations/messages/inbound`、`POST /api/integrations/messages/send`：QQ/微信消息桥接。
+- `GET /api/terms`、`GET /api/terms/{name}`：术语库。
+- `POST /api/terms/{name}/papers`：展开术语相关论文。
+- `POST /api/learning/session`：创建学习会话和下一篇推荐。
+- `POST /api/learn-path`：生成学习路径。
+- `GET /api/papers/search`、`POST /api/papers/load`、`POST /api/papers/evidence`：论文搜索、载入和证据片段。
+
+分析类接口会返回 `llmStatus`：
+
+- `ok`：模型调用成功。
+- `missing_key`：没有配置 Key，已使用本地模式。
+- `error`：模型或解析失败，接口会尽量返回本地可用结果。
 
 ## 常见问题
 
-### 页面能打开，但提示本地模式
+### 页面能打开，但显示本地模式
 
-说明没有配置 API Key，或连接测试失败。可以点击页面顶部“配置模型”，也可以检查 `.env` 里的 `LLM_API_KEY`、`LLM_API_URL` 和 `LLM_MODEL`。
-
-### OpenClaw bootstrap 找不到 Key
-
-先确认当前运行环境里真的有支持的环境变量：
-
-```bash
-echo $OPENAI_API_KEY
-echo $OPENROUTER_API_KEY
-echo $DEEPSEEK_API_KEY
-echo $KIMI_API_KEY
-echo $LLM_API_KEY
-```
-
-Windows PowerShell 可以用：
-
-```powershell
-$env:OPENAI_API_KEY
-$env:OPENROUTER_API_KEY
-$env:DEEPSEEK_API_KEY
-$env:KIMI_API_KEY
-$env:LLM_API_KEY
-```
+说明没有配置 API Key，或模型连接测试失败。可以使用网页“配置模型”，也可以检查 `.env` 中的 `LLM_API_KEY`、`LLM_API_URL` 和 `LLM_MODEL`。
 
 ### 端口 8080 被占用
 
@@ -345,61 +278,76 @@ APP_PORT=8081
 
 然后重新启动，访问 `http://127.0.0.1:8081`。
 
+### Python 或依赖安装失败
+
+先确认 Python 版本：
+
+```bash
+python --version
+```
+
+需要 Python 3.10 或更高版本。然后重新安装：
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
 ### PowerShell 不允许运行脚本
 
-使用一次性绕过命令：
+使用：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\start_windows.ps1
 ```
 
-### Python 或依赖安装失败
-
-确认 Python 版本可用：
-
-```powershell
-python --version
-```
-
-然后重新安装依赖：
-
-```powershell
-python -m pip install --upgrade pip
-python -m pip install -r backend/requirements.txt
-```
-
 ### PDF 无法读取
 
-当前支持可复制文字的 PDF。扫描版 PDF 暂不支持 OCR，会返回明确错误。可以先用其他工具把扫描 PDF 转成可复制文本，再粘贴到文本分析框。
+当前支持可复制文字的 PDF。扫描版 PDF 暂不支持 OCR，会返回明确错误。可以先把扫描版转换成可复制文本，再粘贴到文本分析框。
 
-### 想让局域网其他设备访问
+### 下一篇论文无法下载全文
 
-把 `.env` 里的 host 改成：
+项目会优先加载 PDF 原文；如果 PDF 不可访问或无法提取文本，会自动降级为摘要导读，并保留来源链接。
 
-```env
-APP_HOST=0.0.0.0
+### OpenClaw bootstrap 找不到 Key
+
+确认当前运行环境真的有这些变量之一：
+
+```bash
+echo $OPENAI_API_KEY
+echo $OPENROUTER_API_KEY
+echo $DEEPSEEK_API_KEY
+echo $KIMI_API_KEY
+echo $LLM_API_KEY
 ```
 
-然后用服务所在机器的局域网 IP 访问。这样会让同一网络里的设备也能访问服务，请只在你信任的网络里使用。
+Windows PowerShell：
+
+```powershell
+$env:OPENAI_API_KEY
+$env:OPENROUTER_API_KEY
+$env:DEEPSEEK_API_KEY
+$env:KIMI_API_KEY
+$env:LLM_API_KEY
+```
 
 ## 项目结构
 
 ```text
-backend/app/          # 配置、路由、LLM、PDF、术语、伴学、学习路径
-frontend/             # 静态前端
-knowledge/            # 双语术语库与学习路径
-tests/                # FastAPI 接口测试
-tools/                # 术语检查、扩充、OpenClaw bootstrap、API 冒烟
+backend/app/          后端配置、路由、LLM、PDF、论文、术语和学习路径
+frontend/             静态前端页面
+knowledge/            双语术语库
+tests/                后端接口测试和发布稳定性测试
+tools/                OpenClaw、术语检查、API 冒烟和发布自检工具
 ```
 
-## 已知边界
+## 当前边界
 
-- 扫描版 PDF 暂不支持 OCR。
-- AI 伴学第一版不做账号、长期记忆、复杂 RAG 或流式输出。
-- 学习画像保存在本地 `data/learning_progress.json`，`data/` 默认不进入版本控制。
-- 论文搜索会优先使用本地经典映射和术语库；外部 arXiv/OpenAlex/Semantic Scholar 不可用时会自动降级。
-- GROBID、Marker、PaperQA 仍是下一阶段增强方向，当前版本先提供本地结构化解析、adapter 入口和证据片段能力。
-- `.env` 是本地开发文件，真实 Key 不进入版本控制。
+- 不支持扫描版 PDF OCR。
+- 不做账号系统和云端同步。
+- `data/` 中的学习记录只保存在本地，不进入 Git。
+- 外部论文 API 不可用时会自动降级到本地术语库和内置论文资源。
+- GROBID、Marker、PaperQA 等结构化论文增强仍是后续方向。
 
 ## License
 
