@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from .config import DATA_DIR
 from .models import LearningSessionRequest
+from .papers import enrich_paper_resource
 from .terms import get_term, related_papers_for_term
 
 
@@ -236,7 +237,7 @@ def recommend_next_papers(terms: list[dict]) -> list[dict]:
             if not title or title.lower() in seen:
                 continue
             seen.add(title.lower())
-            item = dict(paper)
+            item = enrich_paper_resource(paper, f"来自你刚读到的术语：{term.get('term', '')}")
             item["fromTerm"] = term.get("term", "")
             papers.append(item)
             if len(papers) >= 8:
@@ -287,4 +288,3 @@ def update_mastery(term: str, mastered: bool) -> dict:
     data.setdefault("seenTerms", {}).setdefault(name, 1)
     _save_progress(data)
     return get_learning_profile()
-

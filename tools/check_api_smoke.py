@@ -47,6 +47,11 @@ def main() -> int:
         paper_search = client.get(f"{args.base_url}/api/papers/search", params={"query": "Transformer", "limit": 3, "external": "false"})
         checks.append(("paper-search", paper_search.status_code == 200 and paper_search.json().get("papers")))
 
+        paper_load = client.post(f"{args.base_url}/api/papers/load", json={
+            "abstract": "This paper explains Transformer attention and encoder decoder learning for students."
+        })
+        checks.append(("paper-load", paper_load.status_code == 200 and paper_load.json().get("text")))
+
         evidence = client.post(f"{args.base_url}/api/papers/evidence", json={
             "question": "What does self-attention do?",
             "paperText": text,

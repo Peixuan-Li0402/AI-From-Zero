@@ -48,3 +48,12 @@ class EvidenceRequest(BaseModel):
     question: str = ""
     paperText: str = ""
     knownTerms: list[dict] = Field(default_factory=list)
+
+
+class PaperLoadRequest(BaseModel):
+    title: str = ""
+    url: str = ""
+    openAccessUrl: str = ""
+    pdfUrl: str = ""
+    abstract: str = ""
+    shortDesc: str = ""

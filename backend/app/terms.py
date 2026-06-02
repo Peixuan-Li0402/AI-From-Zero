@@ -105,7 +105,7 @@ def concept_chain_for_term(term: dict) -> dict:
         "term": name,
         "nodes": nodes,
         "learningOrder": [node["term"] for node in nodes],
-        "hint": f"建议先补 {', '.join(prereqs[:3])}，再回到论文中看 {name} 的具体用法。" if prereqs else f"先建立 {name} 的直觉，再顺着相关概念继续扩展。",
+        "hint": f"先补：{', '.join(prereqs[:3])}。回到论文看 {name} 的用法。" if prereqs else f"先抓住 {name} 的用途，再看相关概念。",
     }
 
 

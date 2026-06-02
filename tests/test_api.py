@@ -98,6 +98,8 @@ def test_text_analysis_degrades_without_key(client):
     assert data["llmStatus"] == "missing_key"
     assert data["knownTerms"]
     assert data["analysis"]["summary"]
+    assert data["translationStatus"] == "missing_key"
+    assert data["translationCoverage"] == 0
     assert "paperStructure" in data
 
 
@@ -126,6 +128,9 @@ def test_learn_path_and_case_study(client):
     learn_data = learn.json()
     assert learn_data["paths"]
     assert learn_data["paths"][0]["stages"][0]["paperItems"][0]["readerPrompt"]
+    first_paper = learn_data["paths"][0]["stages"][0]["paperItems"][0]
+    assert first_paper["resourceStatus"] in {"pdf", "abstract", "link"}
+    assert first_paper.get("url") or first_paper.get("pdfUrl") or first_paper.get("shortDesc")
 
     case = client.post("/api/case-study", json={"text": "这个系统使用 CNN、Transformer 和强化学习做感知与决策。"})
     assert case.status_code == 200
@@ -194,6 +199,8 @@ def test_learning_loop_endpoints(client, tmp_path, monkeypatch):
     assert payload["conceptNotes"]
     assert payload["conceptChains"]
     assert payload["knowledgeGraph"]["nodes"]
+    removed_phrase = "你刚" + "遇到了"
+    assert all(removed_phrase not in str(paper) for paper in payload["nextPapers"])
 
     mastery = client.post("/api/learning/mastery", json={"term": known_terms[0]["term"], "mastered": True})
     assert mastery.status_code == 200
@@ -203,7 +210,19 @@ def test_learning_loop_endpoints(client, tmp_path, monkeypatch):
 def test_paper_search_and_evidence(client):
     search = client.get("/api/papers/search", params={"query": "Transformer", "limit": 3, "external": "false"})
     assert search.status_code == 200
-    assert search.json()["papers"]
+    papers = search.json()["papers"]
+    assert papers
+    assert papers[0].get("readerText")
+    assert papers[0].get("pdfUrl") or papers[0].get("openAccessUrl")
+
+    load = client.post("/api/papers/load", json={
+        "abstract": "This paper explains Transformer attention and encoder decoder learning for students.",
+    })
+    assert load.status_code == 200
+    loaded = load.json()
+    assert loaded["mode"] == "abstract"
+    assert "Transformer" in loaded["text"]
+    assert loaded["paper"]["resourceStatus"] == "abstract"
 
     evidence = client.post("/api/papers/evidence", json={
         "question": "What is self-attention used for?",

@@ -10,15 +10,16 @@ from .terms import extract_terms_from_text, is_known_term, serialize_term
 PDF_LLM_CHAR_LIMIT = 120000
 PDF_CHUNK_SIZE = 10000
 PDF_MAX_CHUNKS = 12
+TRANSLATION_CHUNK_SIZE = 4200
+TRANSLATION_CHAR_LIMIT = 240000
 
 
 def local_analysis_fallback(text: str, known_terms: list, status: str, message: str = "") -> dict:
     term_names = [t["term"] for t in known_terms[:8]]
     term_text = "、".join(term_names) if term_names else "暂未在术语库中匹配到明显术语"
     summary = (
-        "已完成本地术语匹配。"
-        f"当前文本识别到的重点术语包括：{term_text}。"
-        "配置 KIMI_API_KEY 后可以继续生成论文摘要、创新点和中文翻译。"
+        f"本地术语：{term_text}。"
+        "配置模型后生成摘要、创新点和翻译。"
     )
     return {
         "summary": summary,
@@ -26,9 +27,98 @@ def local_analysis_fallback(text: str, known_terms: list, status: str, message: 
         "keyTerms": term_names,
         "innovations": [],
         "translation": "",
-        "hoshinoNote": "本地术语先标出来了っす；如果要完整分析和翻译，记得先设置 KIMI_API_KEY。",
+        "translationStatus": status,
+        "translationCoverage": 0,
+        "translatedChars": 0,
+        "translationTotalChars": len(text),
+        "hoshinoNote": "先看高亮术语；完整分析需要配置模型。",
         "llmStatus": status,
         "llmMessage": message,
+    }
+
+
+def _looks_mostly_chinese(text: str) -> bool:
+    sample = text[:6000]
+    if not sample:
+        return False
+    chinese = sum(1 for ch in sample if "\u4e00" <= ch <= "\u9fff")
+    letters = sum(1 for ch in sample if ch.isalpha())
+    return chinese > 200 and chinese / max(letters, 1) > 0.45
+
+
+def translate_text_with_llm(text: str, title: str = "") -> dict:
+    total_chars = len(text or "")
+    if not text.strip():
+        return {
+            "translation": "",
+            "translationStatus": "empty",
+            "translationCoverage": 0,
+            "translatedChars": 0,
+            "translationTotalChars": total_chars,
+            "translationMessage": "没有可翻译文本。",
+        }
+    if not settings.llm_configured:
+        return {
+            "translation": "",
+            "translationStatus": "missing_key",
+            "translationCoverage": 0,
+            "translatedChars": 0,
+            "translationTotalChars": total_chars,
+            "translationMessage": "未配置模型，无法生成全文翻译。",
+        }
+    if _looks_mostly_chinese(text):
+        return {
+            "translation": "原文已主要是中文，无需翻译。",
+            "translationStatus": "source_chinese",
+            "translationCoverage": 100,
+            "translatedChars": total_chars,
+            "translationTotalChars": total_chars,
+            "translationMessage": "",
+        }
+
+    source_text = text[:TRANSLATION_CHAR_LIMIT]
+    chunks = _chunk_text(source_text, TRANSLATION_CHUNK_SIZE)
+    translated_parts = []
+    translated_chars = 0
+    for idx, chunk in enumerate(chunks, 1):
+        prompt = f"""请把下面论文原文第 {idx}/{len(chunks)} 段完整翻译成中文。
+
+要求：
+1. 只输出译文，不要总结，不要省略，不要解释你做了什么。
+2. 保留公式、变量名、引用编号、表格/图编号和专有名词；英文术语可在首次出现时保留括号原文。
+3. 如果某句难以翻译，也要忠实直译，不要跳过。
+
+论文标题：{title}
+
+原文片段：
+{chunk}
+"""
+        raw = call_kimi("你是严谨的论文全文翻译助手。只输出中文译文，绝不省略原文内容。", prompt, temperature=0.1)
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            parsed = {}
+        if parsed.get("error"):
+            status = "partial_error" if translated_parts else ("missing_key" if parsed.get("error") == "missing_key" else "error")
+            return {
+                "translation": "\n\n".join(translated_parts),
+                "translationStatus": status,
+                "translationCoverage": round(translated_chars / max(total_chars, 1) * 100, 1),
+                "translatedChars": translated_chars,
+                "translationTotalChars": total_chars,
+                "translationMessage": str(parsed.get("error", "")),
+            }
+        translated_parts.append(f"【译文 {idx}/{len(chunks)}】\n{raw.strip()}")
+        translated_chars += len(chunk)
+
+    status = "ok" if total_chars <= TRANSLATION_CHAR_LIMIT else "partial_limit"
+    return {
+        "translation": "\n\n".join(translated_parts),
+        "translationStatus": status,
+        "translationCoverage": round(min(translated_chars, total_chars) / max(total_chars, 1) * 100, 1),
+        "translatedChars": min(translated_chars, total_chars),
+        "translationTotalChars": total_chars,
+        "translationMessage": "" if status == "ok" else f"文本超过 {TRANSLATION_CHAR_LIMIT} 字符，已翻译前 {TRANSLATION_CHAR_LIMIT} 字符。",
     }
 
 
@@ -38,14 +128,14 @@ def analyze_paper_with_llm(text: str, title: str = "", known_terms: list | None 
         return local_analysis_fallback(text, known_terms, "missing_key", "KIMI_API_KEY is not configured.")
 
     truncated = text[:12000]
-    prompt = f"""你是AI论文分析助手。分析论文，输出JSON。JSON必须包含translation字段（完整中文翻译，必须逐句翻译，不能省略）。
+    prompt = f"""你是AI论文分析助手。分析论文，输出JSON。翻译会由另一个全文翻译流程完成，所以这里不要输出长篇翻译。
 
 {{
   "summary": "2-3句话中文概括论文核心内容",
   "tags": ["标签1"],
   "keyTerms": ["术语1"],
   "innovations": ["创新点1"],
-  "translation": "完整中文翻译（必须！如果原文是英文则全部翻译成中文；如果原文已经是中文则写：原文已是中文）",
+  "translation": "",
   "hoshinoNote": "用星野大叔的口吻（慵懒、带〜っす、自称大叔）写一段点评"
 }}
 
@@ -70,7 +160,13 @@ def analyze_paper_with_llm(text: str, title: str = "", known_terms: list | None 
     parsed.setdefault("tags", [])
     parsed.setdefault("keyTerms", [])
     parsed.setdefault("innovations", [])
-    parsed.setdefault("translation", "")
+    translation = translate_text_with_llm(text, title)
+    parsed["translation"] = translation["translation"]
+    parsed["translationStatus"] = translation["translationStatus"]
+    parsed["translationCoverage"] = translation["translationCoverage"]
+    parsed["translatedChars"] = translation["translatedChars"]
+    parsed["translationTotalChars"] = translation["translationTotalChars"]
+    parsed["translationMessage"] = translation["translationMessage"]
     parsed.setdefault("hoshinoNote", "")
     parsed["llmStatus"] = "ok"
     parsed["llmMessage"] = ""
@@ -87,6 +183,11 @@ def build_analysis_response(text: str, title: str = "") -> dict:
         "unknownTerms": unknown_terms,
         "analysis": llm_result,
         "translation": llm_result.get("translation", ""),
+        "translationStatus": llm_result.get("translationStatus", ""),
+        "translationCoverage": llm_result.get("translationCoverage", 0),
+        "translatedChars": llm_result.get("translatedChars", 0),
+        "translationTotalChars": llm_result.get("translationTotalChars", len(text)),
+        "translationMessage": llm_result.get("translationMessage", ""),
         "paperStructure": analyze_text_structure(text),
         "llmStatus": llm_result.get("llmStatus", "ok"),
         "llmMessage": llm_result.get("llmMessage", ""),
@@ -147,7 +248,7 @@ def analyze_long_paper_with_llm(text: str, title: str, known_terms: list, trunca
   "tags": ["标签"],
   "keyTerms": ["术语"],
   "innovations": ["创新点"],
-  "translation": "这是一篇长文档，请说明已完成全文提取；如需逐段翻译，可在右侧伴学中继续提问。",
+  "translation": "",
   "hoshinoNote": "用星野大叔口吻写一段阅读建议"
 }}
 
@@ -172,7 +273,13 @@ def analyze_long_paper_with_llm(text: str, title: str, known_terms: list, trunca
     parsed.setdefault("tags", [])
     parsed.setdefault("keyTerms", [])
     parsed.setdefault("innovations", [])
-    parsed.setdefault("translation", "")
+    translation = translate_text_with_llm(text, title)
+    parsed["translation"] = translation["translation"]
+    parsed["translationStatus"] = translation["translationStatus"]
+    parsed["translationCoverage"] = translation["translationCoverage"]
+    parsed["translatedChars"] = translation["translatedChars"]
+    parsed["translationTotalChars"] = translation["translationTotalChars"]
+    parsed["translationMessage"] = translation["translationMessage"]
     parsed.setdefault("hoshinoNote", "")
     parsed["llmStatus"] = "ok"
     parsed["llmMessage"] = "PDF 已按片段完成综合分析。" + (" 超长内容仅前 120000 个字符送入 LLM。" if truncated else "")
@@ -181,8 +288,7 @@ def analyze_long_paper_with_llm(text: str, title: str, known_terms: list, trunca
 
 def build_pdf_analysis_response(text: str, title: str = "", truncated: bool = False) -> dict:
     known_terms = extract_terms_from_text(text)
-    llm_text = text[:PDF_LLM_CHAR_LIMIT]
-    llm_result = analyze_long_paper_with_llm(llm_text, title, known_terms, truncated)
+    llm_result = analyze_long_paper_with_llm(text, title, known_terms, truncated)
     llm_terms = llm_result.get("keyTerms", [])
     unknown_terms = [t for t in llm_terms if isinstance(t, str) and not is_known_term(t)]
     return {
@@ -190,6 +296,11 @@ def build_pdf_analysis_response(text: str, title: str = "", truncated: bool = Fa
         "unknownTerms": unknown_terms,
         "analysis": llm_result,
         "translation": llm_result.get("translation", ""),
+        "translationStatus": llm_result.get("translationStatus", ""),
+        "translationCoverage": llm_result.get("translationCoverage", 0),
+        "translatedChars": llm_result.get("translatedChars", 0),
+        "translationTotalChars": llm_result.get("translationTotalChars", len(text)),
+        "translationMessage": llm_result.get("translationMessage", ""),
         "paperStructure": analyze_text_structure(text),
         "llmStatus": llm_result.get("llmStatus", "ok"),
         "llmMessage": llm_result.get("llmMessage", ""),
@@ -200,7 +311,7 @@ def analyze_case_study_text(text: str) -> dict:
     if not settings.llm_configured:
         local_terms = extract_terms_from_text(text)
         return {
-            "hoshinoAnalysis": "还没有配置 KIMI_API_KEY，所以大叔先做本地术语匹配。配置 Key 后可以生成完整案例分析っす。",
+            "hoshinoAnalysis": "本地术语匹配。完整案例分析需要配置模型。",
             "involvedFields": sorted({t.get("category", "其他") for t in local_terms}),
             "keyTerms": [t["term"] for t in local_terms[:12]],
             "learningPath": [],

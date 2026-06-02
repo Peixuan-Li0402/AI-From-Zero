@@ -5,13 +5,14 @@ AI-From-Zero 是一个本地 AI 论文溯源阅读助手，面向刚入门 AI、
 ## 现在可以做什么
 
 - 文本和 PDF 分析：粘贴论文正文，或上传可复制文字的 PDF，自动匹配本地双语术语库并高亮显示。
-- PDF 全文阅读：按页提取文本，不再固定截断 8000/10000 字；超长文档会明确提示 LLM 分析上限。
+- PDF 全文阅读：按页提取文本，并用多策略修复英文单词粘连；超长文档会明确提示 LLM 分析上限。
+- 中文翻译：模型已配置时，翻译走全文分块流程并返回覆盖率，不再只翻前几千字。
 - 双语术语库：内置约 820 条 AI、计算机系统、软件工程和工程实践术语，保留中英文名、别名、解释和论文元数据。
 - 模型配置：支持 OpenAI-compatible API，包括 Kimi、OpenAI、OpenRouter、DeepSeek、Ollama 和自定义 endpoint。
 - AI 伴学：右侧聊天框接入 `/api/chat`，可结合当前论文、已识别术语、当前打开术语和学习状态回答问题。
-- AI 学习舱：每次分析后在论文原文下方生成新手版阅读路线、学习画像、概念笔记、概念链条、术语知识图谱和下一篇论文推荐。
-- 论文增强：提供章节/引用/参考文献结构化识别、本地术语库论文推荐、OpenAlex/Semantic Scholar 轻量搜索和基于原文的证据片段抽取。
-- 学习路径联动阅读器：学习路径里的推荐论文可以一键转到阅读器，方便同学粘贴摘要或上传 PDF 后直接开始学习。
+- AI 学习舱：每次分析后在论文原文下方只保留“下一篇推荐论文”，优先提供 PDF/摘要/来源链接，并可一键载入阅读器继续学习。
+- 论文增强：提供章节/引用/参考文献结构化识别、本地经典论文映射、arXiv/OpenAlex/Semantic Scholar 轻量搜索、PDF 自动载入和基于原文的证据片段抽取。
+- 学习路径联动阅读器：学习路径里的推荐论文带来源链接或 PDF 地址，点击“开始学习”会自动载入论文全文或摘要导读。
 - 本地降级：不配置 API Key 也能启动，文本/PDF 分析和伴学会使用本地术语库给出基础结果。
 
 ## 先选一种启动方式
@@ -94,6 +95,16 @@ http://127.0.0.1:8080/api/health
 ```
 
 如果返回里的 `llmConfigured` 是 `true`，说明模型配置已经生效；如果是 `false`，项目仍能以本地模式运行。
+
+OpenClaw 也可以直接调用项目 Skill 工具，不必打开网页：
+
+```bash
+python tools/openclaw_ai_from_zero.py health
+python tools/openclaw_ai_from_zero.py search-papers "Transformer attention" --limit 5
+python tools/openclaw_ai_from_zero.py load-paper "Attention Is All You Need"
+python tools/openclaw_ai_from_zero.py analyze-text --file paper.txt --title "My Paper"
+python tools/openclaw_ai_from_zero.py chat "带我读这篇论文" --paper-file paper.txt --local-only
+```
 
 ## 配置模型
 
@@ -213,13 +224,14 @@ LLM_MODEL=your-model-name
 | `/api/config/providers` | GET | 供应商预设 |
 | `/api/config/test` | POST | 测试临时模型配置 |
 | `/api/config/save` | POST | 保存本地 `.env`，仅允许本机调用 |
-| `/api/analyze` | POST | 分析论文文本 |
+| `/api/analyze` | POST | 分析论文文本，模型已配置时按全文分块生成中文翻译 |
 | `/api/analyze-pdf` | POST | 上传并分析 PDF，返回 `pages/pageCount/textLength/truncated/extractionWarnings` |
 | `/api/chat` | POST | 右侧 AI 伴学；请求中可传 `localOnly: true` 强制本地降级回答 |
-| `/api/learning/profile` | GET | 当前本地学习画像、掌握率、薄弱方向和概念笔记 |
-| `/api/learning/session` | POST | 把一次论文分析沉淀为阅读会话，返回阅读路线、概念笔记、概念链条和图谱 |
+| `/api/learning/profile` | GET | 当前本地学习画像和阅读记录 |
+| `/api/learning/session` | POST | 把一次论文分析沉淀为阅读会话，并推荐下一篇可学习论文 |
 | `/api/learning/mastery` | POST | 标记或取消标记术语掌握状态 |
-| `/api/papers/search` | GET | 从本地术语库和可选外部元数据源搜索论文 |
+| `/api/papers/search` | GET | 从本地经典映射、术语库和可选外部元数据源搜索论文 |
+| `/api/papers/load` | POST | 根据标题/链接/PDF/摘要载入论文；优先抽取 PDF 全文，失败时返回摘要导读 |
 | `/api/papers/evidence` | POST | 从当前论文文本中抽取和问题相关的证据片段 |
 | `/api/terms` | GET | 获取术语分类列表和双语字段 |
 | `/api/terms/{name}` | GET | 获取单个术语详情 |
@@ -277,6 +289,8 @@ tools:
         method: "POST"
       - path: "/api/papers/search"
         method: "GET"
+      - path: "/api/papers/load"
+        method: "POST"
       - path: "/api/papers/evidence"
         method: "POST"
       - path: "/api/terms"
@@ -383,7 +397,7 @@ tools/                # 术语检查、扩充、OpenClaw bootstrap、API 冒烟
 - 扫描版 PDF 暂不支持 OCR。
 - AI 伴学第一版不做账号、长期记忆、复杂 RAG 或流式输出。
 - 学习画像保存在本地 `data/learning_progress.json`，`data/` 默认不进入版本控制。
-- 论文搜索会优先使用本地术语库；外部 OpenAlex/Semantic Scholar 不可用时会自动降级。
+- 论文搜索会优先使用本地经典映射和术语库；外部 arXiv/OpenAlex/Semantic Scholar 不可用时会自动降级。
 - GROBID、Marker、PaperQA 仍是下一阶段增强方向，当前版本先提供本地结构化解析、adapter 入口和证据片段能力。
 - `.env` 是本地开发文件，真实 Key 不进入版本控制。
 

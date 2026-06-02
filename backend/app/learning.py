@@ -2,6 +2,7 @@ import json
 import re
 
 from .config import KNOWLEDGE_DIR
+from .papers import enrich_paper_resource
 
 
 LEARNING_PATHS_PATH = KNOWLEDGE_DIR / "learning_paths.json"
@@ -23,17 +24,31 @@ def _parse_paper_reference(value: str) -> dict:
         meta = match.group("meta").strip()
         year_match = re.search(r"(19|20)\d{2}", meta)
         year = year_match.group(0) if year_match else ""
-    return {
+    resource = enrich_paper_resource({
         "display": raw,
         "title": title,
-        "meta": meta,
         "year": year,
+        "shortDesc": "路径推荐论文",
+    })
+    reader_prompt = resource.get("readerText") or (
+        f"目标：阅读 {resource.get('title') or title}\n\n"
+        "下载 PDF 或粘贴摘要。"
+    )
+    return {
+        "display": raw,
+        "title": resource.get("title") or title,
+        "meta": meta,
+        "year": resource.get("year") or year,
+        "authors": resource.get("authors", ""),
         "searchQuery": title,
-        "readerPrompt": (
-            f"学习目标：阅读 {title}。\n\n"
-            "请先找到论文 PDF 或摘要粘贴到这里，再点击“开始分析”。\n"
-            "建议阅读顺序：摘要 -> 关键术语 -> 方法段 -> 实验结果 -> 局限与后续论文。"
-        ),
+        "url": resource.get("url", ""),
+        "openAccessUrl": resource.get("openAccessUrl", ""),
+        "pdfUrl": resource.get("pdfUrl", ""),
+        "abstract": resource.get("abstract", ""),
+        "shortDesc": resource.get("shortDesc", ""),
+        "resourceStatus": resource.get("resourceStatus", "link"),
+        "learningHint": resource.get("learningHint", ""),
+        "readerPrompt": reader_prompt,
     }
 
 

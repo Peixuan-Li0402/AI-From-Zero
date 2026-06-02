@@ -1,6 +1,6 @@
 {
   "version": "3.0",
-  "lastUpdated": "2026-06-01",
+  "lastUpdated": "2026-06-02",
   "terms": [
     {
       "term": "MLP",
@@ -7540,7 +7540,7 @@
           "title": "FaceNet: A Unified Embedding for Face Recognition and Clustering",
           "authors": "Schroff et al.",
           "year": 2015,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 Triplet Loss 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -7575,7 +7575,7 @@
           "title": "Focal Loss for Dense Object Detection",
           "authors": "Lin et al.",
           "year": 2017,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 Focal Loss 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -7750,7 +7750,7 @@
           "title": "Deep Residual Learning for Image Recognition",
           "authors": "He et al.",
           "year": 2015,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 ResNet 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -7784,7 +7784,7 @@
           "title": "Densely Connected Convolutional Networks",
           "authors": "Huang et al.",
           "year": 2017,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 DenseNet 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -7817,7 +7817,7 @@
           "title": "Squeeze-and-Excitation Networks",
           "authors": "Hu et al.",
           "year": 2017,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 SENet 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -7853,7 +7853,7 @@
           "title": "Mask R-CNN",
           "authors": "He et al.",
           "year": 2017,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 Mask R-CNN 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -7886,7 +7886,7 @@
           "title": "SSD: Single Shot MultiBox Detector",
           "authors": "Liu et al.",
           "year": 2016,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 SSD 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -7919,7 +7919,7 @@
           "title": "Focal Loss for Dense Object Detection",
           "authors": "Lin et al.",
           "year": 2017,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 RetinaNet 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8299,7 +8299,7 @@
           "title": "Adding Conditional Control to Text-to-Image Diffusion Models",
           "authors": "Zhang & Agrawala",
           "year": 2023,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 ControlNet 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8335,7 +8335,7 @@
           "title": "DreamBooth: Fine Tuning Text-to-Image Diffusion Models for Subject-Driven Generation",
           "authors": "Ruiz et al.",
           "year": 2022,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 DreamBooth 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8370,7 +8370,7 @@
           "title": "Classifier-Free Diffusion Guidance",
           "authors": "Ho & Kim",
           "year": 2022,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 CFG 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8405,7 +8405,7 @@
           "title": "Denoising Diffusion Implicit Models",
           "authors": "Song et al.",
           "year": 2020,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 DDIM 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8465,7 +8465,7 @@
           "title": "Continuous Control with Deep Reinforcement Learning",
           "authors": "Lillicrap et al.",
           "year": 2015,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 DDPG 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8501,7 +8501,7 @@
           "title": "Soft Actor-Critic",
           "authors": "Haarnoja et al.",
           "year": 2018,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 SAC 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8537,7 +8537,7 @@
           "title": "Addressing Function Approximation Error in Actor-Critic Methods",
           "authors": "Fujimoto et al.",
           "year": 2018,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 TD3 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8627,7 +8627,7 @@
           "title": "HuBERT: Self-Supervised Speech Representation Learning",
           "authors": "Hsu et al.",
           "year": 2021,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 HuBERT 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8725,7 +8725,7 @@
           "title": "Auto-Encoding Variational Bayes",
           "authors": "Kingma & Welling",
           "year": 2013,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 重参数化技巧 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -8787,7 +8787,7 @@
           "title": "Grad-CAM: Visual Explanations from Deep Networks",
           "authors": "Selvaraju et al.",
           "year": 2017,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 Grad-CAM 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -9176,7 +9176,7 @@
           "title": "RoBERTa: A Robustly Optimized BERT Pretraining Approach",
           "authors": "Liu et al.",
           "year": 2019,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 RoBERTa 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -9350,7 +9350,7 @@
           "title": "Going Deeper with Convolutions",
           "authors": "Szegedy et al.",
           "year": 2014,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 Inception 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -9412,7 +9412,7 @@
           "title": "MLP-Mixer: An all-MLP Architecture for Vision",
           "authors": "Tolstikhin et al.",
           "year": 2021,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 MLP-Mixer 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -9574,7 +9574,7 @@
           "title": "Constitutional AI: Harmlessness from AI Feedback",
           "authors": "Bai et al.",
           "year": 2022,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 宪法AI 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -9676,7 +9676,7 @@
           "title": "Tree of Thoughts: Deliberate Problem Solving with Large Language Models",
           "authors": "Yao et al.",
           "year": 2023,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 思维树 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -9716,7 +9716,7 @@
           "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
           "authors": "Yao et al.",
           "year": 2022,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 ReAct 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -10046,7 +10046,7 @@
           "title": "wav2vec: Unsupervised Pre-training for Speech Recognition",
           "authors": "Schneider et al.",
           "year": 2019,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 wav2vec 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -10207,7 +10207,7 @@
           "title": "Sequence Transduction with Recurrent Neural Networks",
           "authors": "Graves",
           "year": 2012,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 RNN-T 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -10245,7 +10245,7 @@
           "title": "Connectionist Temporal Classification: Labelling Unsegmented Sequence Data with RNNs",
           "authors": "Graves et al.",
           "year": 2006,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 CTC 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -10335,7 +10335,7 @@
           "title": "AnimateDiff: Animate Your Personalized Text-to-Image Diffusion Models",
           "authors": "Guo et al.",
           "year": 2023,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 AnimateDiff 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -10459,7 +10459,7 @@
           "title": "From Local to Global: A Graph RAG Approach to Query-Focused Summarization",
           "authors": "Edge et al.",
           "year": 2024,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 GraphRAG 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -10584,7 +10584,7 @@
           "title": "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity",
           "authors": "Fedus et al.",
           "year": 2022,
-          "shortDesc": "经典相关论文。"
+          "shortDesc": "这篇论文与 稀疏专家混合 相关，适合用来观察该概念在真实研究中的问题设定、方法设计和实验验证。"
         }
       ],
       "relatedTerms": [
@@ -10674,8 +10674,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "Cross-Attention 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "Cross-Attention 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "Cross-Attention（Cross-Attention）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "Cross-Attention先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10685,7 +10685,7 @@
       "fullNameZh": "Cross-Attention",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "Cross-Attention 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "Cross-Attention（Cross-Attention）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "Cross-Attention is an important concept in 基础概念. It is used to reason about Cross-Attention in practical systems and research papers.",
       "academicExplanationZh": "Cross-Attention（Cross-Attention）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10695,8 +10695,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "GPU 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "GPU 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "GPU（GPU）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "GPU先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10706,7 +10706,7 @@
       "fullNameZh": "GPU",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "GPU 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "GPU（GPU）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "GPU is an important concept in 基础概念. It is used to reason about GPU in practical systems and research papers.",
       "academicExplanationZh": "GPU（GPU）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10716,8 +10716,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "GPU计算 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "GPU计算 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "GPU计算（GPU计算）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "GPU计算先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10727,7 +10727,7 @@
       "fullNameZh": "GPU计算",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "GPU计算 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "GPU计算（GPU计算）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "GPU计算 is an important concept in 基础概念. It is used to reason about GPU计算 in practical systems and research papers.",
       "academicExplanationZh": "GPU计算（GPU计算）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10737,8 +10737,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "MCTS 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "MCTS 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "MCTS（MCTS）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "MCTS先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10748,7 +10748,7 @@
       "fullNameZh": "MCTS",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "MCTS 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "MCTS（MCTS）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "MCTS is an important concept in 基础概念. It is used to reason about MCTS in practical systems and research papers.",
       "academicExplanationZh": "MCTS（MCTS）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10758,8 +10758,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "MSE 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "MSE 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "MSE（MSE）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "MSE先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10769,7 +10769,7 @@
       "fullNameZh": "MSE",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "MSE 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "MSE（MSE）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "MSE is an important concept in 基础概念. It is used to reason about MSE in practical systems and research papers.",
       "academicExplanationZh": "MSE（MSE）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10779,8 +10779,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "NER 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "NER 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "NER（NER）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "NER先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10790,7 +10790,7 @@
       "fullNameZh": "NER",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "NER 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "NER（NER）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "NER is an important concept in 基础概念. It is used to reason about NER in practical systems and research papers.",
       "academicExplanationZh": "NER（NER）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10800,8 +10800,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "NLP 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "NLP 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "NLP（NLP）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "NLP先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10811,7 +10811,7 @@
       "fullNameZh": "NLP",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "NLP 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "NLP（NLP）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "NLP is an important concept in 基础概念. It is used to reason about NLP in practical systems and research papers.",
       "academicExplanationZh": "NLP（NLP）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10821,8 +10821,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "NumPy 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "NumPy 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "NumPy（NumPy）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "NumPy先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10832,7 +10832,7 @@
       "fullNameZh": "NumPy",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "NumPy 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "NumPy（NumPy）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "NumPy is an important concept in 基础概念. It is used to reason about NumPy in practical systems and research papers.",
       "academicExplanationZh": "NumPy（NumPy）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10842,8 +10842,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "VQGAN 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "VQGAN 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "VQGAN（VQGAN）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "VQGAN先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10853,7 +10853,7 @@
       "fullNameZh": "VQGAN",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "VQGAN 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "VQGAN（VQGAN）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "VQGAN is an important concept in 基础概念. It is used to reason about VQGAN in practical systems and research papers.",
       "academicExplanationZh": "VQGAN（VQGAN）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10863,8 +10863,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "n-gram 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "n-gram 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "n-gram（n-gram）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "n-gram先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10874,7 +10874,7 @@
       "fullNameZh": "n-gram",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "n-gram 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "n-gram（n-gram）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "n-gram is an important concept in 基础概念. It is used to reason about n-gram in practical systems and research papers.",
       "academicExplanationZh": "n-gram（n-gram）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10884,8 +10884,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "优化 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "优化 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "优化（优化）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "优化先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10895,7 +10895,7 @@
       "fullNameZh": "优化",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "优化 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "优化（优化）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "优化 is an important concept in 基础概念. It is used to reason about 优化 in practical systems and research papers.",
       "academicExplanationZh": "优化（优化）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10905,8 +10905,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "低秩分解 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "低秩分解 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "低秩分解（低秩分解）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "低秩分解先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10916,7 +10916,7 @@
       "fullNameZh": "低秩分解",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "低秩分解 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "低秩分解（低秩分解）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "低秩分解 is an important concept in 基础概念. It is used to reason about 低秩分解 in practical systems and research papers.",
       "academicExplanationZh": "低秩分解（低秩分解）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10926,8 +10926,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "体积渲染 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "体积渲染 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "体积渲染（体积渲染）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "体积渲染先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10937,7 +10937,7 @@
       "fullNameZh": "体积渲染",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "体积渲染 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "体积渲染（体积渲染）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "体积渲染 is an important concept in 基础概念. It is used to reason about 体积渲染 in practical systems and research papers.",
       "academicExplanationZh": "体积渲染（体积渲染）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10947,8 +10947,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "信息论 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "信息论 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "信息论（信息论）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "信息论先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10958,7 +10958,7 @@
       "fullNameZh": "信息论",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "信息论 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "信息论（信息论）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "信息论 is an important concept in 基础概念. It is used to reason about 信息论 in practical systems and research papers.",
       "academicExplanationZh": "信息论（信息论）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10968,8 +10968,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "值函数 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "值函数 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "值函数（值函数）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "值函数先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -10979,7 +10979,7 @@
       "fullNameZh": "值函数",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "值函数 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "值函数（值函数）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "值函数 is an important concept in 基础概念. It is used to reason about 值函数 in practical systems and research papers.",
       "academicExplanationZh": "值函数（值函数）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -10989,8 +10989,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "分布式训练 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "分布式训练 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "分布式训练（分布式训练）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "分布式训练先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11000,7 +11000,7 @@
       "fullNameZh": "分布式训练",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "分布式训练 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "分布式训练（分布式训练）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "分布式训练 is an important concept in 基础概念. It is used to reason about 分布式训练 in practical systems and research papers.",
       "academicExplanationZh": "分布式训练（分布式训练）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11010,8 +11010,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "卡尔曼滤波 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "卡尔曼滤波 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "卡尔曼滤波（卡尔曼滤波）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "卡尔曼滤波先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11021,7 +11021,7 @@
       "fullNameZh": "卡尔曼滤波",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "卡尔曼滤波 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "卡尔曼滤波（卡尔曼滤波）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "卡尔曼滤波 is an important concept in 基础概念. It is used to reason about 卡尔曼滤波 in practical systems and research papers.",
       "academicExplanationZh": "卡尔曼滤波（卡尔曼滤波）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11031,8 +11031,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "向量 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "向量 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "向量（向量）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "向量先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11042,7 +11042,7 @@
       "fullNameZh": "向量",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "向量 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "向量（向量）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "向量 is an important concept in 基础概念. It is used to reason about 向量 in practical systems and research papers.",
       "academicExplanationZh": "向量（向量）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11052,8 +11052,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "向量数据库 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "向量数据库 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "向量数据库（向量数据库）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "向量数据库先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11063,7 +11063,7 @@
       "fullNameZh": "向量数据库",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "向量数据库 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "向量数据库（向量数据库）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "向量数据库 is an important concept in 基础概念. It is used to reason about 向量数据库 in practical systems and research papers.",
       "academicExplanationZh": "向量数据库（向量数据库）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11073,8 +11073,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "向量检索 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "向量检索 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "向量检索（向量检索）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "向量检索先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11084,7 +11084,7 @@
       "fullNameZh": "向量检索",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "向量检索 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "向量检索（向量检索）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "向量检索 is an important concept in 基础概念. It is used to reason about 向量检索 in practical systems and research papers.",
       "academicExplanationZh": "向量检索（向量检索）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11094,8 +11094,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "因果掩码 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "因果掩码 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "因果掩码（因果掩码）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "因果掩码先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11105,7 +11105,7 @@
       "fullNameZh": "因果掩码",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "因果掩码 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "因果掩码（因果掩码）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "因果掩码 is an important concept in 基础概念. It is used to reason about 因果掩码 in practical systems and research papers.",
       "academicExplanationZh": "因果掩码（因果掩码）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11115,8 +11115,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "因果注意力 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "因果注意力 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "因果注意力（因果注意力）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "因果注意力先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11126,7 +11126,7 @@
       "fullNameZh": "因果注意力",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "因果注意力 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "因果注意力（因果注意力）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "因果注意力 is an important concept in 基础概念. It is used to reason about 因果注意力 in practical systems and research papers.",
       "academicExplanationZh": "因果注意力（因果注意力）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11136,8 +11136,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "实例分割 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "实例分割 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "实例分割（实例分割）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "实例分割先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11147,7 +11147,7 @@
       "fullNameZh": "实例分割",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "实例分割 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "实例分割（实例分割）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "实例分割 is an important concept in 基础概念. It is used to reason about 实例分割 in practical systems and research papers.",
       "academicExplanationZh": "实例分割（实例分割）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11157,8 +11157,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "对抗训练 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "对抗训练 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "对抗训练（对抗训练）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "对抗训练先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11168,7 +11168,7 @@
       "fullNameZh": "对抗训练",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "对抗训练 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "对抗训练（对抗训练）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "对抗训练 is an important concept in 基础概念. It is used to reason about 对抗训练 in practical systems and research papers.",
       "academicExplanationZh": "对抗训练（对抗训练）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11178,8 +11178,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "归一化 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "归一化 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "归一化（归一化）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "归一化先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11189,7 +11189,7 @@
       "fullNameZh": "归一化",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "归一化 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "归一化（归一化）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "归一化 is an important concept in 基础概念. It is used to reason about 归一化 in practical systems and research papers.",
       "academicExplanationZh": "归一化（归一化）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11199,8 +11199,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "持续学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "持续学习 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "持续学习（持续学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "持续学习先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11210,7 +11210,7 @@
       "fullNameZh": "持续学习",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "持续学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "持续学习（持续学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "持续学习 is an important concept in 基础概念. It is used to reason about 持续学习 in practical systems and research papers.",
       "academicExplanationZh": "持续学习（持续学习）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11220,8 +11220,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "指数函数 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "指数函数 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "指数函数（指数函数）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "指数函数先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11231,7 +11231,7 @@
       "fullNameZh": "指数函数",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "指数函数 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "指数函数（指数函数）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "指数函数 is an important concept in 基础概念. It is used to reason about 指数函数 in practical systems and research papers.",
       "academicExplanationZh": "指数函数（指数函数）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11241,8 +11241,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "控制理论 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "控制理论 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "控制理论（控制理论）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "控制理论先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11252,7 +11252,7 @@
       "fullNameZh": "控制理论",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "控制理论 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "控制理论（控制理论）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "控制理论 is an important concept in 基础概念. It is used to reason about 控制理论 in practical systems and research papers.",
       "academicExplanationZh": "控制理论（控制理论）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11262,8 +11262,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "推理 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "推理 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "推理（推理）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "推理先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11273,7 +11273,7 @@
       "fullNameZh": "推理",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "推理 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "推理（推理）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "推理 is an important concept in 基础概念. It is used to reason about 推理 in practical systems and research papers.",
       "academicExplanationZh": "推理（推理）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11283,8 +11283,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "推理加速 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "推理加速 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "推理加速（推理加速）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "推理加速先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11294,7 +11294,7 @@
       "fullNameZh": "推理加速",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "推理加速 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "推理加速（推理加速）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "推理加速 is an important concept in 基础概念. It is used to reason about 推理加速 in practical systems and research papers.",
       "academicExplanationZh": "推理加速（推理加速）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11304,8 +11304,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "数据隐私 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "数据隐私 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "数据隐私（数据隐私）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "数据隐私先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11315,7 +11315,7 @@
       "fullNameZh": "数据隐私",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "数据隐私 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "数据隐私（数据隐私）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "数据隐私 is an important concept in 基础概念. It is used to reason about 数据隐私 in practical systems and research papers.",
       "academicExplanationZh": "数据隐私（数据隐私）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11325,8 +11325,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "无监督学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "无监督学习 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "无监督学习（无监督学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "无监督学习先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11336,7 +11336,7 @@
       "fullNameZh": "无监督学习",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "无监督学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "无监督学习（无监督学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "无监督学习 is an important concept in 基础概念. It is used to reason about 无监督学习 in practical systems and research papers.",
       "academicExplanationZh": "无监督学习（无监督学习）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11346,8 +11346,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "显存优化 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "显存优化 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "显存优化（显存优化）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "显存优化先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11357,7 +11357,7 @@
       "fullNameZh": "显存优化",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "显存优化 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "显存优化（显存优化）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "显存优化 is an important concept in 基础概念. It is used to reason about 显存优化 in practical systems and research papers.",
       "academicExplanationZh": "显存优化（显存优化）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11367,8 +11367,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "机器人 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "机器人 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "机器人（机器人）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "机器人先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11378,7 +11378,7 @@
       "fullNameZh": "机器人",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "机器人 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "机器人（机器人）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "机器人 is an important concept in 基础概念. It is used to reason about 机器人 in practical systems and research papers.",
       "academicExplanationZh": "机器人（机器人）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11388,8 +11388,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "条件概率 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "条件概率 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "条件概率（条件概率）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "条件概率先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11399,7 +11399,7 @@
       "fullNameZh": "条件概率",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "条件概率 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "条件概率（条件概率）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "条件概率 is an important concept in 基础概念. It is used to reason about 条件概率 in practical systems and research papers.",
       "academicExplanationZh": "条件概率（条件概率）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11409,8 +11409,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "核方法 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "核方法 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "核方法（核方法）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "核方法先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11420,7 +11420,7 @@
       "fullNameZh": "核方法",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "核方法 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "核方法（核方法）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "核方法 is an important concept in 基础概念. It is used to reason about 核方法 in practical systems and research papers.",
       "academicExplanationZh": "核方法（核方法）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11430,8 +11430,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "梯度消失 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "梯度消失 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "梯度消失（梯度消失）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "梯度消失先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11441,7 +11441,7 @@
       "fullNameZh": "梯度消失",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "梯度消失 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "梯度消失（梯度消失）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "梯度消失 is an important concept in 基础概念. It is used to reason about 梯度消失 in practical systems and research papers.",
       "academicExplanationZh": "梯度消失（梯度消失）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11451,8 +11451,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "梯度爆炸 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "梯度爆炸 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "梯度爆炸（梯度爆炸）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "梯度爆炸先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11462,7 +11462,7 @@
       "fullNameZh": "梯度爆炸",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "梯度爆炸 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "梯度爆炸（梯度爆炸）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "梯度爆炸 is an important concept in 基础概念. It is used to reason about 梯度爆炸 in practical systems and research papers.",
       "academicExplanationZh": "梯度爆炸（梯度爆炸）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11472,8 +11472,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "梯度缩放 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "梯度缩放 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "梯度缩放（梯度缩放）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "梯度缩放先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11483,7 +11483,7 @@
       "fullNameZh": "梯度缩放",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "梯度缩放 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "梯度缩放（梯度缩放）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "梯度缩放 is an important concept in 基础概念. It is used to reason about 梯度缩放 in practical systems and research papers.",
       "academicExplanationZh": "梯度缩放（梯度缩放）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11493,8 +11493,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "概率 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "概率 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "概率（概率）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "概率先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11504,7 +11504,7 @@
       "fullNameZh": "概率",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "概率 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "概率（概率）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "概率 is an important concept in 基础概念. It is used to reason about 概率 in practical systems and research papers.",
       "academicExplanationZh": "概率（概率）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11514,8 +11514,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "概率论 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "概率论 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "概率论（概率论）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "概率论先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11525,7 +11525,7 @@
       "fullNameZh": "概率论",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "概率论 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "概率论（概率论）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "概率论 is an important concept in 基础概念. It is used to reason about 概率论 in practical systems and research papers.",
       "academicExplanationZh": "概率论（概率论）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11535,8 +11535,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "模型压缩 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "模型压缩 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "模型压缩（模型压缩）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "模型压缩先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11546,7 +11546,7 @@
       "fullNameZh": "模型压缩",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "模型压缩 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "模型压缩（模型压缩）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "模型压缩 is an important concept in 基础概念. It is used to reason about 模型压缩 in practical systems and research papers.",
       "academicExplanationZh": "模型压缩（模型压缩）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11556,8 +11556,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "模型部署 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "模型部署 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "模型部署（模型部署）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "模型部署先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11567,7 +11567,7 @@
       "fullNameZh": "模型部署",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "模型部署 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "模型部署（模型部署）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "模型部署 is an important concept in 基础概念. It is used to reason about 模型部署 in practical systems and research papers.",
       "academicExplanationZh": "模型部署（模型部署）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11577,8 +11577,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "深度学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "深度学习 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "深度学习（深度学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "深度学习先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11588,7 +11588,7 @@
       "fullNameZh": "深度学习",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "深度学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "深度学习（深度学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "深度学习 is an important concept in 基础概念. It is used to reason about 深度学习 in practical systems and research papers.",
       "academicExplanationZh": "深度学习（深度学习）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11598,8 +11598,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "潜空间 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "潜空间 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "潜空间（潜空间）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "潜空间先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11609,7 +11609,7 @@
       "fullNameZh": "潜空间",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "潜空间 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "潜空间（潜空间）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "潜空间 is an important concept in 基础概念. It is used to reason about 潜空间 in practical systems and research papers.",
       "academicExplanationZh": "潜空间（潜空间）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11619,8 +11619,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "生成模型 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "生成模型 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "生成模型（生成模型）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "生成模型先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11630,7 +11630,7 @@
       "fullNameZh": "生成模型",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "生成模型 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "生成模型（生成模型）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "生成模型 is an important concept in 基础概念. It is used to reason about 生成模型 in practical systems and research papers.",
       "academicExplanationZh": "生成模型（生成模型）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11640,8 +11640,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "监督学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "监督学习 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "监督学习（监督学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "监督学习先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11651,7 +11651,7 @@
       "fullNameZh": "监督学习",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "监督学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "监督学习（监督学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "监督学习 is an important concept in 基础概念. It is used to reason about 监督学习 in practical systems and research papers.",
       "academicExplanationZh": "监督学习（监督学习）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11661,8 +11661,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "目标检测 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "目标检测 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "目标检测（目标检测）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "目标检测先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11672,7 +11672,7 @@
       "fullNameZh": "目标检测",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "目标检测 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "目标检测（目标检测）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "目标检测 is an important concept in 基础概念. It is used to reason about 目标检测 in practical systems and research papers.",
       "academicExplanationZh": "目标检测（目标检测）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11682,8 +11682,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "相似度 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "相似度 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "相似度（相似度）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "相似度先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11693,7 +11693,7 @@
       "fullNameZh": "相似度",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "相似度 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "相似度（相似度）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "相似度 is an important concept in 基础概念. It is used to reason about 相似度 in practical systems and research papers.",
       "academicExplanationZh": "相似度（相似度）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11703,8 +11703,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "神经元 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "神经元 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "神经元（神经元）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "神经元先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11714,7 +11714,7 @@
       "fullNameZh": "神经元",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "神经元 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "神经元（神经元）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "神经元 is an important concept in 基础概念. It is used to reason about 神经元 in practical systems and research papers.",
       "academicExplanationZh": "神经元（神经元）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11724,8 +11724,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "稀疏计算 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "稀疏计算 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "稀疏计算（稀疏计算）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "稀疏计算先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11735,7 +11735,7 @@
       "fullNameZh": "稀疏计算",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "稀疏计算 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "稀疏计算（稀疏计算）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "稀疏计算 is an important concept in 基础概念. It is used to reason about 稀疏计算 in practical systems and research papers.",
       "academicExplanationZh": "稀疏计算（稀疏计算）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11745,8 +11745,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "精度 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "精度 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "精度（精度）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "精度先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11756,7 +11756,7 @@
       "fullNameZh": "精度",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "精度 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "精度（精度）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "精度 is an important concept in 基础概念. It is used to reason about 精度 in practical systems and research papers.",
       "academicExplanationZh": "精度（精度）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11766,8 +11766,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "统计 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "统计 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "统计（统计）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "统计先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11777,7 +11777,7 @@
       "fullNameZh": "统计",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "统计 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "统计（统计）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "统计 is an important concept in 基础概念. It is used to reason about 统计 in practical systems and research papers.",
       "academicExplanationZh": "统计（统计）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11787,8 +11787,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "自编码器 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "自编码器 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "自编码器（自编码器）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "自编码器先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11798,7 +11798,7 @@
       "fullNameZh": "自编码器",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "自编码器 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "自编码器（自编码器）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "自编码器 is an important concept in 基础概念. It is used to reason about 自编码器 in practical systems and research papers.",
       "academicExplanationZh": "自编码器（自编码器）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11808,8 +11808,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "蒙特卡洛方法 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "蒙特卡洛方法 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "蒙特卡洛方法（蒙特卡洛方法）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "蒙特卡洛方法先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11819,7 +11819,7 @@
       "fullNameZh": "蒙特卡洛方法",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "蒙特卡洛方法 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "蒙特卡洛方法（蒙特卡洛方法）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "蒙特卡洛方法 is an important concept in 基础概念. It is used to reason about 蒙特卡洛方法 in practical systems and research papers.",
       "academicExplanationZh": "蒙特卡洛方法（蒙特卡洛方法）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11829,8 +11829,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "表示学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "表示学习 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "表示学习（表示学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "表示学习先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11840,7 +11840,7 @@
       "fullNameZh": "表示学习",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "表示学习 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "表示学习（表示学习）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "表示学习 is an important concept in 基础概念. It is used to reason about 表示学习 in practical systems and research papers.",
       "academicExplanationZh": "表示学习（表示学习）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11850,8 +11850,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "视频生成 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "视频生成 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "视频生成（视频生成）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "视频生成先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11861,7 +11861,7 @@
       "fullNameZh": "视频生成",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "视频生成 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "视频生成（视频生成）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "视频生成 is an important concept in 基础概念. It is used to reason about 视频生成 in practical systems and research papers.",
       "academicExplanationZh": "视频生成（视频生成）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11871,8 +11871,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "计算机视觉 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "计算机视觉 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "计算机视觉（计算机视觉）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "计算机视觉先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11882,7 +11882,7 @@
       "fullNameZh": "计算机视觉",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "计算机视觉 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "计算机视觉（计算机视觉）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "计算机视觉 is an important concept in 基础概念. It is used to reason about 计算机视觉 in practical systems and research papers.",
       "academicExplanationZh": "计算机视觉（计算机视觉）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11892,8 +11892,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "语义相似度 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "语义相似度 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "语义相似度（语义相似度）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "语义相似度先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11903,7 +11903,7 @@
       "fullNameZh": "语义相似度",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "语义相似度 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "语义相似度（语义相似度）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "语义相似度 is an important concept in 基础概念. It is used to reason about 语义相似度 in practical systems and research papers.",
       "academicExplanationZh": "语义相似度（语义相似度）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11913,8 +11913,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "语言模型 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "语言模型 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "语言模型（语言模型）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "语言模型先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11924,7 +11924,7 @@
       "fullNameZh": "语言模型",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "语言模型 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "语言模型（语言模型）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "语言模型 is an important concept in 基础概念. It is used to reason about 语言模型 in practical systems and research papers.",
       "academicExplanationZh": "语言模型（语言模型）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11934,8 +11934,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "语音 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "语音 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "语音（语音）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "语音先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11945,7 +11945,7 @@
       "fullNameZh": "语音",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "语音 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "语音（语音）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "语音 is an important concept in 基础概念. It is used to reason about 语音 in practical systems and research papers.",
       "academicExplanationZh": "语音（语音）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11955,8 +11955,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "语音识别 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "语音识别 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "语音识别（语音识别）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "语音识别先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11966,7 +11966,7 @@
       "fullNameZh": "语音识别",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "语音识别 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "语音识别（语音识别）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "语音识别 is an important concept in 基础概念. It is used to reason about 语音识别 in practical systems and research papers.",
       "academicExplanationZh": "语音识别（语音识别）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11976,8 +11976,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "贝叶斯定理 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "贝叶斯定理 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "贝叶斯定理（贝叶斯定理）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "贝叶斯定理先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -11987,7 +11987,7 @@
       "fullNameZh": "贝叶斯定理",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "贝叶斯定理 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "贝叶斯定理（贝叶斯定理）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "贝叶斯定理 is an important concept in 基础概念. It is used to reason about 贝叶斯定理 in practical systems and research papers.",
       "academicExplanationZh": "贝叶斯定理（贝叶斯定理）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },
@@ -11997,8 +11997,8 @@
       "category": "基础概念",
       "difficulty": 1,
       "aliases": [],
-      "explanation": "链式法则 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
-      "hoshinoNote": "链式法则 这个坑先占住了っす，后面大叔再慢慢补详细讲解。",
+      "explanation": "链式法则（链式法则）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
+      "hoshinoNote": "链式法则先别背定义，先问自己：它在这篇论文里帮作者解决了什么卡点？能回答这个问题，再看公式和实验会轻松很多。",
       "prerequisiteTerms": [],
       "landmarkPapers": [],
       "relatedTerms": [],
@@ -12008,7 +12008,7 @@
       "fullNameZh": "链式法则",
       "aliasesEn": [],
       "aliasesZh": [],
-      "explanationZh": "链式法则 是理解 AI 论文时经常遇到的基础概念。当前条目用于保证知识链路可点击，后续可继续补充更完整解释。",
+      "explanationZh": "链式法则（链式法则）是基础概念中常见的学习节点。理解它时可以先抓住三个问题：它解决什么问题、依赖哪些输入或假设、在论文的方法或实验里怎样被验证。阅读相关论文时，建议先补 线性代数、概率统计或基础编程直觉，再比较它和相邻模型、算法或工程实践的区别。",
       "explanationEn": "链式法则 is an important concept in 基础概念. It is used to reason about 链式法则 in practical systems and research papers.",
       "academicExplanationZh": "链式法则（链式法则）通常需要结合定义、算法假设、适用场景和局限性理解。阅读论文时可以关注它解决的问题、输入输出、优化目标、评估指标以及与相邻概念的区别。"
     },

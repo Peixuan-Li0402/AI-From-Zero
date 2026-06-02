@@ -1,6 +1,6 @@
 # AI-From-Zero - OpenClaw Skill
 
-AI-From-Zero 是一个本地 AI 论文溯源阅读助手，可以作为 OpenClaw/Claw 的本地 Web 工具使用。它适合帮助用户分析论文文本、读取 PDF、解释术语、推荐学习路径，并通过右侧 AI 伴学回答上下文问题。
+AI-From-Zero 是一个本地 AI 论文溯源阅读助手，也可以作为 OpenClaw/Claw 的可执行 Skill 使用。它适合帮助用户分析论文文本、读取 PDF、解释术语、推荐可直接学习的下一篇论文，并通过 AI 伴学回答上下文问题。
 
 ## 快速接入
 
@@ -49,6 +49,25 @@ Invoke-RestMethod http://127.0.0.1:8080/api/health
 
 `llmConfigured=true` 表示模型已经配置好。`llmConfigured=false` 时，项目仍可用本地术语库降级运行。
 
+## OpenClaw 直接调用
+
+服务启动后，OpenClaw 不一定要打开网页，也可以直接调用本地 Skill 工具：
+
+```bash
+python tools/openclaw_ai_from_zero.py health
+python tools/openclaw_ai_from_zero.py search-papers "Transformer attention" --limit 5
+python tools/openclaw_ai_from_zero.py load-paper "Attention Is All You Need"
+python tools/openclaw_ai_from_zero.py analyze-text --file paper.txt --title "My Paper"
+python tools/openclaw_ai_from_zero.py chat "用新手能懂的话解释这篇论文的方法" --paper-file paper.txt --local-only
+```
+
+推荐 OpenClaw 工作流：
+
+1. 先用 `search-papers` 或 `/api/learn-path` 找到推荐论文。
+2. 再用 `load-paper` 或 `/api/papers/load` 自动载入 PDF 文本；如果 PDF 不可提取，接口会返回摘要导读和来源链接。
+3. 把返回的 `text` 交给 `/api/analyze`，获得术语高亮、基础分析和学习推荐。
+4. 最后用 `/api/chat` 带着论文文本、术语和问题做伴学追问。
+
 ## 模型配置
 
 优先让 OpenClaw 或当前 shell 暴露以下任一环境变量，然后运行 bootstrap：
@@ -83,11 +102,11 @@ APP_PORT=8080
 
 ## 能力入口
 
-- 文本分析：`POST /api/analyze`，输入论文正文，返回术语、高亮数据、摘要、翻译和 `llmStatus`。
-- PDF 分析：`POST /api/analyze-pdf`，按页提取可复制文字 PDF，返回全文、页数、字符数、分块分析状态和术语结果。
+- 文本分析：`POST /api/analyze`，输入论文正文，返回术语、高亮数据、摘要、全文分块中文翻译、翻译覆盖率和 `llmStatus`。
+- PDF 分析：`POST /api/analyze-pdf`，按页提取可复制文字 PDF，修复常见英文粘连，返回全文、页数、字符数、分块分析状态和术语结果。
 - AI 伴学：`POST /api/chat`，结合当前论文、当前术语、已掌握术语和最近对话回答问题；无 Key 时走本地降级回答，也可传 `localOnly: true` 强制本地回答。
-- 学习舱：`GET /api/learning/profile`、`POST /api/learning/session`、`POST /api/learning/mastery`，用于生成学习画像、阅读路线、概念笔记、概念链条和掌握状态。
-- 论文增强：`GET /api/papers/search`、`POST /api/papers/evidence`，用于检索相关论文和抽取基于原文的证据片段；PDF 分析会返回本地结构化章节、引用和参考文献信息。
+- 学习舱：`POST /api/learning/session`，根据当前论文术语推荐下一篇可学习论文；前端只展示推荐论文入口，避免和术语库重复。
+- 论文增强：`GET /api/papers/search`、`POST /api/papers/load`、`POST /api/papers/evidence`，用于检索论文、自动载入 PDF/摘要到阅读器，以及抽取基于原文的证据片段。
 - 模型配置：`GET /api/config`、`GET /api/config/providers`、`POST /api/config/test`、`POST /api/config/save`。
 - 术语库：`GET /api/terms`、`GET /api/terms/{name}`，返回双语术语字段和解释。
 - 相关论文：`POST /api/terms/{name}/papers`。
@@ -129,6 +148,8 @@ tools:
         method: "POST"
       - path: "/api/papers/search"
         method: "GET"
+      - path: "/api/papers/load"
+        method: "POST"
       - path: "/api/papers/evidence"
         method: "POST"
       - path: "/api/terms"

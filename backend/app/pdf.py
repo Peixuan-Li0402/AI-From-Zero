@@ -18,12 +18,52 @@ SECTION_PATTERNS = [
 ]
 
 
+def _long_alpha_tokens(text: str) -> int:
+    return sum(1 for token in re.findall(r"[A-Za-z]{24,}", text or ""))
+
+
+def _text_quality_score(text: str) -> float:
+    if not text:
+        return -10_000
+    alpha = len(re.findall(r"[A-Za-z]", text))
+    spaces = text.count(" ")
+    newlines = text.count("\n")
+    long_tokens = _long_alpha_tokens(text)
+    space_ratio = spaces / max(alpha, 1)
+    score = len(text) * 0.02 + spaces * 1.4 + newlines * 0.6
+    score -= long_tokens * 90
+    if alpha > 200 and space_ratio < 0.08:
+        score -= 500
+    return score
+
+
+def _extract_pdfplumber_page_text(page) -> tuple[str, str]:
+    candidates: list[tuple[str, str]] = []
+    extract_configs = [
+        ("tight-spacing", {"x_tolerance": 1, "y_tolerance": 3, "keep_blank_chars": False}),
+        ("default", {}),
+    ]
+    for name, kwargs in extract_configs:
+        try:
+            candidates.append((name, page.extract_text(**kwargs) or ""))
+        except Exception:
+            continue
+    try:
+        words = page.extract_words(x_tolerance=1, y_tolerance=3, keep_blank_chars=False)
+        candidates.append(("word-stream", " ".join(word.get("text", "") for word in words)))
+    except Exception:
+        pass
+    if not candidates:
+        return "", "empty"
+    return max(candidates, key=lambda item: _text_quality_score(item[1]))
+
+
 def _extract_with_pdfplumber(path: Path) -> list[dict]:
     pages = []
     with pdfplumber.open(str(path)) as pdf:
         for page_num, page in enumerate(pdf.pages, 1):
-            page_text = page.extract_text() or ""
-            pages.append({"page": page_num, "text": page_text, "length": len(page_text)})
+            profile, page_text = _extract_pdfplumber_page_text(page)
+            pages.append({"page": page_num, "text": page_text, "length": len(page_text), "profile": profile})
     return pages
 
 
@@ -61,6 +101,8 @@ def extract_pdf_pages(content: bytes) -> dict:
             for page in pages
             if page.get("text", "").strip()
         )
+        if _long_alpha_tokens(text) > max(8, len(pages) * 2):
+            warnings.append("PDF 文本可能粘连；可上传可复制文本版 PDF。")
         return {
             "text": text,
             "pages": pages,

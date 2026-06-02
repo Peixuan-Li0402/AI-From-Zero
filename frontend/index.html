@@ -41,7 +41,15 @@
           <label>论文标题（选填） <input type="text" id="paperTitle" placeholder="输入论文标题" class="input-sm"></label>
         </div>
       </div>
-      <textarea id="paperText" placeholder="粘贴论文原文（摘要/引言/方法等）&#10;&#10;也可以先试试示例文本……" rows="8"></textarea>
+      <textarea id="paperText" placeholder="粘贴论文原文，或上传 PDF" rows="8"></textarea>
+      <div id="paperLoadOverlay" class="paper-load-overlay" hidden>
+        <div class="paper-load-spinner"></div>
+        <div>
+          <strong id="paperLoadTitle">载入论文</strong>
+          <p id="paperLoadMessage">查找 PDF / 摘要 / 来源</p>
+          <div class="paper-load-bar"><span id="paperLoadBar"></span></div>
+        </div>
+      </div>
       <div class="paper-upload-row">
         <label class="file-upload">
           <input type="file" id="pdfFile" accept="application/pdf">
@@ -97,38 +105,16 @@
         <div class="dashboard-header">
           <div>
             <h3>AI 学习舱</h3>
-            <p>先读原文，再把关键概念沉淀成学习路线。</p>
+            <p>下一篇论文</p>
           </div>
-          <span id="dashboardStatus" class="file-status">正在生成学习路线…</span>
-        </div>
-        <div id="profilePanel" class="dashboard-strip"></div>
-        <div class="dashboard-grid">
-          <section class="dashboard-panel route-panel">
-            <h4>新手版阅读路线</h4>
-            <div id="readingRoute"></div>
-          </section>
-          <section class="dashboard-panel">
-            <h4>论文结构</h4>
-            <div id="paperStructurePanel"></div>
-          </section>
-          <section class="dashboard-panel">
-            <h4>概念笔记</h4>
-            <div id="conceptNotes"></div>
-          </section>
-          <section class="dashboard-panel">
-            <h4>概念链条</h4>
-            <div id="conceptChains"></div>
-          </section>
-          <section class="dashboard-panel">
-            <h4>术语知识图谱</h4>
-            <div id="knowledgeGraph"></div>
-          </section>
+          <span id="dashboardStatus" class="file-status">正在生成推荐…</span>
         </div>
         <section class="dashboard-panel next-paper-panel">
           <div class="panel-title-row">
             <h4>下一篇推荐论文</h4>
             <button id="btnSearchPapers" class="btn secondary small">联网补充论文</button>
           </div>
+          <p class="next-paper-hint">PDF 优先；失败读摘要。</p>
           <div id="nextPapers"></div>
         </section>
       </div>
@@ -140,7 +126,7 @@
     <div class="learn-area">
       <h2>🗺️ AI 学习路径</h2>
       <div class="learn-intro">
-        <p>选一个你感兴趣的方向，大叔给你推荐论文阅读路线っす！</p>
+        <p>选方向，按论文路线开始学。</p>
         <div class="interest-input">
           <label>告诉我你喜欢什么：</label>
           <div class="interest-row">
@@ -174,7 +160,7 @@
     <div class="case-area">
       <h2>🔍 案例分析</h2>
       <div class="case-intro">
-        <p>分享一个你感兴趣的AI应用、产品或案例，大叔帮你分析里面用了哪些AI技术，然后给你推荐学习路线っす！</p>
+        <p>输入案例，生成技术路线。</p>
         <div class="case-input-area">
           <label>分享你的案例：</label>
           <textarea id="caseText" placeholder="例如：特斯拉的自动驾驶系统使用摄像头和雷达感知周围环境，用神经网络识别障碍物，用强化学习做决策……" rows="4"></textarea>
@@ -215,9 +201,8 @@
   <div class="hoshino-messages" id="chatMessages">
     <div class="msg msg-hoshino">
       <div class="msg-bubble">
-        呜嘿～sensei来了っす！<br>
-        把论文扔过来（粘贴文本），大叔给你标出专业术语、逐个讲解～<br>
-        也可以点点右边看看大叔准备的知识库和学习路线哦！
+        呜嘿～sensei。<br>
+        上传论文，点高亮术语；需要路线就问大叔。
       </div>
     </div>
   </div>
@@ -482,19 +467,30 @@ $("pdfFile").addEventListener("change", () => {
   }
 });
 
+function setPaperLoadAnimation(visible, title = "", message = "", progress = 25) {
+  const overlay = $("paperLoadOverlay");
+  if (!overlay) return;
+  overlay.hidden = !visible;
+  if (visible) {
+    $("paperLoadTitle").textContent = title || "载入论文";
+    $("paperLoadMessage").textContent = message || "查找 PDF / 摘要 / 来源";
+    $("paperLoadBar").style.width = `${Math.max(8, Math.min(progress, 100))}%`;
+  }
+}
+
 // ═════════════════════════════════
 //  分析论文
 // ═════════════════════════════════
-$("btnAnalyze").addEventListener("click", async () => {
+async function analyzePaper(options = {}) {
   const text = $("paperText").value.trim();
   if (!text) {
     addChatMessage("sensei～先贴论文内容再点分析っす！📄");
-    return;
+    return false;
   }
 
   $("loadingStatus").hidden = false;
   $("btnAnalyze").disabled = true;
-  addChatMessage("📖 大叔正在读论文…先浏览一遍っす…");
+  if (!options.quiet) addChatMessage("📖 大叔正在读论文…先浏览一遍っす…");
   let rendered = false;
 
   try {
@@ -507,21 +503,25 @@ $("btnAnalyze").addEventListener("click", async () => {
 
     if (!resp.ok || data.error) {
       addChatMessage(`😅 出问题了：${data.error || data.detail || "分析失败"}`);
-      return;
+      return false;
     }
 
     // 显示结果
-    renderAnalysis(data, text);
+    renderAnalysis(data, text, options.source || "text");
     rendered = true;
     addChatMessage(`读完了っす！${data.knownTerms.length} 个大叔认识的术语已经标出来了，点蓝色词看解释～`);
+    return true;
   } catch (err) {
     addChatMessage(`😵 出错了：${err.message}。大叔再去看看怎么回事…`);
+    return false;
   } finally {
     $("loadingStatus").hidden = true;
     $("btnAnalyze").disabled = false;
     if (rendered) $("analysisResults").hidden = false;
   }
-});
+}
+
+$("btnAnalyze").addEventListener("click", () => analyzePaper());
 
 async function analyzePdfFile() {
   const file = $("pdfFile").files[0];
@@ -604,11 +604,19 @@ function renderAnalysis(data, rawText, source = "text") {
   const pdfMeta = data.pageCount
     ? `PDF 已提取 ${data.pageCount} 页、${data.textLength || rawText.length} 个字符${data.truncated ? "；超长内容已分块分析，部分内容未送入 LLM" : ""}。`
     : "";
+  const translationStatus = data.translationStatus || analysis.translationStatus || "";
+  const translationCoverage = data.translationCoverage || analysis.translationCoverage || 0;
+  const translationMessage = data.translationMessage || analysis.translationMessage || "";
+  const translationMeta = translationStatus === "ok"
+    ? `中文翻译已覆盖全文：${translationCoverage || 100}%。`
+    : (translationStatus === "partial_limit" || translationStatus === "partial_error"
+      ? `中文翻译未完全覆盖：已翻译 ${translationCoverage || 0}%。${translationMessage || ""}`
+      : "");
   const warnings = (data.extractionWarnings || []).join(" ");
   const noteHtml = analysis.hoshinoNote
     ? `<span class="hoshino-icon">🐾</span> ${analysis.hoshinoNote}`
     : "";
-  const statusHtml = [statusText, pdfMeta, warnings].filter(Boolean)
+  const statusHtml = [statusText, pdfMeta, translationMeta, warnings].filter(Boolean)
     .map((text) => `<div class="llm-notice">${escapeHtml(text)}</div>`)
     .join("");
   $("hoshinoComment").innerHTML = noteHtml + statusHtml;
@@ -620,6 +628,9 @@ function renderAnalysis(data, rawText, source = "text") {
   const tabTrans = $("tabTranslation");
   if (translation) {
     tabTrans.hidden = false;
+    tabTrans.textContent = translationStatus === "ok" || translationStatus === "source_chinese"
+      ? "🌐 中文翻译"
+      : "🌐 中文翻译（部分）";
   } else {
     tabTrans.hidden = true;
   }
@@ -756,7 +767,7 @@ async function refreshLearningDashboard(data, rawText, source = "text") {
     if (!resp.ok) throw new Error(payload.detail || "学习驾驶舱生成失败");
     _lastLearningSession = payload;
     renderLearningDashboard(payload);
-    $("dashboardStatus").textContent = "已沉淀为学习记录";
+    $("dashboardStatus").textContent = "已生成下一篇推荐";
     $("dashboardStatus").className = "file-status ready";
   } catch (err) {
     $("dashboardStatus").textContent = `学习驾驶舱暂不可用：${err.message}`;
@@ -765,16 +776,11 @@ async function refreshLearningDashboard(data, rawText, source = "text") {
 }
 
 function renderLearningDashboard(payload) {
-  renderProfilePanel(payload.profile || {});
-  renderReadingRoute(payload.readingRoute || []);
-  renderPaperStructure(_lastPaperStructure || {});
-  renderConceptNotes(payload.conceptNotes || []);
-  renderConceptChains(payload.conceptChains || []);
-  renderKnowledgeGraph(payload.knowledgeGraph || {});
   renderNextPapers(payload.nextPapers || []);
 }
 
 function renderPaperStructure(structure) {
+  if (!$("paperStructurePanel")) return;
   const sections = structure.sections || [];
   const citations = structure.citations || [];
   const references = structure.references || [];
@@ -799,6 +805,7 @@ function renderPaperStructure(structure) {
 }
 
 function renderProfilePanel(profile) {
+  if (!$("profilePanel")) return;
   $("profilePanel").innerHTML = `
     <div class="profile-metric"><strong>${profile.sessionsTotal || 0}</strong><span>阅读记录</span></div>
     <div class="profile-metric"><strong>${profile.termsSeen || 0}</strong><span>见过术语</span></div>
@@ -814,6 +821,7 @@ function renderProfilePanel(profile) {
 }
 
 function renderReadingRoute(route) {
+  if (!$("readingRoute")) return;
   $("readingRoute").innerHTML = route.length ? route.map((step) => `
     <div class="route-step">
       <strong>${escapeHtml(step.title)}</strong>
@@ -825,6 +833,7 @@ function renderReadingRoute(route) {
 }
 
 function renderConceptNotes(notes) {
+  if (!$("conceptNotes")) return;
   $("conceptNotes").innerHTML = notes.length ? notes.map((note) => `
     <div class="concept-note-card">
       <div>
@@ -840,6 +849,7 @@ function renderConceptNotes(notes) {
 }
 
 function renderConceptChains(chains) {
+  if (!$("conceptChains")) return;
   $("conceptChains").innerHTML = chains.length ? chains.map((chain) => `
     <div class="concept-chain-card">
       <strong data-open-term="${escapeAttr(chain.term)}">${escapeHtml(chain.term)}</strong>
@@ -855,6 +865,7 @@ function renderConceptChains(chains) {
 }
 
 function renderKnowledgeGraph(graph) {
+  if (!$("knowledgeGraph")) return;
   const nodes = graph.nodes || [];
   const edges = graph.edges || [];
   $("knowledgeGraph").innerHTML = nodes.length ? `
@@ -867,18 +878,42 @@ function renderKnowledgeGraph(graph) {
   ` : `<p class="empty-note">识别到更多术语后会显示依赖关系。</p>`;
 }
 
+function paperResourceBadge(paper) {
+  const status = paper.resourceStatus || (paper.pdfUrl ? "pdf" : (paper.abstract || paper.shortDesc ? "abstract" : "link"));
+  if (status === "pdf") return `<span class="resource-badge pdf">PDF</span>`;
+  if (status === "abstract") return `<span class="resource-badge abstract">摘要</span>`;
+  return `<span class="resource-badge link">来源</span>`;
+}
+
+function paperResourceAttrs(paper) {
+  const abstract = String(paper.abstract || paper.shortDesc || paper.readerText || "").slice(0, 1800);
+  return [
+    `data-start-paper="${escapeAttr(paper.title || "")}"`,
+    `data-paper-title="${escapeAttr(paper.title || "")}"`,
+    `data-paper-url="${escapeAttr(paper.url || "")}"`,
+    `data-paper-open-url="${escapeAttr(paper.openAccessUrl || "")}"`,
+    `data-paper-pdf="${escapeAttr(paper.pdfUrl || "")}"`,
+    `data-paper-abstract="${escapeAttr(abstract)}"`,
+    `data-reader-prompt="${escapeAttr(paper.readerText || `目标：阅读 ${paper.title || ""}\n\n${paper.shortDesc || paper.whyRelated || "下载 PDF 或粘贴摘要。"}`)}"`,
+  ].join(" ");
+}
+
 function renderNextPapers(papers) {
   $("nextPapers").innerHTML = papers.length ? papers.map((paper) => `
     <div class="paper-ref enhanced-paper">
-      <strong>${escapeHtml(paper.title || "")}</strong>
+      <div class="paper-ref-head">
+        <strong>${escapeHtml(paper.title || "")}</strong>
+        ${paperResourceBadge(paper)}
+      </div>
       <span>${escapeHtml([paper.authors, paper.year].filter(Boolean).join(" · "))}</span>
-      <p>${escapeHtml(paper.shortDesc || paper.whyRelated || "")}</p>
+      <p>${escapeHtml(paper.shortDesc || paper.learningHint || paper.whyRelated || "")}</p>
       <div class="paper-actions-row">
-        <button class="btn secondary small" data-start-paper="${escapeAttr(paper.title || "")}" data-reader-prompt="${escapeAttr(`学习目标：阅读 ${paper.title || ""}\n\n${paper.shortDesc || paper.whyRelated || "请粘贴论文摘要或上传 PDF 后开始分析。"}`)}">开始学习</button>
-        ${paper.url || paper.openAccessUrl ? `<a href="${escapeAttr(paper.openAccessUrl || paper.url)}" target="_blank" rel="noopener">查看来源</a>` : ""}
+        <button class="btn secondary small" ${paperResourceAttrs(paper)}>开始学习</button>
+        ${paper.pdfUrl ? `<a href="${escapeAttr(paper.pdfUrl)}" target="_blank" rel="noopener">PDF</a>` : ""}
+        ${paper.url || paper.openAccessUrl ? `<a href="${escapeAttr(paper.openAccessUrl || paper.url)}" target="_blank" rel="noopener">来源</a>` : ""}
       </div>
     </div>
-  `).join("") : `<p class="empty-note">暂时没有推荐论文，稍后可尝试联网补充。</p>`;
+  `).join("") : `<p class="empty-note">暂无推荐。试试联网补充或学习路径。</p>`;
 }
 
 async function markLearningMastery(term, mastered = true) {
@@ -902,7 +937,8 @@ async function markLearningMastery(term, mastered = true) {
 }
 
 async function searchMorePapers() {
-  const query = $("paperTitle").value.trim() || (_lastKnownTerms[0]?.term || "");
+  const termQuery = (_lastKnownTerms || []).slice(0, 4).map((term) => term.term).filter(Boolean).join(" ");
+  const query = [$("paperTitle").value.trim(), termQuery].filter(Boolean).join(" ") || (_lastKnownTerms[0]?.term || "");
   if (!query) return;
   const btn = $("btnSearchPapers");
   btn.disabled = true;
@@ -1139,19 +1175,30 @@ async function loadLearnPath(interest = "") {
 
     container.innerHTML = data.paths.map((path) => `
       <div class="path-card">
-        <h3>${escapeHtml(path.title)}</h3>
-        <p>${escapeHtml(path.description)}</p>
-        ${path.stages.map((stage) => `
+        <div class="path-card-header">
+          <div>
+            <h3>${escapeHtml(path.title)}</h3>
+            <p>${escapeHtml(path.description)}</p>
+          </div>
+          <span>${(path.stages || []).length} 个阶段</span>
+        </div>
+        ${(path.stages || []).map((stage, stageIndex) => `
           <div class="stage">
-            <div class="stage-name">${escapeHtml(stage.name)}</div>
+            <div class="stage-name"><span>${stageIndex + 1}</span>${escapeHtml(stage.name)}</div>
             <div class="path-paper-list">
               ${(stage.paperItems || (stage.papers || []).map((p) => ({ display: p, title: p, readerPrompt: "" }))).map((p) => `
                 <div class="path-paper-item">
                   <div>
                     <strong>${escapeHtml(p.title || p.display || "")}</strong>
-                    <span>${escapeHtml(p.meta || p.year || "")}</span>
+                    <span>${escapeHtml([p.authors, p.year || p.meta].filter(Boolean).join(" · "))}</span>
+                    <small>${escapeHtml(p.shortDesc || p.learningHint || "")}</small>
                   </div>
-                  <button class="btn secondary small" data-start-paper="${escapeAttr(p.title || p.display || "")}" data-reader-prompt="${escapeAttr(p.readerPrompt || "")}">开始学习</button>
+                  <div class="path-paper-actions">
+                    ${paperResourceBadge(p)}
+                    <button class="btn secondary small" ${paperResourceAttrs(p)}>开始学习</button>
+                    ${p.pdfUrl ? `<a href="${escapeAttr(p.pdfUrl)}" target="_blank" rel="noopener">PDF</a>` : ""}
+                    ${p.url || p.openAccessUrl ? `<a href="${escapeAttr(p.openAccessUrl || p.url)}" target="_blank" rel="noopener">来源</a>` : ""}
+                  </div>
                 </div>
               `).join("")}
             </div>
@@ -1255,14 +1302,70 @@ function switchTopTab(tabName) {
   if (btn) btn.click();
 }
 
-function startPaperFromPath(title, promptText = "") {
+async function startPaperFromPath(paper, button = null) {
+  const payload = typeof paper === "string" ? { title: paper, readerPrompt: "" } : (paper || {});
+  const title = payload.title || payload.display || "";
+  const originalText = button ? button.textContent : "";
   switchTopTab("reader");
   $("paperTitle").value = title || "";
-  $("paperText").value = promptText || `学习目标：阅读 ${title}\n\n请把论文摘要、引言或 PDF 文本粘贴到这里，再点击“开始分析”。`;
+  $("paperText").value = `载入：${title || "推荐论文"}`;
   $("analysisResults").hidden = true;
   $("learningDashboard").hidden = true;
+  setPaperLoadAnimation(true, `载入「${title || "推荐论文"}」`, "查找 PDF / 摘要 / 来源", 18);
   window.scrollTo({ top: 0, behavior: "smooth" });
-  addChatMessage(`已把「${escapeHtml(title)}」放到阅读器。找到论文摘要或上传 PDF 后，就可以开始学习了。`);
+  if (button) {
+    button.disabled = true;
+    button.textContent = "正在载入…";
+  }
+
+  try {
+    const resp = await fetch(`${API_BASE}/api/papers/load`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        url: payload.url || "",
+        openAccessUrl: payload.openAccessUrl || "",
+        pdfUrl: payload.pdfUrl || "",
+        abstract: payload.abstract || "",
+        shortDesc: payload.shortDesc || "",
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "论文资源载入失败");
+    setPaperLoadAnimation(true, "资源就绪", data.mode === "pdf_text" ? "载入 PDF 文本" : "载入摘要", 66);
+    const loadedPaper = data.paper || {};
+    const loadedTitle = loadedPaper.title || title;
+    const loadedText = data.text || payload.readerPrompt || "";
+    $("paperTitle").value = loadedTitle;
+    $("paperText").value = loadedText || `目标：阅读 ${loadedTitle}\n\n下载 PDF 或粘贴摘要。`;
+
+    const sourceUrl = loadedPaper.pdfUrl || loadedPaper.openAccessUrl || loadedPaper.url || "";
+    const sourceLink = sourceUrl ? `<br><a href="${escapeAttr(sourceUrl)}" target="_blank" rel="noopener">打开论文来源</a>` : "";
+    const modeText = data.mode === "pdf_text"
+      ? `PDF 已载入：${data.pageCount || 0} 页。`
+      : "摘要已载入。";
+    const warningText = (data.warnings || []).length ? `<br><small>${escapeHtml(data.warnings.join("；"))}</small>` : "";
+    addChatMessage(`${modeText}${sourceLink}${warningText}`);
+
+    if (loadedText && loadedText.length >= 50) {
+      setPaperLoadAnimation(true, "分析论文", "识别术语 / 摘要 / 翻译", 86);
+      await analyzePaper({ quiet: true, source: data.mode === "pdf_text" ? "paper-resource-pdf" : "paper-resource-abstract" });
+      setPaperLoadAnimation(false);
+    } else {
+      setPaperLoadAnimation(false);
+    }
+  } catch (err) {
+    $("paperText").value = payload.readerPrompt || `目标：阅读 ${title}\n\n载入失败：${err.message}\n\n下载 PDF 或粘贴摘要。`;
+    addChatMessage(`载入失败：${escapeHtml(err.message)}。下载 PDF 或粘贴摘要。`);
+    setPaperLoadAnimation(true, "载入失败", "下载 PDF 或粘贴摘要", 100);
+    setTimeout(() => setPaperLoadAnimation(false), 2600);
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = originalText || "开始学习";
+    }
+  }
 }
 
 async function loadAcademicExplain(termName) {
@@ -1492,7 +1595,14 @@ document.addEventListener("click", (event) => {
   const startPaperBtn = target?.closest("[data-start-paper]");
   if (startPaperBtn) {
     event.preventDefault();
-    startPaperFromPath(startPaperBtn.dataset.startPaper || "", startPaperBtn.dataset.readerPrompt || "");
+    startPaperFromPath({
+      title: startPaperBtn.dataset.paperTitle || startPaperBtn.dataset.startPaper || "",
+      url: startPaperBtn.dataset.paperUrl || "",
+      openAccessUrl: startPaperBtn.dataset.paperOpenUrl || "",
+      pdfUrl: startPaperBtn.dataset.paperPdf || "",
+      abstract: startPaperBtn.dataset.paperAbstract || "",
+      readerPrompt: startPaperBtn.dataset.readerPrompt || "",
+    }, startPaperBtn);
     return;
   }
   const el = target?.closest("[data-open-term]");
@@ -1551,7 +1661,7 @@ $("btnAnalyzeCase").addEventListener("click", async () => {
         '<p style="font-size:13px;color:var(--muted)">' + escapeHtml(item.recommendation || "") + '</p>' +
         '<div style="margin-top:6px"><small>📄 入门：</small> ' + (item.startPapers || []).map(p => '<span class="chip" style="font-size:11px">' + escapeHtml(p) + '</span>').join(" ") + '</div>' +
         '<div style="margin-top:4px"><small>📄 进阶：</small> ' + (item.advancedPapers || []).map(p => '<span class="chip" style="font-size:11px">' + escapeHtml(p) + '</span>').join(" ") + '</div></div>'
-      ).join("\n") : '<p>大叔建议再详细描述一下案例っす</p>') + '</div>';
+      ).join("\n") : '<p>补充案例细节。</p>') + '</div>';
 
     addChatMessage("🔍 分析完了っす！涉及 " + fields.length + " 个技术领域，推荐了 " + lp.length + " 个学习方向。");
   } catch (err) {

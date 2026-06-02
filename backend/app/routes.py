@@ -13,9 +13,10 @@ from .models import (
     EvidenceRequest,
     LearningSessionRequest,
     MasteryUpdateRequest,
+    PaperLoadRequest,
     PaperAnalysis,
 )
-from .papers import evidence_snippets, search_papers
+from .papers import evidence_snippets, load_paper_for_reader, search_papers
 from .pdf import extract_pdf_pages
 from .progress import create_learning_session, get_learning_profile, update_mastery
 from .terms import get_term, list_terms_by_category, related_papers_for_term, serialize_term, term_kb, terms, terms_index
@@ -246,6 +247,13 @@ async def learning_mastery(data: MasteryUpdateRequest):
 @router.get("/api/papers/search")
 async def paper_search(query: str = "", limit: int = 8, external: bool = True):
     return search_papers(query, limit=limit, external=external)
+
+
+@router.post("/api/papers/load")
+async def paper_load(data: PaperLoadRequest):
+    if not data.title.strip() and not data.url.strip() and not data.pdfUrl.strip() and not data.abstract.strip():
+        raise HTTPException(status_code=400, detail="至少需要提供论文标题、链接、PDF 或摘要")
+    return load_paper_for_reader(data.model_dump())
 
 
 @router.post("/api/papers/evidence")

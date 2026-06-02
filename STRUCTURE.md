@@ -11,9 +11,9 @@ AI-From-Zero/
 │   │   ├── llm.py           # OpenAI-compatible 调用
 │   │   ├── main.py
 │   │   ├── models.py
-│   │   ├── papers.py        # 论文搜索、元数据适配、证据片段抽取
+│   │   ├── papers.py        # 论文搜索、资源载入、元数据适配、证据片段抽取
 │   │   ├── pdf.py           # page-aware PDF 提取
-│   │   ├── progress.py      # 本地学习画像、阅读会话、复习自测
+│   │   ├── progress.py      # 本地学习画像、阅读会话、下一篇论文推荐
 │   │   ├── routes.py
 │   │   └── terms.py
 │   ├── requirements.txt
@@ -32,6 +32,8 @@ AI-From-Zero/
 │   ├── check_api_smoke.py
 │   ├── check_term_kb.py
 │   ├── expand_term_kb_bilingual.py
+│   ├── fill_term_placeholders.py
+│   ├── openclaw_ai_from_zero.py
 │   ├── pdf2text.py
 │   └── repair_term_kb.py
 ├── .env.example
