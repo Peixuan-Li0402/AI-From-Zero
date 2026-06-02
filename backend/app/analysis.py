@@ -3,6 +3,7 @@ import re
 
 from .config import settings
 from .llm import call_kimi
+from .pdf import analyze_text_structure
 from .terms import extract_terms_from_text, is_known_term, serialize_term
 
 
@@ -86,6 +87,7 @@ def build_analysis_response(text: str, title: str = "") -> dict:
         "unknownTerms": unknown_terms,
         "analysis": llm_result,
         "translation": llm_result.get("translation", ""),
+        "paperStructure": analyze_text_structure(text),
         "llmStatus": llm_result.get("llmStatus", "ok"),
         "llmMessage": llm_result.get("llmMessage", ""),
     }
@@ -188,6 +190,7 @@ def build_pdf_analysis_response(text: str, title: str = "", truncated: bool = Fa
         "unknownTerms": unknown_terms,
         "analysis": llm_result,
         "translation": llm_result.get("translation", ""),
+        "paperStructure": analyze_text_structure(text),
         "llmStatus": llm_result.get("llmStatus", "ok"),
         "llmMessage": llm_result.get("llmMessage", ""),
     }

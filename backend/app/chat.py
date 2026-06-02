@@ -27,6 +27,15 @@ def local_chat_response(request: ChatRequest) -> dict:
             f"当前术语是「{current['term']}」。{current.get('explanation', '')}\n\n"
             f"前置知识：{', '.join(current.get('prerequisiteTerms', []) or ['暂无'])}。"
         )
+    elif "概念链" in text or "chain" in lower or "关联" in text or "关系" in text:
+        focus = names[:3] or ["Transformer", "Attention", "Neural Network"]
+        answer = (
+            "当前是本地伴学模式，大叔先帮你把概念关系串起来：\n"
+            f"先补基础：{focus[0]}\n"
+            f"再看核心：{focus[1] if len(focus) > 1 else focus[0]}\n"
+            f"最后延伸：{focus[-1]}\n\n"
+            "建议你先点开这些高亮术语，看完概念链条后再回到论文方法段。"
+        )
     elif "下一步" in text or "学习" in text or "learn" in lower:
         answer = "本地模式下，大叔建议先把这几个术语串起来看：" + "、".join(names[:8]) + "。配置模型后，我可以按这篇论文给你拆成更具体的学习路线。"
     elif "摘要" in text or "总结" in text or "summary" in lower:
@@ -44,7 +53,7 @@ def local_chat_response(request: ChatRequest) -> dict:
 
 
 def chat_with_context(request: ChatRequest) -> dict:
-    if not settings.llm_configured:
+    if request.localOnly or not settings.llm_configured:
         return local_chat_response(request)
 
     history = "\n".join(
@@ -63,6 +72,11 @@ def chat_with_context(request: ChatRequest) -> dict:
             "prerequisiteTerms": current_term.get("prerequisiteTerms", []),
             "relatedTerms": current_term.get("relatedTerms", []),
         }, ensure_ascii=False)
+    evidence_text = "\n".join(
+        f"- {str(item.get('text', ''))[:800]}"
+        for item in request.evidenceSnippets[:5]
+        if isinstance(item, dict) and item.get("text")
+    )
 
     prompt = f"""你是 AI-From-Zero 的右侧 AI 伴学助手。回答要中文、清楚、适合 AI 入门学习者。
 你可以结合当前论文、术语库和已掌握术语来回答。不要编造不存在的论文细节；不确定时说明需要更多上下文。
@@ -78,6 +92,9 @@ def chat_with_context(request: ChatRequest) -> dict:
 
 当前打开术语：
 {current_term_text or '无'}
+
+证据片段（如果有，请优先基于这些片段回答）：
+{evidence_text or '无'}
 
 已掌握术语：
 {', '.join(request.masteredTerms[:30])}

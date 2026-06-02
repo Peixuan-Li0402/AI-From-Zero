@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PaperAnalysis(BaseModel):
@@ -22,7 +22,29 @@ class ChatRequest(BaseModel):
     message: str
     paperText: str = ""
     paperSummary: str = ""
-    knownTerms: list[dict] = []
+    knownTerms: list[dict] = Field(default_factory=list)
     currentTerm: str = ""
-    masteredTerms: list[str] = []
-    history: list[dict] = []
+    masteredTerms: list[str] = Field(default_factory=list)
+    history: list[dict] = Field(default_factory=list)
+    evidenceSnippets: list[dict] = Field(default_factory=list)
+    localOnly: bool = False
+
+
+class LearningSessionRequest(BaseModel):
+    title: str = ""
+    source: str = "text"
+    paperText: str = ""
+    paperSummary: str = ""
+    knownTerms: list[dict] = Field(default_factory=list)
+    analysis: dict = Field(default_factory=dict)
+
+
+class MasteryUpdateRequest(BaseModel):
+    term: str
+    mastered: bool = True
+
+
+class EvidenceRequest(BaseModel):
+    question: str = ""
+    paperText: str = ""
+    knownTerms: list[dict] = Field(default_factory=list)

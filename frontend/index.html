@@ -92,6 +92,46 @@
           </div>
         </div>
       </div>
+
+      <div id="learningDashboard" class="learning-dashboard" hidden>
+        <div class="dashboard-header">
+          <div>
+            <h3>AI 学习舱</h3>
+            <p>先读原文，再把关键概念沉淀成学习路线。</p>
+          </div>
+          <span id="dashboardStatus" class="file-status">正在生成学习路线…</span>
+        </div>
+        <div id="profilePanel" class="dashboard-strip"></div>
+        <div class="dashboard-grid">
+          <section class="dashboard-panel route-panel">
+            <h4>新手版阅读路线</h4>
+            <div id="readingRoute"></div>
+          </section>
+          <section class="dashboard-panel">
+            <h4>论文结构</h4>
+            <div id="paperStructurePanel"></div>
+          </section>
+          <section class="dashboard-panel">
+            <h4>概念笔记</h4>
+            <div id="conceptNotes"></div>
+          </section>
+          <section class="dashboard-panel">
+            <h4>概念链条</h4>
+            <div id="conceptChains"></div>
+          </section>
+          <section class="dashboard-panel">
+            <h4>术语知识图谱</h4>
+            <div id="knowledgeGraph"></div>
+          </section>
+        </div>
+        <section class="dashboard-panel next-paper-panel">
+          <div class="panel-title-row">
+            <h4>下一篇推荐论文</h4>
+            <button id="btnSearchPapers" class="btn secondary small">联网补充论文</button>
+          </div>
+          <div id="nextPapers"></div>
+        </section>
+      </div>
     </div>
   </div>
 
@@ -166,6 +206,11 @@
       <small>大叔随时待机っす</small>
     </div>
     <button id="clearChat" class="icon-btn" title="清空对话">🗑️</button>
+  </div>
+  <div class="companion-actions">
+    <button class="chip small-chip" data-chat-prompt="请按新手版路线带我读这篇论文">带我读</button>
+    <button class="chip small-chip" data-chat-prompt="请围绕这篇论文的关键术语整理概念链条">概念链</button>
+    <button class="chip small-chip" data-chat-prompt="我下一步应该补哪些知识？">下一步</button>
   </div>
   <div class="hoshino-messages" id="chatMessages">
     <div class="msg msg-hoshino">
@@ -511,7 +556,7 @@ async function analyzePdfFile() {
     const extractedText = data.text || "";
     $("paperTitle").value = file.name.replace(/\.pdf$/i, "");
     $("paperText").value = extractedText;
-    renderAnalysis(data, extractedText);
+    renderAnalysis(data, extractedText, "pdf");
     rendered = true;
     const pageText = data.pageCount ? `${data.pageCount} 页，` : "";
     setPdfStatus(`读取完成，${pageText}提取 ${extractedText.length} 个字符`, "ready");
@@ -533,14 +578,18 @@ $("btnAnalyzePdf").addEventListener("click", analyzePdfFile);
 let _lastRawText = "";
 let _lastKnownTerms = [];
 let _lastTranslation = "";
+let _lastLearningSession = null;
+let _lastEvidenceSnippets = [];
+let _lastPaperStructure = {};
 
-function renderAnalysis(data, rawText) {
+function renderAnalysis(data, rawText, source = "text") {
   const knownTerms = data.knownTerms || [];
   const analysis = data.analysis || {};
   const translation = data.translation || "";
   _lastRawText = rawText;
   _lastKnownTerms = knownTerms;
   _lastTranslation = translation || "";
+  _lastPaperStructure = data.paperStructure || {};
   knownTerms.forEach(cacheTermDetail);
 
   // 摘要
@@ -589,6 +638,7 @@ function renderAnalysis(data, rawText) {
 
   // 右侧聊天告知
   $("termCount").textContent = `${knownTerms.length} 个术语`;
+  refreshLearningDashboard(data, rawText, source);
 }
 
 function switchReaderLang(lang) {
@@ -682,6 +732,194 @@ function renderTermSidebar(knownTerms) {
   container.innerHTML = renderGroup(unmasteredList, "📌 待学习") + renderGroup(masteredList, "✅ 已掌握");
 }
 
+async function refreshLearningDashboard(data, rawText, source = "text") {
+  const dashboard = $("learningDashboard");
+  if (!dashboard) return;
+  dashboard.hidden = false;
+  $("dashboardStatus").textContent = "正在生成学习路线…";
+  $("dashboardStatus").className = "file-status loading";
+  try {
+    const analysis = data.analysis || {};
+    const resp = await fetch(`${API_BASE}/api/learning/session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: $("paperTitle").value.trim() || "未命名论文",
+        source,
+        paperText: String(rawText || "").slice(0, 50000),
+        paperSummary: analysis.summary || $("paperSummary").textContent || "",
+        knownTerms: data.knownTerms || [],
+        analysis,
+      }),
+    });
+    const payload = await resp.json();
+    if (!resp.ok) throw new Error(payload.detail || "学习驾驶舱生成失败");
+    _lastLearningSession = payload;
+    renderLearningDashboard(payload);
+    $("dashboardStatus").textContent = "已沉淀为学习记录";
+    $("dashboardStatus").className = "file-status ready";
+  } catch (err) {
+    $("dashboardStatus").textContent = `学习驾驶舱暂不可用：${err.message}`;
+    $("dashboardStatus").className = "file-status error";
+  }
+}
+
+function renderLearningDashboard(payload) {
+  renderProfilePanel(payload.profile || {});
+  renderReadingRoute(payload.readingRoute || []);
+  renderPaperStructure(_lastPaperStructure || {});
+  renderConceptNotes(payload.conceptNotes || []);
+  renderConceptChains(payload.conceptChains || []);
+  renderKnowledgeGraph(payload.knowledgeGraph || {});
+  renderNextPapers(payload.nextPapers || []);
+}
+
+function renderPaperStructure(structure) {
+  const sections = structure.sections || [];
+  const citations = structure.citations || [];
+  const references = structure.references || [];
+  const anchors = structure.readingAnchors || [];
+  $("paperStructurePanel").innerHTML = `
+    ${anchors.length ? `<div class="structure-anchors">
+      ${anchors.map((anchor) => `<span class="${anchor.available ? "available" : ""}">${escapeHtml(anchor.label)}</span>`).join("")}
+    </div>` : ""}
+    ${sections.length ? `<div class="structure-list">
+      ${sections.slice(0, 7).map((section) => `
+        <div class="structure-item">
+          <strong>${escapeHtml(section.title || section.type || "")}</strong>
+          <p>${escapeHtml(section.textPreview || "").slice(0, 130)}</p>
+        </div>
+      `).join("")}
+    </div>` : `<p class="empty-note">暂时没有识别到清晰章节，仍可按摘要、术语、方法、实验的顺序阅读。</p>`}
+    <div class="structure-meta">
+      <span>引用标记 ${citations.length}</span>
+      <span>参考文献 ${references.length}</span>
+    </div>
+  `;
+}
+
+function renderProfilePanel(profile) {
+  $("profilePanel").innerHTML = `
+    <div class="profile-metric"><strong>${profile.sessionsTotal || 0}</strong><span>阅读记录</span></div>
+    <div class="profile-metric"><strong>${profile.termsSeen || 0}</strong><span>见过术语</span></div>
+    <div class="profile-metric"><strong>${profile.termsMastered || 0}</strong><span>已掌握</span></div>
+    <div class="profile-metric"><strong>${profile.completionRate || 0}%</strong><span>掌握率</span></div>
+    <div class="profile-weak">
+      <span>薄弱方向</span>
+      ${(profile.weakAreas || []).length
+        ? profile.weakAreas.map((item) => `<b>${escapeHtml(item.category)}</b>`).join("")
+        : "<b>等待更多阅读记录</b>"}
+    </div>
+  `;
+}
+
+function renderReadingRoute(route) {
+  $("readingRoute").innerHTML = route.length ? route.map((step) => `
+    <div class="route-step">
+      <strong>${escapeHtml(step.title)}</strong>
+      <p>${escapeHtml(step.goal || "")}</p>
+      <small>${escapeHtml(step.action || "")}</small>
+      ${(step.terms || []).length ? `<div class="mini-term-row">${step.terms.map((term) => `<span data-open-term="${escapeAttr(term)}">${escapeHtml(term)}</span>`).join("")}</div>` : ""}
+    </div>
+  `).join("") : `<p class="empty-note">先完成一次论文分析，就会生成阅读路线。</p>`;
+}
+
+function renderConceptNotes(notes) {
+  $("conceptNotes").innerHTML = notes.length ? notes.map((note) => `
+    <div class="concept-note-card">
+      <div>
+        <strong data-open-term="${escapeAttr(note.term)}">${escapeHtml(note.term)}</strong>
+        <span class="term-diff diff-${note.difficulty || 3}">Lv.${note.difficulty || 3}</span>
+      </div>
+      <p>${escapeHtml(note.oneLine || "")}</p>
+      <small>${escapeHtml(note.learningFocus || "")}</small>
+      <small>${escapeHtml(note.paperFocus || "")}</small>
+      <button class="btn secondary small" data-master-term="${escapeAttr(note.term)}">标记掌握</button>
+    </div>
+  `).join("") : `<p class="empty-note">完成一次论文分析后，会出现适合继续学习的概念笔记。</p>`;
+}
+
+function renderConceptChains(chains) {
+  $("conceptChains").innerHTML = chains.length ? chains.map((chain) => `
+    <div class="concept-chain-card">
+      <strong data-open-term="${escapeAttr(chain.term)}">${escapeHtml(chain.term)}</strong>
+      <div class="concept-chain">
+        ${(chain.nodes || []).map((node) => `
+          <span class="chain-node ${escapeAttr(node.role || "")}" data-open-term="${escapeAttr(node.term)}">
+            <small>${escapeHtml(node.label || "")}</small>${escapeHtml(node.term)}
+          </span>
+        `).join('<span class="chain-arrow">→</span>')}
+      </div>
+    </div>
+  `).join("") : `<p class="empty-note">识别到带前置/相关关系的术语后，会显示概念链条。</p>`;
+}
+
+function renderKnowledgeGraph(graph) {
+  const nodes = graph.nodes || [];
+  const edges = graph.edges || [];
+  $("knowledgeGraph").innerHTML = nodes.length ? `
+    <div class="graph-nodes">
+      ${nodes.map((node) => `<span class="graph-node diff-${node.difficulty || 3}" data-open-term="${escapeAttr(node.id)}">${escapeHtml(node.label)}</span>`).join("")}
+    </div>
+    <div class="graph-edges">
+      ${edges.slice(0, 10).map((edge) => `<div>${escapeHtml(edge.source)} → ${escapeHtml(edge.target)} <small>${escapeHtml(edge.type)}</small></div>`).join("")}
+    </div>
+  ` : `<p class="empty-note">识别到更多术语后会显示依赖关系。</p>`;
+}
+
+function renderNextPapers(papers) {
+  $("nextPapers").innerHTML = papers.length ? papers.map((paper) => `
+    <div class="paper-ref enhanced-paper">
+      <strong>${escapeHtml(paper.title || "")}</strong>
+      <span>${escapeHtml([paper.authors, paper.year].filter(Boolean).join(" · "))}</span>
+      <p>${escapeHtml(paper.shortDesc || paper.whyRelated || "")}</p>
+      <div class="paper-actions-row">
+        <button class="btn secondary small" data-start-paper="${escapeAttr(paper.title || "")}" data-reader-prompt="${escapeAttr(`学习目标：阅读 ${paper.title || ""}\n\n${paper.shortDesc || paper.whyRelated || "请粘贴论文摘要或上传 PDF 后开始分析。"}`)}">开始学习</button>
+        ${paper.url || paper.openAccessUrl ? `<a href="${escapeAttr(paper.openAccessUrl || paper.url)}" target="_blank" rel="noopener">查看来源</a>` : ""}
+      </div>
+    </div>
+  `).join("") : `<p class="empty-note">暂时没有推荐论文，稍后可尝试联网补充。</p>`;
+}
+
+async function markLearningMastery(term, mastered = true) {
+  const list = getMastered();
+  const exists = list.includes(term);
+  if (mastered && !exists) list.push(term);
+  if (!mastered && exists) list.splice(list.indexOf(term), 1);
+  setMastered(list);
+  try {
+    const resp = await fetch(`${API_BASE}/api/learning/mastery`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ term, mastered }),
+    });
+    const profile = await resp.json();
+    if (resp.ok) renderProfilePanel(profile);
+  } catch (_) {}
+  const activeLang = document.querySelector(".reader-tab.active")?.dataset.lang || "original";
+  if (_lastRawText) switchReaderLang(activeLang);
+  renderTermSidebar(_lastKnownTerms);
+}
+
+async function searchMorePapers() {
+  const query = $("paperTitle").value.trim() || (_lastKnownTerms[0]?.term || "");
+  if (!query) return;
+  const btn = $("btnSearchPapers");
+  btn.disabled = true;
+  btn.textContent = "正在搜索…";
+  try {
+    const resp = await fetch(`${API_BASE}/api/papers/search?query=${encodeURIComponent(query)}&limit=8&external=true`);
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "论文搜索失败");
+    renderNextPapers(data.papers || []);
+  } catch (err) {
+    $("nextPapers").innerHTML = `<p class="empty-note">联网补充失败：${escapeHtml(err.message)}</p>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "联网补充论文";
+  }
+}
+
 // ═════════════════════════════════
 //  术语详情弹窗
 // ═════════════════════════════════
@@ -741,6 +979,25 @@ function renderAcademicExplainHtml(detail) {
     '<div style="font-size:14px;line-height:1.9;white-space:pre-wrap;color:var(--ink)">' + escapeHtml(detail) + '</div></div>';
 }
 
+function renderTermConceptChain(data) {
+  const chain = data.conceptChain || {};
+  const nodes = chain.nodes || [];
+  if (!nodes.length) return "";
+  return `
+    <div class="modal-section">
+      <h4>概念链条</h4>
+      <div class="concept-chain modal-chain">
+        ${nodes.map((node) => `
+          <span class="chain-node ${escapeAttr(node.role || "")}" data-open-term="${escapeAttr(node.term)}">
+            <small>${escapeHtml(node.label || "")}</small>${escapeHtml(node.term)}
+          </span>
+        `).join('<span class="chain-arrow">→</span>')}
+      </div>
+      ${chain.hint ? `<p class="empty-note">${escapeHtml(chain.hint)}</p>` : ""}
+    </div>
+  `;
+}
+
 function wireTermModalActions(termName) {
   document.querySelector(".mastery-btn")?.addEventListener("click", function () {
     const term = this.dataset.term;
@@ -751,6 +1008,7 @@ function wireTermModalActions(termName) {
     const activeLang = document.querySelector(".reader-tab.active")?.dataset.lang || "original";
     if (_lastRawText) switchReaderLang(activeLang);
     renderTermSidebar(_lastKnownTerms);
+    markLearningMastery(term, nowMastered);
     addChatMessage(`大叔记下了：「${term}」${nowMastered ? "✅ 学会了！下次不解释了" : "📖 取消了已掌握标记"}`);
   });
 
@@ -805,6 +1063,7 @@ function renderTermDetail(data) {
       <p>${escapeHtml(data.explanationZh || data.explanation)}</p>
       ${data.explanationEn ? `<p class="english-note">${escapeHtml(data.explanationEn)}</p>` : ""}
     </div>
+    ${renderTermConceptChain(data)}
     ${data.hoshinoNote ? `
     <div class="modal-section hoshino-note-section">
       <h4>🐾 星野大叔说</h4>
@@ -885,9 +1144,17 @@ async function loadLearnPath(interest = "") {
         ${path.stages.map((stage) => `
           <div class="stage">
             <div class="stage-name">${escapeHtml(stage.name)}</div>
-            <ul>
-              ${stage.papers.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}
-            </ul>
+            <div class="path-paper-list">
+              ${(stage.paperItems || (stage.papers || []).map((p) => ({ display: p, title: p, readerPrompt: "" }))).map((p) => `
+                <div class="path-paper-item">
+                  <div>
+                    <strong>${escapeHtml(p.title || p.display || "")}</strong>
+                    <span>${escapeHtml(p.meta || p.year || "")}</span>
+                  </div>
+                  <button class="btn secondary small" data-start-paper="${escapeAttr(p.title || p.display || "")}" data-reader-prompt="${escapeAttr(p.readerPrompt || "")}">开始学习</button>
+                </div>
+              `).join("")}
+            </div>
           </div>
         `).join("")}
       </div>
@@ -983,6 +1250,21 @@ async function loadDetailedExplain(termName) {
   }
 }
 
+function switchTopTab(tabName) {
+  const btn = document.querySelector(`[data-tab="${tabName}"]`);
+  if (btn) btn.click();
+}
+
+function startPaperFromPath(title, promptText = "") {
+  switchTopTab("reader");
+  $("paperTitle").value = title || "";
+  $("paperText").value = promptText || `学习目标：阅读 ${title}\n\n请把论文摘要、引言或 PDF 文本粘贴到这里，再点击“开始分析”。`;
+  $("analysisResults").hidden = true;
+  $("learningDashboard").hidden = true;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  addChatMessage(`已把「${escapeHtml(title)}」放到阅读器。找到论文摘要或上传 PDF 后，就可以开始学习了。`);
+}
+
 async function loadAcademicExplain(termName) {
   const key = termCacheKey(termName);
   const cached = termAcademicCache.get(key);
@@ -1076,6 +1358,7 @@ async function sendChat() {
   $("btnChatSend").disabled = true;
 
   try {
+    const evidence = await loadEvidenceForQuestion(text);
     const resp = await fetch(`${API_BASE}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1087,6 +1370,7 @@ async function sendChat() {
         currentTerm: _currentPaperTerm || "",
         masteredTerms: getMastered(),
         history: _chatHistory.slice(-8),
+        evidenceSnippets: evidence,
       }),
     });
     const data = await resp.json();
@@ -1100,6 +1384,26 @@ async function sendChat() {
     addChatMessage(`伴学接口出错了：${escapeHtml(err.message)}<br>先试试问一个已高亮的术语，或者检查模型配置。`);
   } finally {
     $("btnChatSend").disabled = false;
+  }
+}
+
+async function loadEvidenceForQuestion(question) {
+  if (!_lastRawText || _lastRawText.length < 50) return [];
+  try {
+    const resp = await fetch(`${API_BASE}/api/papers/evidence`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question,
+        paperText: _lastRawText.slice(0, 60000),
+        knownTerms: _lastKnownTerms,
+      }),
+    });
+    const data = await resp.json();
+    _lastEvidenceSnippets = data.snippets || [];
+    return _lastEvidenceSnippets;
+  } catch (_) {
+    return [];
   }
 }
 
@@ -1164,6 +1468,33 @@ function buildTermMatchers(terms) {
 
 document.addEventListener("click", (event) => {
   const target = event.target instanceof Element ? event.target : event.target.parentElement;
+  const masterBtn = target?.closest("[data-master-term]");
+  if (masterBtn) {
+    event.preventDefault();
+    const term = masterBtn.dataset.masterTerm || "";
+    markLearningMastery(term, true);
+    masterBtn.textContent = "已标记";
+    masterBtn.disabled = true;
+    return;
+  }
+  if (target?.closest("#btnSearchPapers")) {
+    event.preventDefault();
+    searchMorePapers();
+    return;
+  }
+  const promptBtn = target?.closest("[data-chat-prompt]");
+  if (promptBtn) {
+    event.preventDefault();
+    $("chatInput").value = promptBtn.dataset.chatPrompt || "";
+    sendChat();
+    return;
+  }
+  const startPaperBtn = target?.closest("[data-start-paper]");
+  if (startPaperBtn) {
+    event.preventDefault();
+    startPaperFromPath(startPaperBtn.dataset.startPaper || "", startPaperBtn.dataset.readerPrompt || "");
+    return;
+  }
   const el = target?.closest("[data-open-term]");
   if (!el) return;
   showTermDetail(el.dataset.openTerm || el.textContent.trim());

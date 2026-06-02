@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app import config as config_module  # noqa: E402
+from app import progress as progress_module  # noqa: E402
 from app.config import settings  # noqa: E402
 from app.main import create_app  # noqa: E402
 
@@ -97,12 +98,15 @@ def test_text_analysis_degrades_without_key(client):
     assert data["llmStatus"] == "missing_key"
     assert data["knownTerms"]
     assert data["analysis"]["summary"]
+    assert "paperStructure" in data
 
 
 def test_terms_and_related_papers(client):
     term_resp = client.get("/api/terms/Transformer")
     assert term_resp.status_code == 200
-    assert term_resp.json()["term"] == "Transformer"
+    term_data = term_resp.json()
+    assert term_data["term"] == "Transformer"
+    assert term_data["conceptChain"]["nodes"]
 
     papers_resp = client.post("/api/terms/Transformer/papers")
     assert papers_resp.status_code == 200
@@ -119,7 +123,9 @@ def test_explain_endpoints_degrade_without_key(client):
 def test_learn_path_and_case_study(client):
     learn = client.post("/api/learn-path", json={"interest": "llm"})
     assert learn.status_code == 200
-    assert learn.json()["paths"]
+    learn_data = learn.json()
+    assert learn_data["paths"]
+    assert learn_data["paths"][0]["stages"][0]["paperItems"][0]["readerPrompt"]
 
     case = client.post("/api/case-study", json={"text": "这个系统使用 CNN、Transformer 和强化学习做感知与决策。"})
     assert case.status_code == 200
@@ -138,6 +144,7 @@ def test_pdf_analysis_and_failures(client):
     assert len(data["text"]) > 10000
     assert data["pageCount"] == 1
     assert data["pages"]
+    assert "paperStructure" in data
 
     bad = client.post("/api/analyze-pdf", files={"file": ("bad.txt", b"not a pdf", "text/plain")})
     assert bad.status_code == 400
@@ -161,3 +168,50 @@ def test_chat_degrades_without_key(client):
     data = resp.json()
     assert data["llmStatus"] == "missing_key"
     assert data["reply"]
+
+
+def test_learning_loop_endpoints(client, tmp_path, monkeypatch):
+    monkeypatch.setattr(progress_module, "PROGRESS_PATH", tmp_path / "learning_progress.json")
+    analysis = client.post("/api/analyze", json={
+        "title": "Attention Is All You Need",
+        "text": "Transformer self-attention encoder decoder neural network model analysis text. " * 8,
+    })
+    assert analysis.status_code == 200
+    known_terms = analysis.json()["knownTerms"]
+
+    session = client.post("/api/learning/session", json={
+        "title": "Attention Is All You Need",
+        "source": "text",
+        "paperText": "Transformer self-attention encoder decoder neural network model analysis text.",
+        "paperSummary": "A paper about the Transformer architecture.",
+        "knownTerms": known_terms,
+        "analysis": analysis.json()["analysis"],
+    })
+    assert session.status_code == 200
+    payload = session.json()
+    assert payload["session"]["termCount"] > 0
+    assert payload["readingRoute"]
+    assert payload["conceptNotes"]
+    assert payload["conceptChains"]
+    assert payload["knowledgeGraph"]["nodes"]
+
+    mastery = client.post("/api/learning/mastery", json={"term": known_terms[0]["term"], "mastered": True})
+    assert mastery.status_code == 200
+    assert mastery.json()["termsMastered"] >= 1
+
+
+def test_paper_search_and_evidence(client):
+    search = client.get("/api/papers/search", params={"query": "Transformer", "limit": 3, "external": "false"})
+    assert search.status_code == 200
+    assert search.json()["papers"]
+
+    evidence = client.post("/api/papers/evidence", json={
+        "question": "What is self-attention used for?",
+        "paperText": (
+            "The Transformer uses self-attention to connect tokens in a sequence. "
+            "The encoder and decoder rely on attention mechanisms for sequence transduction."
+        ),
+        "knownTerms": [{"term": "self-attention"}, {"term": "Transformer"}],
+    })
+    assert evidence.status_code == 200
+    assert evidence.json()["snippets"]

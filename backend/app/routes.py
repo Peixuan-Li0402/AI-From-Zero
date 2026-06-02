@@ -6,8 +6,18 @@ from .chat import chat_with_context
 from .config import FRONTEND_DIR, PROVIDER_PRESETS, provider_by_id, save_env_updates, settings
 from .learning import get_learning_paths
 from .llm import test_llm_config
-from .models import ChatRequest, ConfigSaveRequest, ConfigTestRequest, PaperAnalysis
+from .models import (
+    ChatRequest,
+    ConfigSaveRequest,
+    ConfigTestRequest,
+    EvidenceRequest,
+    LearningSessionRequest,
+    MasteryUpdateRequest,
+    PaperAnalysis,
+)
+from .papers import evidence_snippets, search_papers
 from .pdf import extract_pdf_pages
+from .progress import create_learning_session, get_learning_profile, update_mastery
 from .terms import get_term, list_terms_by_category, related_papers_for_term, serialize_term, term_kb, terms, terms_index
 
 
@@ -100,7 +110,7 @@ async def get_term_detail(term_name: str):
     info = get_term(term_name)
     if not info:
         raise HTTPException(status_code=404, detail=f"术语 '{term_name}' 不在知识库中")
-    return info
+    return serialize_term(info)
 
 
 @router.post("/api/terms/{term_name}/papers")
@@ -215,6 +225,36 @@ async def chat(request: ChatRequest):
     return chat_with_context(request)
 
 
+@router.get("/api/learning/profile")
+async def learning_profile():
+    return get_learning_profile()
+
+
+@router.post("/api/learning/session")
+async def learning_session(data: LearningSessionRequest):
+    return create_learning_session(data)
+
+
+@router.post("/api/learning/mastery")
+async def learning_mastery(data: MasteryUpdateRequest):
+    try:
+        return update_mastery(data.term, data.mastered)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/api/papers/search")
+async def paper_search(query: str = "", limit: int = 8, external: bool = True):
+    return search_papers(query, limit=limit, external=external)
+
+
+@router.post("/api/papers/evidence")
+async def paper_evidence(data: EvidenceRequest):
+    if not data.paperText.strip():
+        raise HTTPException(status_code=400, detail="paperText is required")
+    return evidence_snippets(data.question, data.paperText, data.knownTerms)
+
+
 @router.post("/api/analyze-pdf")
 async def analyze_pdf(file: UploadFile = File(...)):
     filename = file.filename or ""
@@ -234,6 +274,7 @@ async def analyze_pdf(file: UploadFile = File(...)):
             "textLength": 0,
             "truncated": False,
             "extractionWarnings": [],
+            "paperStructure": {},
             "knownTerms": [],
             "unknownTerms": [],
             "analysis": {},
@@ -250,6 +291,7 @@ async def analyze_pdf(file: UploadFile = File(...)):
             "textLength": extracted.get("textLength", 0),
             "truncated": False,
             "extractionWarnings": extracted.get("warnings", []),
+            "paperStructure": extracted.get("structure", {}),
             "knownTerms": [],
             "unknownTerms": [],
             "analysis": {},
@@ -265,6 +307,7 @@ async def analyze_pdf(file: UploadFile = File(...)):
     response["textLength"] = extracted.get("textLength", len(text))
     response["truncated"] = truncated
     response["extractionWarnings"] = extracted.get("warnings", [])
+    response["paperStructure"] = extracted.get("structure", response.get("paperStructure", {}))
     if truncated:
         response["extractionWarnings"].append(
             f"PDF 已完整提取，但 LLM 分析只使用前 {PDF_LLM_CHAR_LIMIT} 个字符；阅读区展示全文。"

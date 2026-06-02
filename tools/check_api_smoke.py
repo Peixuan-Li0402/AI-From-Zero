@@ -31,8 +31,28 @@ def main() -> int:
         learn = client.post(f"{args.base_url}/api/learn-path", json={"interest": "llm"})
         checks.append(("learn-path", learn.status_code == 200 and learn.json().get("paths")))
 
-        chat = client.post(f"{args.base_url}/api/chat", json={"message": "解释 Transformer", "knownTerms": [{"term": "Transformer"}]})
+        chat = client.post(f"{args.base_url}/api/chat", json={"message": "解释 Transformer", "knownTerms": [{"term": "Transformer"}], "localOnly": True})
         checks.append(("chat", chat.status_code == 200 and chat.json().get("reply")))
+
+        learning = client.post(f"{args.base_url}/api/learning/session", json={
+            "title": "Smoke paper",
+            "source": "text",
+            "paperText": text,
+            "paperSummary": "A smoke-test paper about Transformer.",
+            "knownTerms": analyze.json().get("knownTerms", []),
+            "analysis": analyze.json().get("analysis", {}),
+        })
+        checks.append(("learning-session", learning.status_code == 200 and learning.json().get("readingRoute")))
+
+        paper_search = client.get(f"{args.base_url}/api/papers/search", params={"query": "Transformer", "limit": 3, "external": "false"})
+        checks.append(("paper-search", paper_search.status_code == 200 and paper_search.json().get("papers")))
+
+        evidence = client.post(f"{args.base_url}/api/papers/evidence", json={
+            "question": "What does self-attention do?",
+            "paperText": text,
+            "knownTerms": analyze.json().get("knownTerms", []),
+        })
+        checks.append(("evidence", evidence.status_code == 200 and evidence.json().get("snippets")))
 
     failed = [name for name, ok in checks if not ok]
     if failed:

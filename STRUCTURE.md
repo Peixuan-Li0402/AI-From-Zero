@@ -11,7 +11,9 @@ AI-From-Zero/
 │   │   ├── llm.py           # OpenAI-compatible 调用
 │   │   ├── main.py
 │   │   ├── models.py
+│   │   ├── papers.py        # 论文搜索、元数据适配、证据片段抽取
 │   │   ├── pdf.py           # page-aware PDF 提取
+│   │   ├── progress.py      # 本地学习画像、阅读会话、复习自测
 │   │   ├── routes.py
 │   │   └── terms.py
 │   ├── requirements.txt

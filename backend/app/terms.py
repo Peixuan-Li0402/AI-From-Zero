@@ -88,6 +88,24 @@ def serialize_term(term: dict) -> dict:
         "prerequisiteTerms": term.get("prerequisiteTerms", []),
         "relatedTerms": term.get("relatedTerms", []),
         "relatedTags": term.get("relatedTags", []),
+        "conceptChain": concept_chain_for_term(term),
+    }
+
+
+def concept_chain_for_term(term: dict) -> dict:
+    name = term.get("term", "")
+    prereqs = [item for item in term.get("prerequisiteTerms", [])[:5] if item]
+    related = [item for item in term.get("relatedTerms", [])[:5] if item]
+    nodes = [
+        *[{"term": item, "role": "prerequisite", "label": "前置知识"} for item in prereqs],
+        {"term": name, "role": "current", "label": "当前概念"},
+        *[{"term": item, "role": "related", "label": "延伸概念"} for item in related],
+    ]
+    return {
+        "term": name,
+        "nodes": nodes,
+        "learningOrder": [node["term"] for node in nodes],
+        "hint": f"建议先补 {', '.join(prereqs[:3])}，再回到论文中看 {name} 的具体用法。" if prereqs else f"先建立 {name} 的直觉，再顺着相关概念继续扩展。",
     }
 
 
