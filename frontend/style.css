@@ -455,6 +455,19 @@ body {
   padding: 12px 16px;
   border-radius: var(--radius);
 }
+.explain-generated {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+}
+.explain-friendly {
+  background: #f0f6f0;
+  border-left: 3px solid var(--green);
+}
+.explain-academic {
+  background: #fefefe;
+  border: 1px solid var(--line);
+  margin-top: 8px;
+}
 .modal-actions { margin-top: 16px; }
 .prereq-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip-term {

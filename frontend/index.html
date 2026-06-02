@@ -233,6 +233,10 @@ const API_BASE = "";
 let _providers = [];
 let _chatHistory = [];
 let _currentConfig = null;
+const termDetailCache = new Map();
+const termExplainCache = new Map();
+const termAcademicCache = new Map();
+let _termDetailRequestSeq = 0;
 
 // 已掌握术语（localStorage）
 const getMastered = () => JSON.parse(localStorage.getItem("hoshinoMastered") || "[]");
@@ -537,6 +541,7 @@ function renderAnalysis(data, rawText) {
   _lastRawText = rawText;
   _lastKnownTerms = knownTerms;
   _lastTranslation = translation || "";
+  knownTerms.forEach(cacheTermDetail);
 
   // 摘要
   $("paperSummary").textContent = analysis.summary || "（暂无摘要）";
@@ -680,109 +685,179 @@ function renderTermSidebar(knownTerms) {
 // ═════════════════════════════════
 //  术语详情弹窗
 // ═════════════════════════════════
+function termCacheKey(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function cacheTermDetail(term) {
+  if (!term || !term.term) return;
+  const values = [term.term, term.termEn, term.termZh, term.fullName, term.fullNameEn, term.fullNameZh, ...(term.aliases || [])];
+  values.forEach((value) => {
+    if (value) termDetailCache.set(termCacheKey(value), term);
+  });
+}
+
+function renderTermLoading(termName) {
+  _currentPaperTerm = termName;
+  $("modalBody").innerHTML = `
+    <div class="modal-term-header">
+      <h2>${escapeHtml(termName)}</h2>
+      <span class="term-cat">正在读取术语详情</span>
+    </div>
+    <div class="modal-section">
+      <p class="empty-note">基础解释马上就来，不会等待 AI 生成。</p>
+    </div>
+  `;
+  $("termModal").style.display = "flex";
+}
+
+function renderExplainButton(termName, type) {
+  const isAcademic = type === "academic";
+  const cache = isAcademic ? termAcademicCache : termExplainCache;
+  const cached = cache.get(termCacheKey(termName));
+  if (cached) {
+    return isAcademic ? renderAcademicExplainHtml(cached) : renderDetailedExplainHtml(cached);
+  }
+  return `
+    <div class="modal-section">
+      <h4>${isAcademic ? "📖 学术详细版（AI生成）" : "🐾 大叔的通俗版（AI生成）"}</h4>
+      <p class="empty-note">这部分可能比较慢，点击后再生成。</p>
+      <button class="btn secondary small ${isAcademic ? "btn-generate-academic" : "btn-generate-detailed"}" data-term="${escapeAttr(termName)}">
+        ${isAcademic ? "生成学术解释" : "生成通俗解释"}
+      </button>
+    </div>
+  `;
+}
+
+function renderDetailedExplainHtml(detail) {
+  return '<div class="modal-section explain-generated explain-friendly">' +
+    '<h4>'+String.fromCodePoint(0x1f43e)+' 大叔的通俗版（AI生成）</h4>' +
+    '<div style="font-size:14px;line-height:1.8;white-space:pre-wrap">' + escapeHtml(detail) + '</div></div>';
+}
+
+function renderAcademicExplainHtml(detail) {
+  return '<div class="modal-section explain-generated explain-academic">' +
+    '<h4>'+String.fromCodePoint(0x1f4d6)+' 学术详细版（AI生成）</h4>' +
+    '<div style="font-size:14px;line-height:1.9;white-space:pre-wrap;color:var(--ink)">' + escapeHtml(detail) + '</div></div>';
+}
+
+function wireTermModalActions(termName) {
+  document.querySelector(".mastery-btn")?.addEventListener("click", function () {
+    const term = this.dataset.term;
+    const nowMastered = toggleMastered(term);
+    this.textContent = nowMastered ? "✅ 已掌握" : "📌 标记已学会";
+    this.className = `btn ${nowMastered ? "secondary" : "primary"} mastery-btn`;
+
+    const activeLang = document.querySelector(".reader-tab.active")?.dataset.lang || "original";
+    if (_lastRawText) switchReaderLang(activeLang);
+    renderTermSidebar(_lastKnownTerms);
+    addChatMessage(`大叔记下了：「${term}」${nowMastered ? "✅ 学会了！下次不解释了" : "📖 取消了已掌握标记"}`);
+  });
+
+  document.querySelector(".btn-generate-detailed")?.addEventListener("click", () => loadDetailedExplain(termName));
+  document.querySelector(".btn-generate-academic")?.addEventListener("click", () => loadAcademicExplain(termName));
+}
+
+function renderTermDetail(data) {
+  cacheTermDetail(data);
+  const mastered = getMastered().includes(data.term);
+  const hasPrereqs = data.prerequisiteTerms && data.prerequisiteTerms.length;
+  const hasPapers = data.landmarkPapers && data.landmarkPapers.length;
+  _currentPaperTerm = data.term;
+
+  const prereqHtml = hasPrereqs ? `
+    <div class="modal-section">
+      <h4>🔗 前置知识</h4>
+      <div class="prereq-list">
+        ${data.prerequisiteTerms.map((p) => `<button class="chip chip-term" data-open-term="${escapeAttr(p)}">${escapeHtml(p)}</button>`).join("")}
+      </div>
+    </div>` : `
+    <div class="modal-section">
+      <h4>🔗 前置知识</h4>
+      <p class="empty-note">这个术语暂时没有必需的前置知识。</p>
+    </div>`;
+
+  const papersHtml = hasPapers ? `
+    <div class="modal-section">
+      <h4>📄 经典论文溯源</h4>
+      ${data.landmarkPapers.map((p) => `
+        <div class="paper-ref">
+          <strong>${escapeHtml(p.title)}</strong>
+          <span>${escapeHtml(p.authors)} (${escapeHtml(String(p.year || ""))})</span>
+          <p>${escapeHtml(p.shortDesc)}</p>
+        </div>
+      `).join("")}
+    </div>` : `
+    <div class="modal-section">
+      <h4>📄 经典论文溯源</h4>
+      <p class="empty-note">知识库里暂时还没有记录经典论文。</p>
+    </div>`;
+
+  $("modalBody").innerHTML = `
+    <div class="modal-term-header">
+      <h2>${escapeHtml(data.term)}</h2>
+      <span class="term-diff diff-${data.difficulty}">难度 Lv.${data.difficulty}</span>
+      <span class="term-cat">${escapeHtml(data.category || "")}</span>
+    </div>
+    <p class="modal-fullname">${escapeHtml(data.fullNameZh || data.fullName || "")}${data.termEn ? ` · ${escapeHtml(data.termEn)}` : ""}</p>
+    <div class="modal-section">
+      <h4>📖 大叔的解释</h4>
+      <p>${escapeHtml(data.explanationZh || data.explanation)}</p>
+      ${data.explanationEn ? `<p class="english-note">${escapeHtml(data.explanationEn)}</p>` : ""}
+    </div>
+    ${data.hoshinoNote ? `
+    <div class="modal-section hoshino-note-section">
+      <h4>🐾 星野大叔说</h4>
+      <p>${escapeHtml(data.hoshinoNote)}</p>
+    </div>` : ""}
+    <div class="modal-actions">
+      <button class="btn ${mastered ? 'secondary' : 'primary'} mastery-btn" data-term="${escapeAttr(data.term)}">
+        ${mastered ? "✅ 已掌握" : "📌 标记已学会"}
+      </button>
+    </div>
+    ${prereqHtml}
+    <div class="modal-section">
+      <button class="btn secondary small" id="btnExpandPapers" onclick="expandPapers()" style="margin-bottom:8px">📚 展开更多相关论文 →</button>
+    </div>
+    <div id="expandedPapers"></div>
+    <div id="detailedExplainSection">${renderExplainButton(data.term, "detailed")}</div>
+    <div id="academicExplainSection">${renderExplainButton(data.term, "academic")}</div>
+    ${papersHtml}
+  `;
+  $("termModal").style.display = "flex";
+  wireTermModalActions(data.term);
+}
+
 async function showTermDetail(termName) {
+  const requestedName = termName;
+  const seq = ++_termDetailRequestSeq;
+  const cached = termDetailCache.get(termCacheKey(requestedName));
+  if (cached) {
+    renderTermDetail(cached);
+    return;
+  }
+
+  renderTermLoading(requestedName);
   try {
-    const resp = await fetch(`${API_BASE}/api/terms/${encodeURIComponent(termName)}`);
+    const resp = await fetch(`${API_BASE}/api/terms/${encodeURIComponent(requestedName)}`);
     const data = await resp.json();
     if (!resp.ok) {
       throw new Error(data.detail || "术语不存在");
     }
-
-    const mastered = getMastered().includes(data.term);
-    const hasPrereqs = data.prerequisiteTerms && data.prerequisiteTerms.length;
-    const hasPapers = data.landmarkPapers && data.landmarkPapers.length;
-    _currentPaperTerm = data.term;
-
-    const prereqHtml = hasPrereqs ? `
-      <div class="modal-section">
-        <h4>🔗 前置知识</h4>
-        <div class="prereq-list">
-          ${data.prerequisiteTerms.map((p) => `<button class="chip chip-term" data-open-term="${escapeAttr(p)}">${escapeHtml(p)}</button>`).join("")}
-        </div>
-      </div>` : `
-      <div class="modal-section">
-        <h4>🔗 前置知识</h4>
-        <p class="empty-note">这个术语暂时没有必需的前置知识。</p>
-      </div>`;
-
-    const papersHtml = hasPapers ? `
-      <div class="modal-section">
-        <h4>📄 经典论文溯源</h4>
-        ${data.landmarkPapers.map((p) => `
-          <div class="paper-ref">
-            <strong>${escapeHtml(p.title)}</strong>
-            <span>${escapeHtml(p.authors)} (${escapeHtml(String(p.year || ""))})</span>
-            <p>${escapeHtml(p.shortDesc)}</p>
-          </div>
-        `).join("")}
-      </div>` : `
-      <div class="modal-section">
-        <h4>📄 经典论文溯源</h4>
-        <p class="empty-note">知识库里暂时还没有记录经典论文。</p>
-      </div>`;
-
-    let html = `
-      <div class="modal-term-header">
-        <h2>${escapeHtml(data.term)}</h2>
-        <span class="term-diff diff-${data.difficulty}">难度 Lv.${data.difficulty}</span>
-        <span class="term-cat">${escapeHtml(data.category || "")}</span>
-      </div>
-      <p class="modal-fullname">${escapeHtml(data.fullNameZh || data.fullName || "")}${data.termEn ? ` · ${escapeHtml(data.termEn)}` : ""}</p>
-      <div class="modal-section">
-        <h4>📖 大叔的解释</h4>
-        <p>${escapeHtml(data.explanationZh || data.explanation)}</p>
-        ${data.explanationEn ? `<p class="english-note">${escapeHtml(data.explanationEn)}</p>` : ""}
-      </div>
-      ${data.hoshinoNote ? `
-      <div class="modal-section hoshino-note-section">
-        <h4>🐾 星野大叔说</h4>
-        <p>${escapeHtml(data.hoshinoNote)}</p>
-      </div>` : ""}
-      <div class="modal-actions">
-        <button class="btn ${mastered ? 'secondary' : 'primary'} mastery-btn" data-term="${escapeHtml(data.term)}">
-          ${mastered ? "✅ 已掌握" : "📌 标记已学会"}
-        </button>
-      </div>
-      ${prereqHtml}
-      <div class="modal-section">
-        <button class="btn secondary small" id="btnExpandPapers" onclick="expandPapers()" style="margin-bottom:8px">📚 展开更多相关论文 →</button>
-      </div>
-      <div id="expandedPapers"></div>
-      <div id="detailedExplainSection">
-        <div class="modal-section">
-          <h4>🐾 大叔的通俗版（AI生成）</h4>
-          <p style="color:var(--muted);font-size:13px">大叔正在写通俗讲解……⏳</p>
-        </div>
-      </div>
-      <div id="academicExplainSection">
-        <div class="modal-section">
-          <h4>📖 学术详细版（AI生成）</h4>
-          <p style="color:var(--muted);font-size:13px">正在生成详细学术解释……⏳</p>
-        </div>
-      </div>
-      ${papersHtml}
-    `;
-
-    $("modalBody").innerHTML = html;
-    $("termModal").style.display = "flex";
-    loadDetailedExplain(termName);
-    loadAcademicExplain(termName);
-
-    // 已掌握按钮
-    document.querySelector(".mastery-btn")?.addEventListener("click", function () {
-      const term = this.dataset.term;
-      const nowMastered = toggleMastered(term);
-      this.textContent = nowMastered ? "✅ 已掌握" : "📌 标记已学会";
-      this.className = `btn ${nowMastered ? "secondary" : "primary"} mastery-btn`;
-
-      const activeLang = document.querySelector(".reader-tab.active")?.dataset.lang || "original";
-      if (_lastRawText) switchReaderLang(activeLang);
-      renderTermSidebar(_lastKnownTerms);
-      addChatMessage(`大叔记下了：「${term}」${nowMastered ? "✅ 学会了！下次不解释了" : "📖 取消了已掌握标记"}`);
-    });
-
+    cacheTermDetail(data);
+    if (seq === _termDetailRequestSeq) renderTermDetail(data);
   } catch (err) {
-    addChatMessage(`😅 查「${termName}」的时候出了点问题：${err.message}`);
+    if (seq !== _termDetailRequestSeq) return;
+    $("modalBody").innerHTML = `
+      <div class="modal-term-header">
+        <h2>${escapeHtml(requestedName)}</h2>
+        <span class="term-cat">加载失败</span>
+      </div>
+      <div class="modal-section">
+        <p class="empty-note">查这个术语时出了点问题：${escapeHtml(err.message)}</p>
+      </div>
+    `;
+    addChatMessage(`😅 查「${requestedName}」的时候出了点问题：${err.message}`);
   }
 }
 
@@ -873,40 +948,80 @@ async function expandPapers() {
 }
 
 async function loadDetailedExplain(termName) {
+  const key = termCacheKey(termName);
+  const cached = termExplainCache.get(key);
+  if (cached) {
+    const section = document.getElementById("detailedExplainSection");
+    if (section) section.innerHTML = renderDetailedExplainHtml(cached);
+    return;
+  }
+  const btn = document.querySelector(".btn-generate-detailed");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "正在生成通俗解释…";
+  }
   try {
     const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain");
     const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "生成失败");
     const detail = data.detailedExplanation || "";
-    if (detail && detail.length > 50) {
-      const section = document.getElementById("detailedExplainSection");
-      if (section) {
-        section.innerHTML = '<div class="modal-section" style="background:#f0f6f0;border-left:3px solid var(--green);padding:12px 16px;border-radius:8px">' +
-          '<h4>'+String.fromCodePoint(0x1f43e)+' 大叔的通俗版（AI生成）</h4>' +
-          '<div style="font-size:14px;line-height:1.8;white-space:pre-wrap">' + escapeHtml(detail) + '</div></div>';
-      }
+    const section = document.getElementById("detailedExplainSection");
+    if (detail && section) {
+      termExplainCache.set(key, detail);
+      section.innerHTML = renderDetailedExplainHtml(detail);
     }
-  } catch (err) {}
+  } catch (err) {
+    const section = document.getElementById("detailedExplainSection");
+    if (section) {
+      section.innerHTML = `<div class="modal-section">
+        <h4>🐾 大叔的通俗版（AI生成）</h4>
+        <p class="empty-note">生成失败：${escapeHtml(err.message)}</p>
+        <button class="btn secondary small btn-generate-detailed" data-term="${escapeAttr(termName)}">重试通俗解释</button>
+      </div>`;
+      document.querySelector(".btn-generate-detailed")?.addEventListener("click", () => loadDetailedExplain(termName));
+    }
+  }
 }
 
 async function loadAcademicExplain(termName) {
+  const key = termCacheKey(termName);
+  const cached = termAcademicCache.get(key);
+  if (cached) {
+    const section = document.getElementById("academicExplainSection");
+    if (section) section.innerHTML = renderAcademicExplainHtml(cached);
+    return;
+  }
+  const btn = document.querySelector(".btn-generate-academic");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "正在生成学术解释…";
+  }
   try {
     const resp = await fetch(API_BASE + "/api/terms/" + encodeURIComponent(termName) + "/explain-academic");
     const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "生成失败");
     const detail = data.academicExplanation || "";
-    if (detail && detail.length > 50) {
-      const section = document.getElementById("academicExplainSection");
-      if (section) {
-        section.innerHTML = '<div class="modal-section" style="background:#fefefe;border:1px solid var(--line);padding:16px;border-radius:8px;margin-top:8px">' +
-          '<h4>'+String.fromCodePoint(0x1f4d6)+' 学术详细版（AI生成）</h4>' +
-          '<div style="font-size:14px;line-height:1.9;white-space:pre-wrap;color:var(--ink)">' + escapeHtml(detail) + '</div></div>';
-        if (typeof renderMathInElement !== 'undefined') {
-          setTimeout(function() {
-            renderMathInElement(section, {delimiters:[{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false}]});
-          }, 50);
-        }
+    const section = document.getElementById("academicExplainSection");
+    if (detail && section) {
+      termAcademicCache.set(key, detail);
+      section.innerHTML = renderAcademicExplainHtml(detail);
+      if (typeof renderMathInElement !== 'undefined') {
+        setTimeout(function() {
+          renderMathInElement(section, {delimiters:[{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false}]});
+        }, 50);
       }
     }
-  } catch (err) {}
+  } catch (err) {
+    const section = document.getElementById("academicExplainSection");
+    if (section) {
+      section.innerHTML = `<div class="modal-section">
+        <h4>📖 学术详细版（AI生成）</h4>
+        <p class="empty-note">生成失败：${escapeHtml(err.message)}</p>
+        <button class="btn secondary small btn-generate-academic" data-term="${escapeAttr(termName)}">重试学术解释</button>
+      </div>`;
+      document.querySelector(".btn-generate-academic")?.addEventListener("click", () => loadAcademicExplain(termName));
+    }
+  }
 }
 
 async function loadTermKB() {
