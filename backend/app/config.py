@@ -182,7 +182,10 @@ class Settings:
         self.qxd_allow_private_dns_proxy = _get_bool("QXD_ALLOW_PRIVATE_DNS_PROXY", False)
         self.cors_allowed_origins = _get_csv(
             "CORS_ALLOWED_ORIGINS",
-            "http://127.0.0.1:8080,http://localhost:8080",
+            (
+                "http://127.0.0.1:8080,http://localhost:8080,"
+                "https://www.xiaoda.tsinghua.edu.cn,https://xiaoda.tsinghua.edu.cn"
+            ),
         )
 
     @property

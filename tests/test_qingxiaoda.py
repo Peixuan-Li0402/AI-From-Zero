@@ -114,6 +114,19 @@ def test_unversioned_models_alias_uses_same_auth_and_shape(client):
     assert response.json()["data"][0]["id"] == "ai-from-zero-agent"
 
 
+def test_qingxiaoda_web_origin_can_preflight_agent_endpoint(client):
+    response = client.options(
+        "/v1/models",
+        headers={
+            "Origin": "https://www.xiaoda.tsinghua.edu.cn",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://www.xiaoda.tsinghua.edu.cn"
+
+
 def test_non_stream_completion_and_unknown_model(client):
     response = client.post(
         "/v1/chat/completions",
