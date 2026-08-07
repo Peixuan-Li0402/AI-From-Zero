@@ -122,6 +122,7 @@ async def _stream_completion(request: QingxiaodaChatRequest, completion_id: str,
     yield "data: [DONE]\n\n"
 
 
+@router.get("/models", include_in_schema=False)
 @router.get("/v1/models")
 async def qingxiaoda_models(authorization: str | None = Header(default=None)):
     _authenticate(authorization)
@@ -138,6 +139,7 @@ async def qingxiaoda_models(authorization: str | None = Header(default=None)):
     }
 
 
+@router.post("/chat/completions", include_in_schema=False)
 @router.post("/v1/chat/completions")
 async def qingxiaoda_chat_completions(
     request: QingxiaodaChatRequest,

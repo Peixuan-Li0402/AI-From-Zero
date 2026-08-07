@@ -107,6 +107,13 @@ def test_models_auth_and_shape(client, monkeypatch):
     assert client.get("/v1/models", headers=auth_headers()).status_code == 503
 
 
+def test_unversioned_models_alias_uses_same_auth_and_shape(client):
+    assert client.get("/models").status_code == 401
+    response = client.get("/models", headers=auth_headers())
+    assert response.status_code == 200
+    assert response.json()["data"][0]["id"] == "ai-from-zero-agent"
+
+
 def test_non_stream_completion_and_unknown_model(client):
     response = client.post(
         "/v1/chat/completions",
@@ -120,6 +127,19 @@ def test_non_stream_completion_and_unknown_model(client):
     assert "Transformer" in payload["choices"][0]["message"]["content"]
     assert payload["choices"][0]["finish_reason"] == "stop"
     assert payload["usage"]["total_tokens"] > 0
+
+
+def test_unversioned_chat_alias_supports_platform_probe(client):
+    response = client.post(
+        "/chat/completions",
+        headers=auth_headers(),
+        json={"stream": True, "max_tokens": 1, "messages": [{"role": "user", "content": "你好"}]},
+    )
+    assert response.status_code == 200
+    payloads, done = parse_sse(response.text)
+    assert payloads[0]["choices"][0]["delta"]["role"] == "assistant"
+    assert payloads[-1]["choices"][0]["finish_reason"] == "stop"
+    assert done is True
 
 
 def test_stream_probe_is_fast_and_has_exact_frame_order(client):
