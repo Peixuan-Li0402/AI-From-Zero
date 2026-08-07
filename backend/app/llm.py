@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 import httpx
 
@@ -21,6 +22,31 @@ def call_llm(
     api_key: str | None = None,
     model: str | None = None,
     timeout: float | None = None,
+    max_tokens: int = 8192,
+) -> str:
+    return call_llm_messages(
+        [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=temperature,
+        api_url=api_url,
+        api_key=api_key,
+        model=model,
+        timeout=timeout,
+        max_tokens=max_tokens,
+    )
+
+
+def call_llm_messages(
+    messages: list[dict[str, Any]],
+    temperature: float = 0.3,
+    *,
+    api_url: str | None = None,
+    api_key: str | None = None,
+    model: str | None = None,
+    timeout: float | None = None,
+    max_tokens: int = 8192,
 ) -> str:
     target_url = api_url or settings.llm_api_url
     target_key = api_key if api_key is not None else settings.llm_api_key
@@ -40,12 +66,9 @@ def call_llm(
             headers=headers,
             json={
                 "model": target_model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
+                "messages": messages,
                 "temperature": temperature,
-                "max_tokens": 8192,
+                "max_tokens": max(1, min(max_tokens, 8192)),
             },
             timeout=target_timeout,
         )

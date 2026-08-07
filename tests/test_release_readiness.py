@@ -9,6 +9,9 @@ def test_release_entry_files_exist():
     required = [
         "README.md",
         "SKILL.md",
+        "Dockerfile",
+        ".dockerignore",
+        "railway.toml",
         "requirements.txt",
         "backend/requirements.txt",
         "start_windows.ps1",
@@ -21,6 +24,8 @@ def test_release_entry_files_exist():
         "docs/competition/README.md",
         "docs/competition/demo-script.md",
         "docs/competition/scoring-map.md",
+        "docs/qingxiaoda-agent.md",
+        "tools/check_qingxiaoda_compat.py",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]
     assert not missing

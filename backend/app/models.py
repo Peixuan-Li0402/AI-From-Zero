@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
 
 
 class PaperAnalysis(BaseModel):
@@ -72,3 +74,21 @@ class IntegrationSendRequest(BaseModel):
     text: str = ""
     markdown: bool = False
     token: str = ""
+
+
+class QingxiaodaMessage(BaseModel):
+    role: Literal["system", "user", "assistant"]
+    content: str | list[dict[str, Any]] = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class QingxiaodaChatRequest(BaseModel):
+    model: str | None = None
+    messages: list[QingxiaodaMessage] = Field(min_length=1)
+    stream: StrictBool = False
+    max_tokens: int | None = Field(default=None, ge=1)
+    temperature: float | None = None
+    user: str | None = None
+
+    model_config = ConfigDict(extra="allow")

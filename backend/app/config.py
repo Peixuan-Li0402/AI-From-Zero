@@ -57,6 +57,15 @@ def _get_float(name: str, default: float) -> float:
         return default
 
 
+def _get_csv(name: str, default: str = "") -> list[str]:
+    return [item.strip() for item in _get_env(name, default).split(",") if item.strip()]
+
+
+def _get_bool(name: str, default: bool = False) -> bool:
+    value = _get_env(name, "true" if default else "false").lower()
+    return value in {"1", "true", "yes", "on"}
+
+
 class ProviderPreset(BaseModel):
     id: str
     label: str
@@ -137,7 +146,7 @@ def _discover_provider() -> str:
 
 class Settings:
     app_name = "AI From Zero"
-    app_version = "0.3.0"
+    app_version = "0.4.0"
 
     def __init__(self):
         self.reload()
@@ -148,7 +157,7 @@ class Settings:
         provider = _discover_provider()
         preset = provider_by_id(provider)
         self.app_host = _get_env("APP_HOST", "127.0.0.1")
-        self.app_port = _get_int("APP_PORT", 8080)
+        self.app_port = _get_int("APP_PORT", _get_int("PORT", 8080))
         self.llm_provider = provider
         self.llm_api_key = _get_env("LLM_API_KEY", "", preset.env_var, "KIMI_API_KEY")
         self.llm_api_url = _get_env("LLM_API_URL", preset.api_url, "KIMI_API_URL")
@@ -162,6 +171,19 @@ class Settings:
         self.wechat_webhook_url = _get_env("WECHAT_WEBHOOK_URL", "")
         self.qq_bot_webhook_url = _get_env("QQ_BOT_WEBHOOK_URL", "")
         self.message_bridge_token = _get_env("MESSAGE_BRIDGE_TOKEN", "")
+        self.qxd_api_key = _get_env("QXD_API_KEY", "")
+        self.public_base_url = _get_env("PUBLIC_BASE_URL", "").rstrip("/")
+        self.qxd_model_id = _get_env("QXD_MODEL_ID", "ai-from-zero-agent")
+        self.qxd_attachment_allowed_hosts = _get_csv("QXD_ATTACHMENT_ALLOWED_HOSTS")
+        self.qxd_max_attachment_mb = max(1, _get_int("QXD_MAX_ATTACHMENT_MB", 25))
+        self.qxd_max_concurrency = max(1, _get_int("QXD_MAX_CONCURRENCY", 4))
+        self.qxd_request_timeout = min(115.0, max(5.0, _get_float("QXD_REQUEST_TIMEOUT", 105.0)))
+        self.qxd_artifact_ttl = max(300, _get_int("QXD_ARTIFACT_TTL", 1800))
+        self.qxd_allow_private_dns_proxy = _get_bool("QXD_ALLOW_PRIVATE_DNS_PROXY", False)
+        self.cors_allowed_origins = _get_csv(
+            "CORS_ALLOWED_ORIGINS",
+            "http://127.0.0.1:8080,http://localhost:8080",
+        )
 
     @property
     def llm_configured(self) -> bool:
@@ -172,6 +194,10 @@ class Settings:
     @property
     def config_writable(self) -> bool:
         return os.access(ROOT_DIR, os.W_OK)
+
+    @property
+    def qxd_configured(self) -> bool:
+        return bool(self.qxd_api_key and self.qxd_api_key != "REPLACE_WITH_A_RANDOM_SECRET")
 
     def masked_key(self) -> str:
         key = self.llm_api_key
