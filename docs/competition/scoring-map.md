@@ -4,6 +4,8 @@
 
 - `start_windows.ps1` 和 `start.sh` 提供本地一键启动。
 - `tools/check_release_readiness.py` 提供发布自检。
+- `/v1/models` 和 `/v1/chat/completions` 提供清小搭 OpenAI-compatible 接入，包含 Bearer 鉴权和 SSE 流式响应。
+- `Dockerfile`、`railway.toml` 和清小搭兼容探测脚本支持公网部署与平台验收。
 - `/api/integrations/status`、`/api/integrations/messages/inbound`、`/api/integrations/messages/send` 支持 QQ/微信桥接。
 - `tools/openclaw_ai_from_zero.py message` 支持无真实平台凭证时的本地模拟验收。
 
@@ -20,6 +22,7 @@
 - PDF page-aware 抽取和全文展示。
 - arXiv / OpenAlex / Semantic Scholar 轻量论文搜索。
 - OpenAI-compatible 模型配置。
+- URL 附件输入、SSRF 防护、PDF 解析缓存和 `x_soda.attachments` 学习笔记输出。
 - 无 Key 降级模式。
 - GitHub Actions CI 和本地测试套件。
 

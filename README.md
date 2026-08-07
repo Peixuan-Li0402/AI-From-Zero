@@ -25,6 +25,22 @@ GitHub: https://github.com/Peixuan-Li0402/AI-From-Zero
 - 术语通俗解释和学术解释按需生成。
 - 配置微信或 QQ Webhook 后，把导读结果推送到群聊或机器人桥。
 
+## 清小搭智能体
+
+项目现在可以作为 OpenAI-compatible 论文学习智能体接入清小搭：
+
+- 在对话中直接解释术语、生成概念链和论文学习路径。
+- 接收 PDF、TXT、Markdown 和论文链接，返回结构化导读与原文证据。
+- 支持标准 JSON 和 SSE 流式回答。
+- 可生成清小搭能够下载的 Markdown 学习笔记附件。
+- 无模型 Key、附件解析失败或外部服务中断时自动降级，不中断整次会话。
+
+完整部署步骤见 [清小搭智能体接入文档](docs/qingxiaoda-agent.md)。本地验证：
+
+```bash
+python tools/check_qingxiaoda_compat.py --base-url http://127.0.0.1:8080/v1 --key your_qxd_key
+```
+
 ## 快速开始
 
 ### Windows
@@ -244,6 +260,7 @@ GitHub Actions 会自动运行这些核心检查，确保公开版本不会轻�
 ## 主要接口
 
 - `GET /api/health`：服务健康状态、术语数量、模型配置状态。
+- `GET /v1/models`、`POST /v1/chat/completions`：清小搭 OpenAI-compatible Agent，使用独立 Bearer 凭证。
 - `GET /api/config`、`POST /api/config/save`：本地模型配置。
 - `POST /api/analyze`：分析论文文本。
 - `POST /api/analyze-pdf`：读取并分析 PDF。

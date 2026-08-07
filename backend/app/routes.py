@@ -59,6 +59,11 @@ async def health():
         "llmModel": settings.llm_model,
         "model": settings.llm_model,
         "configWritable": settings.config_writable,
+        "agentProtocol": "openai-compatible-v1",
+        "agentModel": settings.qxd_model_id,
+        "agentAuthConfigured": settings.qxd_configured,
+        "publicBaseUrlConfigured": bool(settings.public_base_url),
+        "attachmentLimitMb": settings.qxd_max_attachment_mb,
         "hoshino": "AI-From-Zero ready",
     }
 

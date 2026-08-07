@@ -57,3 +57,31 @@ jobs:
         run: |
           python tools/check_api_smoke.py --base-url http://127.0.0.1:8080
           python tools/check_release_readiness.py --strict --base-url http://127.0.0.1:8080
+
+      - name: Build deployment container
+        run: docker build -t ai-from-zero-agent:ci .
+
+      - name: Probe container Agent protocol
+        run: |
+          docker run -d --name ai-from-zero-agent-ci -p 8081:8080 \
+            -e QXD_API_KEY=ci-test-key \
+            -e APP_HOST=0.0.0.0 \
+            ai-from-zero-agent:ci
+          trap 'docker rm -f ai-from-zero-agent-ci >/dev/null 2>&1 || true' EXIT
+          python - <<'PY'
+          import time
+          import httpx
+
+          for _ in range(60):
+              try:
+                  response = httpx.get("http://127.0.0.1:8081/api/health", timeout=2)
+                  if response.status_code == 200:
+                      raise SystemExit(0)
+              except Exception:
+                  pass
+              time.sleep(0.5)
+          raise SystemExit("container did not become healthy")
+          PY
+          python tools/check_qingxiaoda_compat.py \
+            --base-url http://127.0.0.1:8081/v1 \
+            --key ci-test-key
