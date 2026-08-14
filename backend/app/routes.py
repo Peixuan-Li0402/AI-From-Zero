@@ -31,7 +31,9 @@ router = APIRouter()
 
 def _is_local_request(request: Request) -> bool:
     host = request.client.host if request.client else ""
-    return host in {"127.0.0.1", "::1", "localhost", "testclient", ""} or host.endswith("127.0.0.1")
+    app_is_loopback_only = settings.app_host in {"127.0.0.1", "::1", "localhost"}
+    request_is_local = host in {"127.0.0.1", "::1", "localhost", "testclient", ""} or host.endswith("127.0.0.1")
+    return app_is_loopback_only and request_is_local
 
 
 def _config_payload() -> dict:
@@ -79,7 +81,9 @@ async def get_config():
 
 
 @router.post("/api/config/test")
-async def test_config(data: ConfigTestRequest):
+async def test_config(data: ConfigTestRequest, request: Request):
+    if not _is_local_request(request):
+        raise HTTPException(status_code=403, detail="配置只能从本机测试")
     preset = provider_by_id(data.provider)
     api_url = data.apiUrl.strip() or preset.api_url
     model = data.model.strip() or preset.model

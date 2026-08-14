@@ -87,6 +87,19 @@ def test_config_status_and_local_save(client, tmp_path, monkeypatch):
     assert "sk-test-secret-value" in env_file.read_text(encoding="utf-8")
 
 
+def test_config_mutations_are_disabled_when_bound_publicly(client, monkeypatch):
+    monkeypatch.setattr(settings, "app_host", "0.0.0.0")
+    payload = {
+        "provider": "custom",
+        "apiKey": "not-a-real-key",
+        "apiUrl": "https://provider.example/v1/chat/completions",
+        "model": "example-model",
+        "timeout": 10,
+    }
+    assert client.post("/api/config/test", json=payload).status_code == 403
+    assert client.post("/api/config/save", json=payload).status_code == 403
+
+
 def test_text_analysis_degrades_without_key(client):
     text = (
         "The Transformer uses self-attention, encoder and decoder layers, CNN and RNN baselines, "

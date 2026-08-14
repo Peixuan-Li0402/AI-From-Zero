@@ -1,5 +1,9 @@
+import logging
+import secrets
+import time
+
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -9,8 +13,46 @@ from .qingxiaoda import router as qingxiaoda_router
 from .terms import terms_index
 
 
+logger = logging.getLogger("ai_from_zero.qingxiaoda")
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title=settings.app_name, version=settings.app_version)
+
+    @app.middleware("http")
+    async def trace_qingxiaoda_requests(request: Request, call_next):
+        if request.url.path not in {
+            "/models",
+            "/chat/completions",
+            "/v1/models",
+            "/v1/chat/completions",
+        }:
+            return await call_next(request)
+
+        request_id = secrets.token_hex(6)
+        started = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:
+            logger.exception(
+                "qxd_request id=%s method=%s path=%s status=500",
+                request_id,
+                request.method,
+                request.url.path,
+            )
+            raise
+        elapsed_ms = round((time.perf_counter() - started) * 1000)
+        response.headers["X-AFZ-Request-ID"] = request_id
+        logger.info(
+            "qxd_request id=%s method=%s path=%s status=%s elapsed_ms=%s",
+            request_id,
+            request.method,
+            request.url.path,
+            response.status_code,
+            elapsed_ms,
+        )
+        return response
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_allowed_origins,

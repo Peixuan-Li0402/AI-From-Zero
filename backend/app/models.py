@@ -77,7 +77,7 @@ class IntegrationSendRequest(BaseModel):
 
 
 class QingxiaodaMessage(BaseModel):
-    role: Literal["system", "user", "assistant"]
+    role: Literal["system", "user", "assistant", "tool"]
     content: str | list[dict[str, Any]] = ""
 
     model_config = ConfigDict(extra="allow")

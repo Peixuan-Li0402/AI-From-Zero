@@ -35,11 +35,13 @@ GitHub: https://github.com/Peixuan-Li0402/AI-From-Zero
 - 可生成清小搭能够下载的 Markdown 学习笔记附件。
 - 无模型 Key、附件解析失败或外部服务中断时自动降级，不中断整次会话。
 
-完整部署步骤见 [清小搭智能体接入文档](docs/qingxiaoda-agent.md)。本地验证：
+完整的官方协议映射、腾讯云部署参数和上线闸门见 [清小搭智能体部署与验收](docs/qingxiaoda-agent.md)。本地验证：
 
 ```bash
 python tools/check_qingxiaoda_compat.py --base-url http://127.0.0.1:8080/v1 --key your_qxd_key
 ```
+
+公网验收脚本默认绕过环境代理，并拒绝把代理 fake-IP 当作清小搭可直连的证据。
 
 ## 快速开始
 
@@ -261,7 +263,7 @@ GitHub Actions 会自动运行这些核心检查，确保公开版本不会轻�
 
 - `GET /api/health`：服务健康状态、术语数量、模型配置状态。
 - `GET /v1/models`、`POST /v1/chat/completions`：清小搭 OpenAI-compatible Agent，使用独立 Bearer 凭证。
-- `GET /api/config`、`POST /api/config/save`：本地模型配置。
+- `GET /api/config`、`POST /api/config/test`、`POST /api/config/save`：本地模型配置；测试和保存只允许本机调用。
 - `POST /api/analyze`：分析论文文本。
 - `POST /api/analyze-pdf`：读取并分析 PDF。
 - `POST /api/chat`：AI 伴学问答。

@@ -1,107 +1,179 @@
-# 清小搭智能体接入
+# 清小搭智能体部署与验收
 
-AI-From-Zero 提供 OpenAI-compatible Agent 端点。清小搭中的用户可以直接发送论文问题、PDF、TXT 或 Markdown，获得论文导读、双语术语、概念链、原文证据和后续论文路径。
+AI-From-Zero 通过清小搭“标准协议接入”上线。清小搭中的用户可以发送问题、论文链接、PDF、TXT 或 Markdown，获得论文导读、双语术语、概念链、原文证据和后续论文路径。
 
-## 1. 本地验证
+## 1. 官方协议对应关系
 
-在 `.env` 中增加独立的清小搭访问凭证。不要复用模型 API Key：
+| 清小搭要求 | AI-From-Zero 实现 |
+| --- | --- |
+| `GET {baseUrl}/models` | `GET /v1/models`，Bearer 凭证错误返回 `401` |
+| `POST {baseUrl}/chat/completions` | `POST /v1/chat/completions`，支持 JSON 与 SSE |
+| `stream` 必须是 JSON 布尔值 | 使用严格布尔校验，字符串会返回 `422` |
+| `model` 可缺失或未知 | 统一映射为 `ai-from-zero-agent` |
+| `max_tokens:1` 探测 | 本地快速通道，不调用论文解析和外部模型 |
+| SSE 帧顺序 | role 帧、content 帧、单个 stop 帧、`data: [DONE]` |
+| `usage` | 非流式在响应顶层；流式在 stop 帧 |
+| 文件只通过 URL 输入 | 支持 `file.url`；不接受 Base64；`file_id` 单独出现时友好降级 |
+| 输出附件 | `x_soda.attachments`；流式只在 stop 帧出现一次 |
+
+不要把网站根地址或完整对话端点填入清小搭。`API 地址`必须精确填到 `/v1`：
+
+```text
+正确：https://your-domain.example/v1
+错误：https://your-domain.example
+错误：https://your-domain.example/v1/chat/completions
+```
+
+## 2. 本地验收
+
+在本地 `.env` 中配置独立的清小搭访问凭证。它不能与模型供应商的 Key 混用：
 
 ```env
-QXD_API_KEY=YOUR_QXD_KEY
+QXD_API_KEY=your-qxd-key
 QXD_MODEL_ID=ai-from-zero-agent
 QXD_MAX_ATTACHMENT_MB=25
 QXD_MAX_CONCURRENCY=4
+QXD_REQUEST_TIMEOUT=105
+QXD_ARTIFACT_TTL=1800
 ```
 
-可以用 Python 生成随机凭证：
+生成随机凭证：
 
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-启动服务后运行：
+启动服务后运行与清小搭探测规则一致的检查：
 
 ```bash
 python tools/check_qingxiaoda_compat.py --base-url http://127.0.0.1:8080/v1 --key YOUR_QXD_KEY
 ```
 
-清小搭使用的两个端点是：
-
-- `GET /v1/models`
-- `POST /v1/chat/completions`
-
-错误或缺失凭证返回 `401`；服务未配置 `QXD_API_KEY` 时返回 `503`。
-
-## 2. Railway 部署
-
-1. 登录 Railway，选择 **New Project → Deploy from GitHub repo**。
-2. 选择 `Peixuan-Li0402/AI-From-Zero` 和 `master` 分支。
-3. Railway 会自动识别根目录的 `Dockerfile` 和 `railway.toml`。
-4. 在 Variables 中配置：
-
-```env
-QXD_API_KEY=YOUR_QXD_KEY
-PUBLIC_BASE_URL=https://your-service.up.railway.app
-LLM_PROVIDER=your_provider
-LLM_API_KEY=your_model_key
-LLM_API_URL=https://your-provider.example/v1/chat/completions
-LLM_MODEL=your_model
-APP_HOST=0.0.0.0
-```
-
-`PORT` 由 Railway 自动注入，不要手动填写。`LLM_*` 未配置时，智能体仍会用本地知识库运行，但回答质量会受限。
-
-部署完成后执行公网探测：
+真实模型对话是独立的慢速检查，不影响平台最小探测：
 
 ```bash
-python tools/check_qingxiaoda_compat.py --base-url https://your-service.up.railway.app/v1 --key YOUR_QXD_KEY
+python tools/check_qingxiaoda_compat.py --base-url http://127.0.0.1:8080/v1 --key YOUR_QXD_KEY --full-chat
 ```
 
-评审期间不要启用自动休眠。建议设置费用提醒，并确保服务在比赛检查期间保持运行。
+## 3. 腾讯云 CloudBase Run 部署
 
-## 3. 清小搭后台
-
-填写以下信息：
+推荐选择上海地域，使用仓库根目录的 `Dockerfile`。服务配置：
 
 ```text
-Base URL: https://your-service.up.railway.app/v1
-Auth: Bearer Token
-Credential: 与 QXD_API_KEY 完全一致
-Stream terminator: [DONE]
-Usage position: stop 帧
-Model: ai-from-zero-agent
+构建目录：仓库根目录
+Dockerfile：Dockerfile
+监听端口：8080
+公网访问：开启
+最小实例：1
+最大实例：1
+日志：标准输出
 ```
 
-先运行接入探测，再依次试聊：
+最小实例不能为 0，否则冷启动可能超过清小搭单项 5 秒探测。当前学习笔记附件临时保存在实例本地，因此评审阶段固定为单实例；未来改为对象存储后再扩容。
 
-1. `解释 Transformer，并给出概念链。`
-2. 上传文本型论文 PDF，发送 `给我一条阅读路线。`
-3. 继续追问 `论文在哪一页支持这个结论？`
-4. 发送 `推荐下一篇论文，必须给可访问链接。`
-5. 发送 `生成学习笔记。`，确认出现 Markdown 附件。
+环境变量使用以下模板：
 
-## 4. 附件规则
+```env
+APP_HOST=0.0.0.0
+APP_PORT=8080
 
-- PDF、TXT、Markdown 会被下载并解析，单文件默认上限 25MB。
-- 图片会在上游模型支持视觉输入时使用；否则只处理文字问题。
-- 扫描版 PDF、音频和其他暂不支持的文件会返回提示，不会导致整次对话失败。
-- 所有输入和输出附件都只使用 URL，不接受 Base64。
-- 默认拒绝 localhost、私网、链路本地地址和异常 DNS 变化。
-- `QXD_ATTACHMENT_ALLOWED_HOSTS` 留空时允许通过安全检查的公网域名；确认清小搭附件域名后，可填写逗号分隔白名单进一步收紧。
-- 某些校园网或企业代理会把公网域名解析到代理私网地址。仅在可信的本地代理环境中可设置 `QXD_ALLOW_PRIVATE_DNS_PROXY=true`；公网部署必须保持 `false`。
+QXD_API_KEY=your-qxd-key
+QXD_MODEL_ID=ai-from-zero-agent
+QXD_MAX_ATTACHMENT_MB=25
+QXD_MAX_CONCURRENCY=4
+QXD_REQUEST_TIMEOUT=105
+QXD_ARTIFACT_TTL=1800
+QXD_ALLOW_PRIVATE_DNS_PROXY=false
 
-## 5. 学习笔记附件
+LLM_PROVIDER=custom
+LLM_API_KEY=your-model-key
+LLM_API_URL=https://your-provider.example/v1/chat/completions
+LLM_MODEL=your-model-name
+LLM_TIMEOUT=75
 
-设置 `PUBLIC_BASE_URL` 后，用户请求生成学习笔记时，服务会返回 `x_soda.attachments`。文件使用随机临时地址并默认保留 30 分钟，清小搭收到响应后会转存文件。
+PUBLIC_BASE_URL=https://YOUR_CLOUDBASE_DOMAIN
+```
 
-没有配置 `PUBLIC_BASE_URL` 时，笔记正文仍会直接显示，但不会产生下载附件。
+注意：
 
-## 6. 排障
+- `PUBLIC_BASE_URL` 不带 `/v1`，用于生成学习笔记下载地址。
+- `LLM_API_URL` 必须是模型供应商的完整 OpenAI-compatible 对话端点。
+- `QXD_API_KEY` 是清小搭访问本服务的门锁；`LLM_API_KEY` 是本服务访问模型的凭证。
+- 初次接入不要设置 `QXD_ATTACHMENT_ALLOWED_HOSTS`，避免未知的清小搭 OSS 域名被误拦截。确认实际域名后再配置白名单。
+- 云端不要启用 `QXD_ALLOW_PRIVATE_DNS_PROXY`。
+- CloudBase 系统默认域名适合接入验证；正式长期运行应使用已备案的自定义域名并启用 HTTPS。
 
-- `/models` 返回 `503`：云端没有配置 `QXD_API_KEY`。
-- 返回 `401`：清小搭凭证与 `QXD_API_KEY` 不一致。
-- 探测超时：确认填写的是到 `/v1` 为止的公网 HTTPS 地址，并关闭自动休眠。
-- PDF 无法解析：确认 PDF 可以选中文字；扫描版需要先进行 OCR。
-- 模型回答降级：检查 `/api/health` 中的 `llmConfigured`，并验证 `LLM_*` 变量。
-- 附件无法下载：检查文件是否超过限制、是否为公网 URL，以及附件域名白名单。
-- 公网域名被提示为私网：当前网络可能使用私网代理 DNS。本地可按上一节启用兼容开关，Railway 中不要启用。
+部署完成后先验证：
+
+```bash
+curl https://YOUR_CLOUDBASE_DOMAIN/api/health
+python tools/check_qingxiaoda_compat.py --base-url https://YOUR_CLOUDBASE_DOMAIN/v1 --key YOUR_QXD_KEY
+python tools/check_qingxiaoda_compat.py --base-url https://YOUR_CLOUDBASE_DOMAIN/v1 --key YOUR_QXD_KEY --full-chat
+```
+
+公网验收必须在关闭代理/VPN的中国大陆网络执行。脚本默认不读取 `HTTP_PROXY`、`HTTPS_PROXY` 等代理变量，并会拒绝把 `198.18.0.0/15` 等代理 fake-IP 当作直连证据。
+
+## 4. 清小搭后台填写
+
+```text
+智能体平台：标准协议接入
+API 地址：https://YOUR_CLOUDBASE_DOMAIN/v1
+API 密钥：与 QXD_API_KEY 完全一致
+鉴权方式：Bearer Token
+流式终止符：[DONE]
+usage 位置：stop 帧内
+```
+
+能力声明只勾选已经实测的能力：
+
+- 流式输出：勾选。
+- 文件输入（文档）：完成 PDF/TXT/Markdown 实测后勾选。
+- 视觉、音频、工具：当前不要勾选。
+
+点击“测试连接”后，立即在 CloudBase 日志中搜索 `qxd_request`：
+
+- 有 `GET /v1/models` 且状态为 `200`：请求已到应用，继续看最小对话日志。
+- 有请求但为 `401`：两端 `QXD_API_KEY` 不一致。
+- 完全没有 `qxd_request`：问题在 DNS、网络路由或平台到云服务的连接，不在业务代码。
+- 路径是 `/models` 而非 `/v1/models`：清小搭里填写的地址缺少 `/v1`。
+
+## 5. 上线闸门
+
+以下项目全部通过后再提交审核：
+
+1. `/api/health` 中 `agentAuthConfigured`、`publicBaseUrlConfigured`、`llmConfigured` 均为 `true`。
+2. 错误凭证访问 `/v1/models` 返回 `401`。
+3. `/v1/models` 在 5 秒内返回 `200`。
+4. `stream:true,max_tokens:1` 在 5 秒内完成，SSE 以 `[DONE]` 结束。
+5. 整轮官方探测少于 15 秒。
+6. 普通提问和真实模型回答少于 120 秒。
+7. 文本型 PDF 能生成导读；扫描版 PDF 返回明确提示而不是 `500`。
+8. 连续追问、术语解释、下一篇论文链接和学习笔记附件各完成一次实测。
+9. CloudBase 最小实例为 1，评审期间不缩容到 0。
+10. 云日志不会出现 API Key、Authorization 或完整论文正文。
+
+## 6. 上次 Railway 失败的判读
+
+现有 Railway 服务的协议响应是正确的：`/v1/models` 返回 `200`，错误凭证返回 `401`，官方最小 SSE 帧顺序完整。清小搭显示的 `SocketException` 属于建立 HTTP 连接之前的网络错误，不是 JSON、SSE、模型 Key 或 CORS 错误。
+
+本机当时启用了系统代理和 fake-IP DNS；域名被解析到 `198.18.0.0/15`，访问经过代理出口，因而本机测试成功不能证明清小搭服务器能够直连 Railway。Railway 响应头显示请求经过境外边缘节点，也与清小搭国内服务器的直连路径不同。迁移到上海 CloudBase 的目的，是消除这段跨境路由不确定性。
+
+以后只使用两类证据判断问题：
+
+1. 无代理中国大陆网络运行官方探测脚本。
+2. 云端 `qxd_request` 日志确认平台请求是否到达应用。
+
+## 7. 附件边界
+
+- 当前稳定读取 PDF、TXT、Markdown，单文件默认上限 25MB。
+- 扫描版 PDF、音频、Word/Excel/PPT 会友好提示，不会导致整次对话失败。
+- 输入和输出附件都只使用 URL，不接受 Base64。
+- 默认拒绝 localhost、私网、链路本地地址、过多重定向和异常 DNS 变化。
+- 学习笔记地址默认保留 30 分钟；清小搭收到响应后会转存。
+
+## 8. 部署参考
+
+- 清小搭《自研 Agent 接入清小搭广场 · 开发者指南（OpenAI 兼容协议）》
+- 清小搭《多模态附件对端接口文档》v1.0
+- 腾讯云 CloudBase Run：[服务设置](https://cloud.tencent.com/document/product/1243/77197)
+- 腾讯云 CloudBase Run：[服务开发说明](https://cloud.tencent.com/document/product/1243/53551)

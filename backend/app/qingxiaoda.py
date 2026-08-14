@@ -69,8 +69,13 @@ def _usage(prompt: str, completion: str) -> dict:
 async def _run_agent(request: QingxiaodaChatRequest) -> AgentResult:
     if request.max_tokens is not None and request.max_tokens <= 1:
         return AgentResult(content="OK")
-    async with _AGENT_SEMAPHORE:
-        return await asyncio.wait_for(generate_agent_response(request), timeout=settings.qxd_request_timeout)
+
+    async def run_bounded() -> AgentResult:
+        async with _AGENT_SEMAPHORE:
+            return await generate_agent_response(request)
+
+    # Queueing time counts toward the gateway deadline as well as processing time.
+    return await asyncio.wait_for(run_bounded(), timeout=settings.qxd_request_timeout)
 
 
 def _frame(

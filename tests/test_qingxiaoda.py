@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app import agent_attachments as attachment_module  # noqa: E402
 from app import agent_core as agent_core_module  # noqa: E402
 from app import artifacts as artifact_module  # noqa: E402
+from app import qingxiaoda as qingxiaoda_module  # noqa: E402
 from app.agent_attachments import (  # noqa: E402
     AttachmentError,
     AttachmentInput,
@@ -101,6 +102,7 @@ def test_models_auth_and_shape(client, monkeypatch):
     response = client.get("/v1/models", headers=auth_headers())
     assert response.status_code == 200
     assert response.json()["data"][0]["id"] == "ai-from-zero-agent"
+    assert response.headers["x-afz-request-id"]
     assert TEST_KEY not in response.text
 
     monkeypatch.setattr(settings, "qxd_api_key", "")
@@ -181,6 +183,32 @@ def test_stream_must_be_json_boolean(client):
         json={"stream": "true", "messages": [{"role": "user", "content": "你好"}]},
     )
     assert response.status_code == 422
+
+
+def test_tool_role_is_accepted_and_ignored_safely(client):
+    response = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={
+            "max_tokens": 1,
+            "messages": [
+                {"role": "tool", "content": "untrusted tool output"},
+                {"role": "user", "content": "probe"},
+            ],
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["choices"][0]["message"]["content"] == "OK"
+
+
+def test_queue_wait_counts_toward_agent_timeout(monkeypatch):
+    from app.models import QingxiaodaChatRequest
+
+    monkeypatch.setattr(qingxiaoda_module, "_AGENT_SEMAPHORE", asyncio.Semaphore(0))
+    monkeypatch.setattr(settings, "qxd_request_timeout", 0.01)
+    request = QingxiaodaChatRequest(messages=[{"role": "user", "content": "分析论文"}])
+    with pytest.raises(asyncio.TimeoutError):
+        asyncio.run(qingxiaoda_module._run_agent(request))
 
 
 def test_pdf_content_part_uses_existing_learning_pipeline(client, monkeypatch):
