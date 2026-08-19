@@ -13,7 +13,13 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from .agent_core import AgentResult, generate_agent_response, parse_conversation
 from .artifacts import artifact_response
 from .config import settings
-from .models import QingxiaodaChatRequest
+from .models import QingxiaodaChatRequest, ReaderConversationSaveRequest
+from .reader_sessions import (
+    finalize_reader_workspace,
+    reader_session_response,
+    reserve_reader_workspace,
+    save_reader_conversation,
+)
 
 
 router = APIRouter()
@@ -51,6 +57,10 @@ def _limit_content(content: str, max_tokens: int | None) -> tuple[str, str]:
     if not max_tokens:
         return content, "stop"
     max_chars = max_tokens * 4
+    if content.startswith("[在 AI-From-Zero 阅读器继续学习]"):
+        link_end = content.find("\n\n")
+        if link_end >= 0:
+            max_chars = max(max_chars, link_end + 2)
     if len(content) <= max_chars:
         return content, "stop"
     return content[:max_chars].rstrip(), "length"
@@ -64,6 +74,41 @@ def _usage(prompt: str, completion: str) -> dict:
         "completion_tokens": completion_tokens,
         "total_tokens": prompt_tokens + completion_tokens,
     }
+
+
+def _workspace_content(request: QingxiaodaChatRequest, result: AgentResult) -> tuple[str, dict | None, str]:
+    if request.max_tokens is not None and request.max_tokens <= 1:
+        return result.content, None, ""
+    try:
+        workspace = reserve_reader_workspace(request)
+    except Exception:
+        workspace = None
+    if not workspace:
+        return result.content, None, ""
+    prefix = f"[在 AI-From-Zero 阅读器继续学习]({workspace['url']})\n\n"
+    return prefix + result.content, workspace, prefix
+
+
+def _finalize_workspace(
+    request: QingxiaodaChatRequest,
+    result: AgentResult,
+    workspace: dict | None,
+    delivered_content: str,
+    prefix: str,
+) -> None:
+    if not workspace:
+        return
+    display_content = delivered_content[len(prefix):].strip() if delivered_content.startswith(prefix) else ""
+    try:
+        finalize_reader_workspace(
+            workspace["token"],
+            request,
+            delivered_content,
+            display_content,
+            result.reader_context,
+        )
+    except Exception:
+        pass
 
 
 async def _run_agent(request: QingxiaodaChatRequest) -> AgentResult:
@@ -113,7 +158,9 @@ async def _stream_completion(request: QingxiaodaChatRequest, completion_id: str,
         result = AgentResult(content="本次处理超过时间限制。请缩小论文范围或稍后重试。")
     except Exception:
         result = AgentResult(content="当前服务暂时无法完成分析，请稍后重试。")
-    content, finish_reason = _limit_content(result.content, request.max_tokens)
+    workspace_content, workspace, prefix = _workspace_content(request, result)
+    content, finish_reason = _limit_content(workspace_content, request.max_tokens)
+    _finalize_workspace(request, result, workspace, content, prefix)
     for offset in range(0, len(content), 80):
         yield _frame(completion_id, created, {"content": content[offset:offset + 80]})
     yield _frame(
@@ -170,7 +217,9 @@ async def qingxiaoda_chat_completions(
         result = AgentResult(content="本次处理超过时间限制。请缩小论文范围或稍后重试。")
     except Exception:
         result = AgentResult(content="当前服务暂时无法完成分析，请稍后重试。")
-    content, finish_reason = _limit_content(result.content, request.max_tokens)
+    workspace_content, workspace, prefix = _workspace_content(request, result)
+    content, finish_reason = _limit_content(workspace_content, request.max_tokens)
+    _finalize_workspace(request, result, workspace, content, prefix)
     payload = {
         "id": completion_id,
         "object": "chat.completion",
@@ -193,3 +242,13 @@ async def qingxiaoda_chat_completions(
 @router.get("/artifacts/{token}")
 async def download_agent_artifact(token: str):
     return artifact_response(token)
+
+
+@router.get("/api/reader-sessions/{token}")
+async def get_reader_session(token: str):
+    return reader_session_response(token)
+
+
+@router.post("/api/reader-sessions/{token}/conversation")
+async def save_reader_session_conversation(token: str, request: ReaderConversationSaveRequest):
+    return save_reader_conversation(token, [item.model_dump() for item in request.messages])

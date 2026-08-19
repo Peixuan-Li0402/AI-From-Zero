@@ -31,6 +31,8 @@ GitHub: https://github.com/Peixuan-Li0402/AI-From-Zero
 
 - 在对话中直接解释术语、生成概念链和论文学习路径。
 - 接收 PDF、TXT、Markdown 和论文链接，返回结构化导读与原文证据。
+- 每轮回答都返回同一个会话学习工作台链接；网页恢复清小搭问答、论文全文、术语高亮和学习路径。
+- 用户可在工作台继续使用原版阅读器、术语库、学习路径和网页伴学，新增问答会写回会话记录。
 - 支持标准 JSON 和 SSE 流式回答。
 - 可生成清小搭能够下载的 Markdown 学习笔记附件。
 - 无模型 Key、附件解析失败或外部服务中断时自动降级，不中断整次会话。
@@ -263,6 +265,8 @@ GitHub Actions 会自动运行这些核心检查，确保公开版本不会轻�
 
 - `GET /api/health`：服务健康状态、术语数量、模型配置状态。
 - `GET /v1/models`、`POST /v1/chat/completions`：清小搭 OpenAI-compatible Agent，使用独立 Bearer 凭证。
+- `GET /api/reader-sessions/{token}`：通过不可猜测令牌恢复清小搭会话学习工作台。
+- `POST /api/reader-sessions/{token}/conversation`：从网页端保存该工作台的伴学对话。
 - `GET /api/config`、`POST /api/config/test`、`POST /api/config/save`：本地模型配置；测试和保存只允许本机调用。
 - `POST /api/analyze`：分析论文文本。
 - `POST /api/analyze-pdf`：读取并分析 PDF。

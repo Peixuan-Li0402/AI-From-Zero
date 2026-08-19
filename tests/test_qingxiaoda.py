@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -16,6 +17,7 @@ from app import agent_attachments as attachment_module  # noqa: E402
 from app import agent_core as agent_core_module  # noqa: E402
 from app import artifacts as artifact_module  # noqa: E402
 from app import qingxiaoda as qingxiaoda_module  # noqa: E402
+from app import reader_sessions as reader_session_module  # noqa: E402
 from app.agent_attachments import (  # noqa: E402
     AttachmentError,
     AttachmentInput,
@@ -40,10 +42,13 @@ def agent_settings(monkeypatch, tmp_path):
     monkeypatch.setattr(settings, "qxd_max_attachment_mb", 25)
     monkeypatch.setattr(settings, "qxd_allow_private_dns_proxy", False)
     monkeypatch.setattr(settings, "qxd_request_timeout", 5.0)
+    monkeypatch.setattr(settings, "qxd_workspace_ttl", 604800)
+    monkeypatch.setattr(settings, "qxd_workspace_limit", 100)
     monkeypatch.setattr(settings, "llm_api_key", "")
     monkeypatch.setattr(settings, "kimi_api_key", "")
     monkeypatch.setattr(settings, "llm_provider", "kimi")
     monkeypatch.setattr(artifact_module, "ARTIFACT_DIR", tmp_path / "artifacts")
+    monkeypatch.setattr(reader_session_module, "SESSION_DIR", tmp_path / "reader_sessions")
     artifact_module._ARTIFACTS.clear()
     attachment_module._CACHE.clear()
 
@@ -176,6 +181,36 @@ def test_stream_probe_is_fast_and_has_exact_frame_order(client):
     assert done is True
 
 
+def test_small_non_probe_limit_keeps_complete_workspace_link(client, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    response = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"max_tokens": 2, "messages": [{"role": "user", "content": "你好"}]},
+    )
+    content = response.json()["choices"][0]["message"]["content"]
+    match = re.fullmatch(r"\[在 AI-From-Zero 阅读器继续学习\]\(http://testserver/\?session=([A-Za-z0-9_-]+)\)", content)
+    assert match
+    assert response.json()["choices"][0]["finish_reason"] == "length"
+    assert client.get(f"/api/reader-sessions/{match.group(1)}").status_code == 200
+
+
+def test_stream_answer_contains_reader_workspace_link(client, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    response = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"stream": True, "messages": [{"role": "user", "content": "解释 Attention"}]},
+    )
+    payloads, done = parse_sse(response.text)
+    content = "".join(item["choices"][0]["delta"].get("content", "") for item in payloads)
+    match = re.search(r"http://testserver/\?session=([A-Za-z0-9_-]+)", content)
+    assert match
+    assert payloads[-1]["choices"][0]["finish_reason"] == "stop"
+    assert done is True
+    assert client.get(f"/api/reader-sessions/{match.group(1)}").status_code == 200
+
+
 def test_stream_must_be_json_boolean(client):
     response = client.post(
         "/v1/chat/completions",
@@ -240,6 +275,176 @@ def test_pdf_content_part_uses_existing_learning_pipeline(client, monkeypatch):
     assert "学习导读" in content
     assert "阅读顺序" in content
     assert "Transformer" in content
+
+
+def test_pdf_content_part_creates_web_reader_session(client, monkeypatch):
+    async def fake_process(_item):
+        return ProcessedDocument(
+            url="https://files.example/paper.pdf",
+            filename="attention-paper.pdf",
+            text="Transformer self-attention encoder decoder method experiment. " * 20,
+            pages=[{"page": 1, "text": "Transformer uses self-attention in the encoder."}],
+            structure={"abstract": "A paper about Transformer and self-attention.", "sections": []},
+        )
+
+    monkeypatch.setattr(agent_core_module, "process_document", fake_process)
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    response = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "分析这篇论文"},
+                    {"type": "file", "file": {"url": "https://files.example/paper.pdf", "filename": "attention-paper.pdf"}},
+                ],
+            }],
+        },
+    )
+    assert response.status_code == 200
+    content = response.json()["choices"][0]["message"]["content"]
+    match = re.search(r"http://testserver/\?session=([A-Za-z0-9_-]+)", content)
+    assert match
+
+    session = client.get(f"/api/reader-sessions/{match.group(1)}")
+    assert session.status_code == 200
+    payload = session.json()
+    assert payload["title"] == "attention-paper"
+    assert payload["pageCount"] == 1
+    assert "Transformer self-attention" in payload["text"]
+    assert any(term["term"] == "Transformer" for term in payload["knownTerms"])
+    assert session.headers["cache-control"] == "private, no-store"
+    assert session.headers["referrer-policy"] == "no-referrer"
+
+
+def test_each_agent_turn_reuses_one_reader_workspace_and_saves_history(client, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    first_request = {
+        "user": "qxd-user-1",
+        "messages": [{"role": "user", "content": "解释 Transformer"}],
+    }
+    first_response = client.post("/v1/chat/completions", headers=auth_headers(), json=first_request)
+    first_content = first_response.json()["choices"][0]["message"]["content"]
+    first_match = re.search(r"http://testserver/\?session=([A-Za-z0-9_-]+)", first_content)
+    assert first_match
+
+    second_request = {
+        "user": "qxd-user-1",
+        "messages": [
+            first_request["messages"][0],
+            {"role": "assistant", "content": first_content},
+            {"role": "user", "content": "它和 Attention 有什么关系？"},
+        ],
+    }
+    second_response = client.post("/v1/chat/completions", headers=auth_headers(), json=second_request)
+    second_content = second_response.json()["choices"][0]["message"]["content"]
+    second_match = re.search(r"http://testserver/\?session=([A-Za-z0-9_-]+)", second_content)
+    assert second_match
+    assert second_match.group(1) == first_match.group(1)
+
+    workspace = client.get(f"/api/reader-sessions/{first_match.group(1)}")
+    assert workspace.status_code == 200
+    payload = workspace.json()
+    assert [item["role"] for item in payload["conversation"]] == ["user", "assistant", "user", "assistant"]
+    assert payload["turnCount"] == 2
+    assert "Transformer" in payload["conversation"][0]["content"]
+    assert not any(key.startswith("_") for key in payload)
+
+
+def test_explicit_conversation_id_reuses_workspace_without_full_history(client, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    first = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"conversation_id": "conversation-42", "messages": [{"role": "user", "content": "你好"}]},
+    )
+    second = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"conversation_id": "conversation-42", "messages": [{"role": "user", "content": "继续学习"}]},
+    )
+    first_token = re.search(r"session=([A-Za-z0-9_-]+)", first.json()["choices"][0]["message"]["content"])
+    second_token = re.search(r"session=([A-Za-z0-9_-]+)", second.json()["choices"][0]["message"]["content"])
+    assert first_token and second_token
+    assert first_token.group(1) == second_token.group(1)
+
+
+def test_web_reader_can_save_conversation_updates(client, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    response = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"messages": [{"role": "user", "content": "建立学习会话"}]},
+    )
+    token = re.search(r"session=([A-Za-z0-9_-]+)", response.json()["choices"][0]["message"]["content"]).group(1)
+    saved = client.post(
+        f"/api/reader-sessions/{token}/conversation",
+        json={
+            "messages": [
+                {"role": "user", "content": "网页里的问题"},
+                {"role": "assistant", "content": "网页里的回答"},
+            ]
+        },
+    )
+    assert saved.status_code == 200
+    assert saved.json()["messageCount"] == 2
+    restored = client.get(f"/api/reader-sessions/{token}").json()
+    assert restored["conversation"][-1]["content"] == "网页里的回答"
+
+
+def test_web_and_qingxiaoda_turns_merge_without_repeating_history(client, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    first_user = {"role": "user", "content": "先解释 Transformer"}
+    first = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"messages": [first_user]},
+    )
+    first_content = first.json()["choices"][0]["message"]["content"]
+    token = re.search(r"session=([A-Za-z0-9_-]+)", first_content).group(1)
+    original = client.get(f"/api/reader-sessions/{token}").json()["conversation"]
+    client.post(
+        f"/api/reader-sessions/{token}/conversation",
+        json={"messages": original + [
+            {"role": "user", "content": "网页追问"},
+            {"role": "assistant", "content": "网页回答"},
+        ]},
+    )
+
+    second = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"messages": [
+            first_user,
+            {"role": "assistant", "content": first_content},
+            {"role": "user", "content": "回到清小搭继续"},
+        ]},
+    )
+    assert token in second.json()["choices"][0]["message"]["content"]
+    conversation = client.get(f"/api/reader-sessions/{token}").json()["conversation"]
+    contents = [item["content"] for item in conversation]
+    assert contents.count("先解释 Transformer") == 1
+    assert "网页追问" in contents
+    assert "回到清小搭继续" in contents
+    assert [item["role"] for item in conversation] == ["user", "assistant", "user", "assistant", "user", "assistant"]
+
+
+def test_expired_reader_session_returns_404(client, monkeypatch):
+    monkeypatch.setattr(settings, "public_base_url", "http://testserver")
+    session = reader_session_module.create_reader_session(
+        ProcessedDocument(url="https://files.example/paper.txt", filename="paper.txt", text="paper text " * 20),
+        [],
+        "summary",
+    )
+    token = urlparse(session["url"]).query.split("=", 1)[1]
+    path = reader_session_module.SESSION_DIR / f"{token}.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["_expiresAtEpoch"] = time.time() - 1
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    response = client.get(f"/api/reader-sessions/{token}")
+    assert response.status_code == 404
 
 
 def test_unsupported_file_id_degrades_without_500(client):

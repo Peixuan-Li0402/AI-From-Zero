@@ -92,3 +92,12 @@ class QingxiaodaChatRequest(BaseModel):
     user: str | None = None
 
     model_config = ConfigDict(extra="allow")
+
+
+class ReaderConversationMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=8000)
+
+
+class ReaderConversationSaveRequest(BaseModel):
+    messages: list[ReaderConversationMessage] = Field(default_factory=list, max_length=80)

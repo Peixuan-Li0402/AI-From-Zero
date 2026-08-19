@@ -146,7 +146,7 @@ def _discover_provider() -> str:
 
 class Settings:
     app_name = "AI From Zero"
-    app_version = "0.4.0"
+    app_version = "0.6.0"
 
     def __init__(self):
         self.reload()
@@ -179,6 +179,8 @@ class Settings:
         self.qxd_max_concurrency = max(1, _get_int("QXD_MAX_CONCURRENCY", 4))
         self.qxd_request_timeout = min(115.0, max(5.0, _get_float("QXD_REQUEST_TIMEOUT", 105.0)))
         self.qxd_artifact_ttl = max(300, _get_int("QXD_ARTIFACT_TTL", 1800))
+        self.qxd_workspace_ttl = max(1800, _get_int("QXD_WORKSPACE_TTL", 604800))
+        self.qxd_workspace_limit = min(500, max(12, _get_int("QXD_WORKSPACE_LIMIT", 100)))
         self.qxd_allow_private_dns_proxy = _get_bool("QXD_ALLOW_PRIVATE_DNS_PROXY", False)
         self.cors_allowed_origins = _get_csv(
             "CORS_ALLOWED_ORIGINS",

@@ -66,6 +66,7 @@ async def health():
         "agentAuthConfigured": settings.qxd_configured,
         "publicBaseUrlConfigured": bool(settings.public_base_url),
         "attachmentLimitMb": settings.qxd_max_attachment_mb,
+        "workspaceTtlSeconds": settings.qxd_workspace_ttl,
         "hoshino": "AI-From-Zero ready",
     }
 

@@ -15,6 +15,7 @@ AI-From-Zero 通过清小搭“标准协议接入”上线。清小搭中的用�
 | `usage` | 非流式在响应顶层；流式在 stop 帧 |
 | 文件只通过 URL 输入 | 支持 `file.url`；不接受 Base64；`file_id` 单独出现时友好降级 |
 | 输出附件 | `x_soda.attachments`；流式只在 stop 帧出现一次 |
+| 会话学习工作台 | 每轮返回稳定链接；同一会话恢复问答记录、论文正文、术语高亮和学习路径 |
 
 不要把网站根地址或完整对话端点填入清小搭。`API 地址`必须精确填到 `/v1`：
 
@@ -35,6 +36,8 @@ QXD_MAX_ATTACHMENT_MB=25
 QXD_MAX_CONCURRENCY=4
 QXD_REQUEST_TIMEOUT=105
 QXD_ARTIFACT_TTL=1800
+QXD_WORKSPACE_TTL=604800
+QXD_WORKSPACE_LIMIT=100
 ```
 
 生成随机凭证：
@@ -69,7 +72,7 @@ Dockerfile：Dockerfile
 日志：标准输出
 ```
 
-最小实例不能为 0，否则冷启动可能超过清小搭单项 5 秒探测。当前学习笔记附件临时保存在实例本地，因此评审阶段固定为单实例；未来改为对象存储后再扩容。
+最小实例不能为 0，否则冷启动可能超过清小搭单项 5 秒探测。当前学习笔记和会话工作台临时保存在实例本地，因此评审阶段固定为单实例；迁移到数据库和对象存储后再扩容。
 
 环境变量使用以下模板：
 
@@ -83,6 +86,8 @@ QXD_MAX_ATTACHMENT_MB=25
 QXD_MAX_CONCURRENCY=4
 QXD_REQUEST_TIMEOUT=105
 QXD_ARTIFACT_TTL=1800
+QXD_WORKSPACE_TTL=604800
+QXD_WORKSPACE_LIMIT=100
 QXD_ALLOW_PRIVATE_DNS_PROXY=false
 
 LLM_PROVIDER=custom
@@ -96,7 +101,10 @@ PUBLIC_BASE_URL=https://YOUR_CLOUDBASE_DOMAIN
 
 注意：
 
-- `PUBLIC_BASE_URL` 不带 `/v1`，用于生成学习笔记下载地址。
+- `PUBLIC_BASE_URL` 不带 `/v1`，用于生成学习笔记下载地址和会话学习工作台链接。
+- `QXD_ARTIFACT_TTL` 只控制学习笔记下载时间；`QXD_WORKSPACE_TTL` 控制会话工作台保留时间，默认 7 天。
+- 工作台使用不可猜测令牌。同一清小搭对话会复用同一链接；协议携带会话 ID 时优先使用，否则根据完整 `messages` 历史续接。
+- 工作台保存于单实例本地目录，重新部署或实例被替换时可能丢失。评审阶段保持最小/最大实例均为 1；长期运行应迁移到 CloudBase 数据库或对象存储。
 - `LLM_API_URL` 必须是模型供应商的完整 OpenAI-compatible 对话端点。
 - `QXD_API_KEY` 是清小搭访问本服务的门锁；`LLM_API_KEY` 是本服务访问模型的凭证。
 - 初次接入不要设置 `QXD_ATTACHMENT_ALLOWED_HOSTS`，避免未知的清小搭 OSS 域名被误拦截。确认实际域名后再配置白名单。

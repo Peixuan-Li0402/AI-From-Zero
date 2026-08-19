@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 <title>🧠 从零开始的人工智能生活 — 论文溯源阅读</title>
 <link rel="stylesheet" href="static/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
@@ -198,7 +199,7 @@
     <div class="hoshino-avatar">🐾</div>
     <div class="hoshino-info">
       <strong>小鸟游星野</strong>
-      <small>大叔随时待机っす</small>
+      <small id="companionStatus">大叔随时待机っす</small>
     </div>
     <button id="clearChat" class="icon-btn" title="清空对话">🗑️</button>
   </div>
@@ -271,6 +272,8 @@
 const API_BASE = "";
 let _providers = [];
 let _chatHistory = [];
+let _activeReaderSessionToken = "";
+let _conversationSaveQueue = Promise.resolve();
 let _currentConfig = null;
 let _demoCases = [];
 const termDetailCache = new Map();
@@ -336,6 +339,67 @@ function addChatMessageRaw(text, from = "hoshino") {
   msg.appendChild(bubble);
   $("chatMessages").appendChild(msg);
   msg.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function formatChatMarkdown(text) {
+  return escapeHtml(String(text || ""))
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/^#{1,3}\s+(.+)$/gm, "<strong>$1</strong>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/^[-*]\s+(.+)$/gm, "• $1")
+    .replace(/\n/g, "<br>");
+}
+
+function addMappedChatMessage(message, options = {}) {
+  const role = message?.role === "user" ? "sensei" : "hoshino";
+  const msg = document.createElement("div");
+  msg.className = `msg msg-${role}`;
+  const source = options.source ? `<div class="msg-source">${escapeHtml(options.source)}</div>` : "";
+  const rawContent = String(message?.content || "");
+  const content = rawContent.length > 900
+    ? `${formatChatMarkdown(rawContent.slice(0, 300))}…<details class="msg-long"><summary>展开完整内容</summary><div>${formatChatMarkdown(rawContent)}</div></details>`
+    : formatChatMarkdown(rawContent);
+  const attachments = (message?.attachments || []).length
+    ? `<div class="msg-attachments">${message.attachments.map((item) => `<span>${escapeHtml(item.name || item.type || "附件")}</span>`).join("")}</div>`
+    : "";
+  msg.innerHTML = `<div class="msg-bubble">${source}${content}${attachments}</div>`;
+  $("chatMessages").appendChild(msg);
+  if (options.scroll !== false) msg.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function renderSyncedConversation(messages, turnCount = 0) {
+  const conversation = (messages || []).filter((item) => ["user", "assistant"].includes(item?.role) && item?.content);
+  $("chatMessages").innerHTML = "";
+  _chatHistory = conversation.map((item) => ({ role: item.role, content: String(item.content) }));
+  if (!conversation.length) {
+    addChatMessage("学习会话已建立。上传论文或直接提问。", "hoshino");
+  } else {
+    conversation.forEach((item) => addMappedChatMessage(item, {
+      source: item.role === "user" ? "清小搭用户" : "AI-From-Zero Agent",
+      scroll: false,
+    }));
+    $("chatMessages").lastElementChild?.scrollIntoView({ block: "end" });
+  }
+  $("companionStatus").textContent = `已同步清小搭会话 · ${turnCount || conversation.filter((item) => item.role === "user").length} 轮`;
+}
+
+function persistActiveReaderConversation() {
+  if (!_activeReaderSessionToken) return _conversationSaveQueue;
+  const token = _activeReaderSessionToken;
+  const messages = _chatHistory.slice(-80);
+  _conversationSaveQueue = _conversationSaveQueue.then(async () => {
+    try {
+      await fetch(`${API_BASE}/api/reader-sessions/${encodeURIComponent(token)}/conversation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      });
+    } catch (_err) {
+      return null;
+    }
+    return null;
+  });
+  return _conversationSaveQueue;
 }
 
 async function loadConfig() {
@@ -1432,6 +1496,48 @@ async function startPaperFromPath(paper, button = null) {
   }
 }
 
+async function loadReaderSessionFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("session");
+  if (!token) return;
+
+  _activeReaderSessionToken = token;
+  switchTopTab("reader");
+  $("analysisResults").hidden = true;
+  $("learningDashboard").hidden = true;
+  setPaperLoadAnimation(true, "同步清小搭论文", "载入正文与术语", 24);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  try {
+    const resp = await fetch(`${API_BASE}/api/reader-sessions/${encodeURIComponent(token)}`, {
+      cache: "no-store",
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "阅读会话载入失败");
+    const text = String(data.text || "");
+    renderSyncedConversation(data.conversation || [], data.turnCount || 0);
+    if (text.length >= 50) {
+      $("paperTitle").value = data.title || "清小搭论文";
+      $("paperText").value = text;
+      setPaperLoadAnimation(true, "论文已同步", "恢复术语高亮与学习路径", 78);
+      renderAnalysis(data, text, "qingxiaoda-session");
+      $("analysisResults").hidden = false;
+      const pageText = data.pageCount ? `${data.pageCount} 页，` : "";
+      setPdfStatus(`已从清小搭载入，${pageText}${text.length} 个字符`, "ready");
+    } else {
+      $("paperTitle").value = "";
+      $("paperText").value = "";
+      setPdfStatus("清小搭会话已同步，可上传 PDF 或粘贴论文", "ready");
+    }
+    setPaperLoadAnimation(false);
+  } catch (err) {
+    setPaperLoadAnimation(true, "链接不可用", err.message, 100);
+    setPdfStatus(err.message, "error");
+    addChatMessage(`阅读会话载入失败：${escapeHtml(err.message)}`);
+    setTimeout(() => setPaperLoadAnimation(false), 3200);
+  }
+}
+
 async function loadAcademicExplain(termName) {
   const key = termCacheKey(termName);
   const cached = termAcademicCache.get(key);
@@ -1522,6 +1628,7 @@ async function sendChat() {
 
   addChatMessage(text, "sensei");
   _chatHistory.push({ role: "user", content: text });
+  persistActiveReaderConversation();
   $("btnChatSend").disabled = true;
 
   try {
@@ -1545,10 +1652,18 @@ async function sendChat() {
     const prefix = data.llmStatus === "missing_key"
       ? `<div class="llm-mini">本地模式</div>`
       : (data.llmStatus === "error" ? `<div class="llm-mini error">模型暂不可用，已降级</div>` : "");
-    addChatMessage(prefix + escapeHtml(data.reply || "大叔暂时没想好怎么回答。").replace(/\n/g, "<br>"));
+    addMappedChatMessage({
+      role: "assistant",
+      content: data.reply || "暂时无法回答。",
+    }, { source: _activeReaderSessionToken ? "网页伴学" : "AI-From-Zero" });
+    if (prefix) {
+      $("chatMessages").lastElementChild?.querySelector(".msg-bubble")?.insertAdjacentHTML("afterbegin", prefix);
+    }
     _chatHistory.push({ role: "assistant", content: data.reply || "" });
+    persistActiveReaderConversation();
   } catch (err) {
     addChatMessage(`伴学接口出错了：${escapeHtml(err.message)}<br>先试试问一个已高亮的术语，或者检查模型配置。`);
+    persistActiveReaderConversation();
   } finally {
     $("btnChatSend").disabled = false;
   }
@@ -1687,6 +1802,7 @@ loadConfig();
 loadDemoCases();
 loadTermKB();
 loadLearnPath();
+loadReaderSessionFromUrl();
 
 // ═════════════════════════════════
 //  案例分析
@@ -1753,6 +1869,7 @@ $("termModal").addEventListener("click", (e) => {
 $("clearChat").addEventListener("click", () => {
   $("chatMessages").innerHTML = "";
   _chatHistory = [];
+  persistActiveReaderConversation();
   addChatMessage("呜嘿～对话清空っす！继续聊吧🐾");
 });
 
