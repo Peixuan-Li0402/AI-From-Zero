@@ -6,6 +6,7 @@ AI-From-Zero/
 │   ├── app/
 │   │   ├── agent_attachments.py # 清小搭附件下载、SSRF 防护和解析缓存
 │   │   ├── agent_core.py     # 论文学习智能体编排
+│   │   ├── agent_runtime.py  # 意图路由、学习画像、混合检索与概念桥
 │   │   ├── analysis.py      # 文本/PDF 分析、长文分块
 │   │   ├── artifacts.py     # 临时学习笔记附件
 │   │   ├── chat.py          # 右侧 AI 伴学
@@ -28,18 +29,22 @@ AI-From-Zero/
 ├── knowledge/
 │   ├── learning_paths.json
 │   ├── term_kb.json         # 820 条双语术语
-│   └── term_kb.json.bak
+│   └── expand_round*.py
+├── evals/                   # 严格隔离的 train/dev/test Agent 评测集
 ├── tests/
 │   ├── test_api.py
+│   ├── test_agent_v2.py
 │   ├── test_qingxiaoda.py
 │   └── test_release_readiness.py
 ├── tools/
 │   ├── bootstrap_openclaw_env.py
 │   ├── check_api_smoke.py
+│   ├── check_agent_eval_split.py
 │   ├── check_qingxiaoda_compat.py
 │   ├── check_term_kb.py
 │   ├── expand_term_kb_bilingual.py
 │   ├── fill_term_placeholders.py
+│   ├── eval_agent_v2.py
 │   ├── openclaw_ai_from_zero.py
 │   ├── pdf2text.py
 │   └── repair_term_kb.py

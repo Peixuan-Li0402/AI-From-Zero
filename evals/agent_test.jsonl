@@ -1,0 +1,8 @@
+{"id":"test-moe-term","topic":"mixture-of-experts","question":"MoE 到底是什么","expected_intent":"term","must_contain":["MoE"]}
+{"id":"test-flashattention-paper","topic":"flashattention","question":"推荐 FlashAttention 的论文","expected_intent":"paper_search","must_contain":["推荐阅读"]}
+{"id":"test-dpo-term","topic":"dpo","question":"解释 DPO 的核心想法","expected_intent":"term","must_contain":["DPO"]}
+{"id":"test-nerf-path","topic":"nerf","question":"我想系统学习 NeRF，给论文学习路径","expected_intent":"learning_path","must_contain":["论文学习路径"]}
+{"id":"test-raft-term","topic":"raft","question":"Raft 是什么","expected_intent":"term","must_contain":["Raft"]}
+{"id":"test-mvcc-term","topic":"mvcc","question":"解释 MVCC","expected_intent":"term","must_contain":["MVCC"]}
+{"id":"test-fuzzing-term","topic":"fuzzing","question":"Fuzzing 的用途是什么","expected_intent":"term","must_contain":["Fuzzing"]}
+{"id":"test-ssa-term","topic":"ssa","question":"编译器里的 SSA 是什么","expected_intent":"term","must_contain":["SSA"]}

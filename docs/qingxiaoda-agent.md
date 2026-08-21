@@ -38,6 +38,11 @@ QXD_REQUEST_TIMEOUT=105
 QXD_ARTIFACT_TTL=1800
 QXD_WORKSPACE_TTL=604800
 QXD_WORKSPACE_LIMIT=100
+AGENT_LLM_TIMEOUT=28
+AGENT_MAX_TOKENS=1000
+AGENT_REALTIME_SEARCH=true
+AGENT_SEARCH_TIMEOUT=4.5
+AGENT_SEARCH_CACHE_TTL=600
 ```
 
 生成随机凭证：
@@ -90,6 +95,12 @@ QXD_WORKSPACE_TTL=604800
 QXD_WORKSPACE_LIMIT=100
 QXD_ALLOW_PRIVATE_DNS_PROXY=false
 
+AGENT_LLM_TIMEOUT=28
+AGENT_MAX_TOKENS=1000
+AGENT_REALTIME_SEARCH=true
+AGENT_SEARCH_TIMEOUT=4.5
+AGENT_SEARCH_CACHE_TTL=600
+
 LLM_PROVIDER=custom
 LLM_API_KEY=your-model-key
 LLM_API_URL=https://your-provider.example/v1/chat/completions
@@ -104,6 +115,8 @@ PUBLIC_BASE_URL=https://YOUR_CLOUDBASE_DOMAIN
 - `PUBLIC_BASE_URL` 不带 `/v1`，用于生成学习笔记下载地址和会话学习工作台链接。
 - `QXD_ARTIFACT_TTL` 只控制学习笔记下载时间；`QXD_WORKSPACE_TTL` 控制会话工作台保留时间，默认 7 天。
 - 工作台使用不可猜测令牌。同一清小搭对话会复用同一链接；协议携带会话 ID 时优先使用，否则根据完整 `messages` 历史续接。
+- `AGENT_SEARCH_TIMEOUT` 是每个实时论文来源的上限，三个来源并发执行；超时后使用缓存或本地知识库。
+- `AGENT_LLM_TIMEOUT` 应小于 `QXD_REQUEST_TIMEOUT`，给协议封装、会话保存和本地回退留出时间。
 - 工作台保存于单实例本地目录，重新部署或实例被替换时可能丢失。评审阶段保持最小/最大实例均为 1；长期运行应迁移到 CloudBase 数据库或对象存储。
 - `LLM_API_URL` 必须是模型供应商的完整 OpenAI-compatible 对话端点。
 - `QXD_API_KEY` 是清小搭访问本服务的门锁；`LLM_API_KEY` 是本服务访问模型的凭证。

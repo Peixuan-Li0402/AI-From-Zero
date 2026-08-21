@@ -1,0 +1,8 @@
+{"id":"test2-kv-cache-term","topic":"kv-cache","question":"解释 KV Cache 为什么能加速推理","expected_intent":"term","must_contain":["KV Cache"]}
+{"id":"test2-speculative-paper","topic":"speculative-decoding","question":"推荐 Speculative Decoding 的论文","expected_intent":"paper_search","must_contain":["推荐阅读"]}
+{"id":"test2-contrastive-path","topic":"contrastive-learning","question":"给我 Contrastive Learning 的论文学习路线","expected_intent":"learning_path","must_contain":["论文学习路径"]}
+{"id":"test2-mask-rcnn-paper","topic":"mask-rcnn","question":"找一下 Mask R-CNN 的经典论文","expected_intent":"paper_search","must_contain":["推荐阅读"]}
+{"id":"test2-paxos-term","topic":"paxos","question":"Paxos 是什么","expected_intent":"term","must_contain":["Paxos"]}
+{"id":"test2-lsm-tree-term","topic":"lsm-tree","question":"简单讲讲 LSM Tree","expected_intent":"term","must_contain":["LSM Tree"]}
+{"id":"test2-property-testing-term","topic":"property-based-testing","question":"Property-Based Testing 有什么用","expected_intent":"term","must_contain":["Property-Based Testing"]}
+{"id":"test2-type-inference-term","topic":"type-inference","question":"解释 Type Inference","expected_intent":"term","must_contain":["Type Inference"]}

@@ -30,6 +30,7 @@ REQUIRED_FILES = [
     "start_windows.ps1",
     "start.sh",
     "backend/server.py",
+    "backend/app/agent_runtime.py",
     "backend/app/main.py",
     "backend/requirements.txt",
     "frontend/index.html",
@@ -39,8 +40,15 @@ REQUIRED_FILES = [
     "docs/competition/demo-script.md",
     "docs/competition/scoring-map.md",
     "docs/qingxiaoda-agent.md",
+    "docs/agent-v2-research.md",
+    "evals/agent_train.jsonl",
+    "evals/agent_dev.jsonl",
+    "evals/agent_test.jsonl",
+    "evals/agent_test_round2.jsonl",
     "tools/bootstrap_openclaw_env.py",
     "tools/check_api_smoke.py",
+    "tools/check_agent_eval_split.py",
+    "tools/eval_agent_v2.py",
     "tools/check_qingxiaoda_compat.py",
     "tools/check_term_kb.py",
     "tools/openclaw_ai_from_zero.py",
@@ -192,6 +200,11 @@ def check_term_kb(results: list[tuple[str, bool, str]]) -> None:
     add_result(results, "term-kb", result.returncode == 0, (result.stdout or result.stderr).strip())
 
 
+def check_agent_eval_split(results: list[tuple[str, bool, str]]) -> None:
+    result = run([sys.executable, "tools/check_agent_eval_split.py"], timeout=30)
+    add_result(results, "agent-eval-split", result.returncode == 0, (result.stdout or result.stderr).strip())
+
+
 def check_backend_import(results: list[tuple[str, bool, str]]) -> None:
     script = "import sys; sys.path.insert(0, 'backend'); from app.main import create_app; app=create_app(); print(app.title)"
     result = run([sys.executable, "-c", script], timeout=40)
@@ -265,6 +278,7 @@ def main() -> int:
     check_no_secrets(results)
     check_start_scripts(results)
     check_term_kb(results)
+    check_agent_eval_split(results)
     check_backend_import(results)
     check_frontend_js(results, strict=args.strict)
     check_api_health(results, base_url=args.base_url or None, strict=args.strict)

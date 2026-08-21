@@ -67,6 +67,11 @@ async def health():
         "publicBaseUrlConfigured": bool(settings.public_base_url),
         "attachmentLimitMb": settings.qxd_max_attachment_mb,
         "workspaceTtlSeconds": settings.qxd_workspace_ttl,
+        "agentRuntime": "hybrid-evidence-v2",
+        "realtimeSearch": settings.agent_realtime_search,
+        "agentSearchTimeoutSeconds": settings.agent_search_timeout,
+        "agentLlmTimeoutSeconds": settings.agent_llm_timeout,
+        "agentMaxTokens": settings.agent_max_tokens,
         "hoshino": "AI-From-Zero ready",
     }
 

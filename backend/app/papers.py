@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import re
+import time
 import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import datetime
@@ -13,6 +15,11 @@ from .terms import related_papers_for_term, terms
 
 MAX_PDF_BYTES = 24 * 1024 * 1024
 ARXIV_NS = {"atom": "http://www.w3.org/2005/Atom"}
+_SEARCH_CACHE: dict[str, tuple[float, dict]] = {}
+_PROVIDER_COOLDOWN_UNTIL: dict[str, float] = {}
+_SEARCH_CACHE_TTL_SECONDS = 600.0
+_PROVIDER_COOLDOWN_SECONDS = 45.0
+_SEARCH_CACHE_LIMIT = 128
 
 CANONICAL_PAPERS: dict[str, dict] = {
     "word2vec": {
@@ -567,7 +574,9 @@ def search_papers(query: str, limit: int = 8, external: bool = True) -> dict:
 
     canonical = _canonical_for_query(query)
     if canonical:
-        add_unique(enrich_paper_resource(canonical, "本地经典论文映射"))
+        canonical_item = enrich_paper_resource(canonical, "本地经典论文映射")
+        canonical_item.setdefault("source", "curated")
+        add_unique(canonical_item)
     local_items = _local_paper_search(query, limit)
     for paper in local_items:
         add_unique(paper)
@@ -591,6 +600,102 @@ def search_papers(query: str, limit: int = 8, external: bool = True) -> dict:
                 break
 
     return {"query": query, "papers": papers[:limit], "sourceStatus": status}
+
+
+def _copy_search_payload(payload: dict) -> dict:
+    return {
+        "query": payload.get("query", ""),
+        "papers": [dict(item) for item in payload.get("papers", [])],
+        "sourceStatus": dict(payload.get("sourceStatus", {})),
+        "cached": bool(payload.get("cached", False)),
+        "latencyMs": int(payload.get("latencyMs", 0)),
+    }
+
+
+def _cache_search(key: str, payload: dict, ttl_seconds: float) -> None:
+    if len(_SEARCH_CACHE) >= _SEARCH_CACHE_LIMIT:
+        oldest = min(_SEARCH_CACHE, key=lambda item: _SEARCH_CACHE[item][0])
+        _SEARCH_CACHE.pop(oldest, None)
+    _SEARCH_CACHE[key] = (time.monotonic() + ttl_seconds, _copy_search_payload(payload))
+
+
+async def search_papers_realtime(
+    query: str,
+    limit: int = 8,
+    *,
+    timeout: float = 4.5,
+    cache_ttl: float = _SEARCH_CACHE_TTL_SECONDS,
+) -> dict:
+    """Run bounded concurrent scholarly search while preserving local results."""
+    started = time.perf_counter()
+    query = _clean(query)
+    limit = max(1, min(int(limit or 8), 20))
+    local_payload = search_papers(query, limit, external=False)
+    if not query or len(local_payload.get("papers", [])) >= limit:
+        local_payload["cached"] = False
+        local_payload["latencyMs"] = round((time.perf_counter() - started) * 1000)
+        return local_payload
+
+    cache_key = f"{query.lower()}::{limit}"
+    cached = _SEARCH_CACHE.get(cache_key)
+    if cached and cached[0] > time.monotonic():
+        payload = _copy_search_payload(cached[1])
+        payload["cached"] = True
+        payload["latencyMs"] = round((time.perf_counter() - started) * 1000)
+        return payload
+    if cached:
+        _SEARCH_CACHE.pop(cache_key, None)
+
+    providers = {
+        "arxiv": _arxiv_search,
+        "openalex": _openalex_search,
+        "semanticScholar": _semantic_scholar_search,
+    }
+    remaining = max(1, limit - len(local_payload.get("papers", [])))
+    provider_timeout = max(1.0, min(float(timeout), 5.0))
+
+    async def run_provider(name: str, function) -> tuple[str, list[dict], str]:
+        if _PROVIDER_COOLDOWN_UNTIL.get(name, 0.0) > time.monotonic():
+            return name, [], "cooldown"
+        try:
+            items = await asyncio.wait_for(
+                asyncio.to_thread(function, query, remaining),
+                timeout=provider_timeout,
+            )
+            _PROVIDER_COOLDOWN_UNTIL.pop(name, None)
+            return name, items, f"{len(items)} results"
+        except asyncio.TimeoutError:
+            _PROVIDER_COOLDOWN_UNTIL[name] = time.monotonic() + _PROVIDER_COOLDOWN_SECONDS
+            return name, [], "timeout"
+        except Exception as exc:
+            _PROVIDER_COOLDOWN_UNTIL[name] = time.monotonic() + _PROVIDER_COOLDOWN_SECONDS
+            return name, [], f"error: {type(exc).__name__}"
+
+    tasks = [run_provider(name, function) for name, function in providers.items()]
+    results = await asyncio.gather(*tasks)
+    papers = list(local_payload.get("papers", []))
+    seen = {_paper_key(item) for item in papers if _paper_key(item)}
+    status = dict(local_payload.get("sourceStatus", {}))
+    for name, items, provider_status in results:
+        status[name] = provider_status
+        for item in items:
+            key = _paper_key(item)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            papers.append(item)
+            if len(papers) >= limit:
+                break
+
+    payload = {
+        "query": query,
+        "papers": papers[:limit],
+        "sourceStatus": status,
+        "cached": False,
+        "latencyMs": round((time.perf_counter() - started) * 1000),
+    }
+    _cache_search(cache_key, payload, max(30.0, float(cache_ttl)))
+    return payload
 
 
 def _download_pdf_text(url: str) -> dict:

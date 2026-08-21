@@ -33,6 +33,11 @@ jobs:
       - name: Run API tests
         run: python -m pytest
 
+      - name: Check Agent evaluation isolation
+        run: |
+          python tools/check_agent_eval_split.py
+          python tools/eval_agent_v2.py --split dev
+
       - name: Start backend for smoke test
         run: |
           python backend/server.py > server.log 2>&1 &

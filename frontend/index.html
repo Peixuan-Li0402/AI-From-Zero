@@ -208,6 +208,11 @@
     <button class="chip small-chip" data-chat-prompt="请围绕这篇论文的关键术语整理概念链条">概念链</button>
     <button class="chip small-chip" data-chat-prompt="我下一步应该补哪些知识？">下一步</button>
   </div>
+  <div class="agent-compass" id="agentCompass" hidden>
+    <div><span>当前位置</span><strong id="agentLevel">探索中</strong></div>
+    <div><span>本轮目标</span><strong id="agentGoal">系统学习</strong></div>
+    <p id="agentSources"></p>
+  </div>
   <div class="hoshino-messages" id="chatMessages">
     <div class="msg msg-hoshino">
       <div class="msg-bubble">
@@ -381,6 +386,19 @@ function renderSyncedConversation(messages, turnCount = 0) {
     $("chatMessages").lastElementChild?.scrollIntoView({ block: "end" });
   }
   $("companionStatus").textContent = `已同步清小搭会话 · ${turnCount || conversation.filter((item) => item.role === "user").length} 轮`;
+}
+
+function renderAgentCompass(state) {
+  const compass = $("agentCompass");
+  if (!state || !Object.keys(state).length) {
+    compass.hidden = true;
+    return;
+  }
+  $("agentLevel").textContent = state.learnerLevel || "探索中";
+  $("agentGoal").textContent = state.learnerGoal || "系统学习";
+  const sources = (state.sources || []).slice(0, 3);
+  $("agentSources").textContent = sources.length ? `依据：${sources.join(" · ")}` : "";
+  compass.hidden = false;
 }
 
 function persistActiveReaderConversation() {
@@ -1516,6 +1534,7 @@ async function loadReaderSessionFromUrl() {
     if (!resp.ok) throw new Error(data.detail || "阅读会话载入失败");
     const text = String(data.text || "");
     renderSyncedConversation(data.conversation || [], data.turnCount || 0);
+    renderAgentCompass(data.agentState || {});
     if (text.length >= 50) {
       $("paperTitle").value = data.title || "清小搭论文";
       $("paperText").value = text;

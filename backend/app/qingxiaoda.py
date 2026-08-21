@@ -10,7 +10,8 @@ from collections.abc import AsyncIterator
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from .agent_core import AgentResult, generate_agent_response, parse_conversation
+from .agent_core import AgentResult, generate_agent_response, parse_conversation, quick_fallback_response
+from .agent_runtime import route_agent_request
 from .artifacts import artifact_response
 from .config import settings
 from .models import QingxiaodaChatRequest, ReaderConversationSaveRequest
@@ -20,6 +21,7 @@ from .reader_sessions import (
     reserve_reader_workspace,
     save_reader_conversation,
 )
+from .terms import extract_terms_from_text
 
 
 router = APIRouter()
@@ -151,13 +153,19 @@ async def _stream_completion(request: QingxiaodaChatRequest, completion_id: str,
     yield _frame(completion_id, created, {"role": "assistant"})
     is_probe = request.max_tokens is not None and request.max_tokens <= 1
     if not is_probe:
-        yield _frame(completion_id, created, {"reasoning": "正在读取论文与学习上下文"})
+        parsed = parse_conversation(request)
+        quick_plan = route_agent_request(
+            parsed.latest_user_text,
+            has_documents=bool(parsed.files),
+            has_focus_term=bool(extract_terms_from_text(parsed.latest_user_text)),
+        )
+        yield _frame(completion_id, created, {"reasoning": quick_plan.progress})
     try:
         result = await _run_agent(request)
     except asyncio.TimeoutError:
-        result = AgentResult(content="本次处理超过时间限制。请缩小论文范围或稍后重试。")
+        result = quick_fallback_response(request, "timeout")
     except Exception:
-        result = AgentResult(content="当前服务暂时无法完成分析，请稍后重试。")
+        result = quick_fallback_response(request, "error")
     workspace_content, workspace, prefix = _workspace_content(request, result)
     content, finish_reason = _limit_content(workspace_content, request.max_tokens)
     _finalize_workspace(request, result, workspace, content, prefix)
@@ -214,9 +222,9 @@ async def qingxiaoda_chat_completions(
     try:
         result = await _run_agent(request)
     except asyncio.TimeoutError:
-        result = AgentResult(content="本次处理超过时间限制。请缩小论文范围或稍后重试。")
+        result = quick_fallback_response(request, "timeout")
     except Exception:
-        result = AgentResult(content="当前服务暂时无法完成分析，请稍后重试。")
+        result = quick_fallback_response(request, "error")
     workspace_content, workspace, prefix = _workspace_content(request, result)
     content, finish_reason = _limit_content(workspace_content, request.max_tokens)
     _finalize_workspace(request, result, workspace, content, prefix)

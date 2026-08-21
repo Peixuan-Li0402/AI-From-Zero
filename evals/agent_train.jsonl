@@ -1,0 +1,8 @@
+{"id":"train-transformer-term","topic":"transformer","question":"用新手能懂的话解释 Transformer 是什么","expected_intent":"term","must_contain":["Transformer","概念链"]}
+{"id":"train-cnn-term","topic":"cnn","question":"解释 CNN 这个概念","expected_intent":"term","must_contain":["CNN"]}
+{"id":"train-word2vec-paper","topic":"word2vec","question":"推荐 Word2Vec 的经典论文","expected_intent":"paper_search","must_contain":["推荐阅读"]}
+{"id":"train-q-learning-path","topic":"q-learning","question":"给我一条 Q-Learning 学习路径","expected_intent":"learning_path","must_contain":["论文学习路径"]}
+{"id":"train-api-gateway-term","topic":"api-gateway","question":"API Gateway 是什么","expected_intent":"term","must_contain":["API Gateway"]}
+{"id":"train-sql-term","topic":"sql","question":"简单解释 SQL","expected_intent":"term","must_contain":["SQL"]}
+{"id":"train-design-pattern-term","topic":"design-pattern","question":"设计模式是什么概念","expected_intent":"term","must_contain":["Design Pattern"]}
+{"id":"train-unit-test-term","topic":"unit-testing","question":"解释 Unit Testing 的作用","expected_intent":"term","must_contain":["Unit Test"]}

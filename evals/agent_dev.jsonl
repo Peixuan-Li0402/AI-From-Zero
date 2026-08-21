@@ -1,0 +1,8 @@
+{"id":"dev-rag-term","topic":"rag","question":"RAG 是什么，先讲清核心概念","expected_intent":"term","must_contain":["RAG","概念链"]}
+{"id":"dev-diffusion-paper","topic":"diffusion-model","question":"推荐 Diffusion Model 的入门论文","expected_intent":"paper_search","must_contain":["推荐阅读"]}
+{"id":"dev-lora-term","topic":"lora","question":"LoRA 和完整微调有什么区别","expected_intent":"term","must_contain":["LoRA"]}
+{"id":"dev-ppo-term","topic":"ppo","question":"解释 PPO 的核心思路","expected_intent":"term","must_contain":["PPO"]}
+{"id":"dev-kubernetes-term","topic":"kubernetes","question":"Kubernetes 是什么","expected_intent":"term","must_contain":["Kubernetes"]}
+{"id":"dev-bert-paper","topic":"bert","question":"帮我找 BERT 的经典论文","expected_intent":"paper_search","must_contain":["推荐阅读"]}
+{"id":"dev-gnn-path","topic":"gnn","question":"图神经网络应该怎么学，给学习路线","expected_intent":"learning_path","must_contain":["论文学习路径"]}
+{"id":"dev-ci-term","topic":"continuous-integration","question":"解释 Continuous Integration","expected_intent":"term","must_contain":["Continuous Integration"]}

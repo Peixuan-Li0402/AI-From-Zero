@@ -36,6 +36,9 @@ GitHub: https://github.com/Peixuan-Li0402/AI-From-Zero
 - 支持标准 JSON 和 SSE 流式回答。
 - 可生成清小搭能够下载的 Markdown 学习笔记附件。
 - 无模型 Key、附件解析失败或外部服务中断时自动降级，不中断整次会话。
+- Agent v2 会先用确定性路由判断任务：术语和概念桥直接走本地知识库，复杂论文问题才调用模型。
+- arXiv、OpenAlex、Semantic Scholar 实时并发检索，带短期缓存、来源级超时和熔断。
+- 回答区分论文原文、自建知识库和实时论文来源；阅读器同步显示学习阶段、本轮目标和依据。
 
 完整的官方协议映射、腾讯云部署参数和上线闸门见 [清小搭智能体部署与验收](docs/qingxiaoda-agent.md)。本地验证：
 
@@ -257,9 +260,13 @@ python tools/check_api_smoke.py --base-url http://127.0.0.1:8080
 python -m pip install -r requirements-dev.txt
 python -m pytest
 python tools/check_term_kb.py
+python tools/check_agent_eval_split.py
+python tools/eval_agent_v2.py --split dev
 ```
 
 GitHub Actions 会自动运行这些核心检查，确保公开版本不会轻易退化。
+
+最终盲测使用 `python tools/eval_agent_v2.py --split test`。第一轮盲测曾暴露术语别名显示问题，修复后另建不重叠的 `test_round2` 做最终验收；失败记录没有被删除或伪装成首次通过。所有评测文件都不会被运行时代码或提示词读取，主题、问题和 ID 由脚本检查为互不重叠。Agent v2 的研究样本与架构取舍见 [研究与决策记录](docs/agent-v2-research.md)。
 
 ## 主要接口
 

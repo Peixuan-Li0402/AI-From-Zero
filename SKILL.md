@@ -2,6 +2,8 @@
 
 AI-From-Zero 可以作为 OpenClaw/Claw 的本地论文学习 Skill 使用。它适合完成论文文本分析、PDF 读取、术语解释、下一篇论文推荐、学习路径和上下文伴学问答。
 
+Agent v2 默认先走本地双语知识库和确定性路由；只有复杂归纳才调用模型。需要最新论文时并发检索 arXiv、OpenAlex 和 Semantic Scholar，任一来源失败都会自动降级。
+
 GitHub: https://github.com/Peixuan-Li0402/AI-From-Zero
 
 ## 准备项目
@@ -184,6 +186,8 @@ tools:
 ```bash
 python tools/check_release_readiness.py
 python tools/check_term_kb.py
+python tools/check_agent_eval_split.py
+python tools/eval_agent_v2.py --split dev
 ```
 
 启动后：
