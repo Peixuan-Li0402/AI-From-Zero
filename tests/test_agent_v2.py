@@ -189,6 +189,18 @@ def test_realtime_search_prioritizes_fresh_external_results_over_local_fallback(
     assert [paper["title"] for paper in payload["papers"]] == ["Fresh retrieval topic arXiv paper", "Classic retrieval topic paper"]
 
 
+def test_arxiv_source_year_follows_identifier_when_metadata_is_stale():
+    paper = papers_module.enrich_paper_resource({
+        "title": "A future arXiv paper",
+        "year": 2025,
+        "url": "https://arxiv.org/abs/2601.05264v1",
+        "source": "arxiv",
+    })
+
+    assert paper["year"] == "2026"
+    assert paper["pdfUrl"] == "https://arxiv.org/pdf/2601.05264v1"
+
+
 def test_realtime_search_uses_unexpanded_query_for_local_fallback(monkeypatch):
     papers_module._SEARCH_CACHE.clear()
     papers_module._PROVIDER_COOLDOWN_UNTIL.clear()

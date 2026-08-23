@@ -343,6 +343,14 @@ def _arxiv_pdf_from_url(url: str) -> str:
     return f"https://arxiv.org/pdf/{match.group(1)}" if match else ""
 
 
+def _arxiv_year_from_url(url: str) -> str:
+    match = re.search(r"arxiv\.org/(?:abs|html|pdf)/([0-9]{2})([0-9]{2})\.[0-9]{4,5}", url or "")
+    if not match:
+        return ""
+    month = int(match.group(2))
+    return str(2000 + int(match.group(1))) if 1 <= month <= 12 else ""
+
+
 def _paper_reader_text(paper: dict, note: str = "") -> str:
     title = _clean(paper.get("title", "")) or "未命名论文"
     authors = _clean(paper.get("authors", ""))
@@ -380,6 +388,12 @@ def enrich_paper_resource(paper: dict, why: str = "") -> dict:
         item["pdfUrl"] = _arxiv_pdf_from_url(item.get("url", ""))
     if item.get("openAccessUrl") and not item.get("pdfUrl"):
         item["pdfUrl"] = _arxiv_pdf_from_url(item.get("openAccessUrl", ""))
+    if item.get("source") == "arxiv":
+        for field in ("url", "openAccessUrl", "pdfUrl"):
+            arxiv_year = _arxiv_year_from_url(str(item.get(field, "")))
+            if arxiv_year:
+                item["year"] = arxiv_year
+                break
     item.setdefault("openAccessUrl", item.get("pdfUrl") or item.get("url", ""))
     item.setdefault("abstract", item.get("shortDesc", ""))
     item.setdefault("whyRelated", why)
