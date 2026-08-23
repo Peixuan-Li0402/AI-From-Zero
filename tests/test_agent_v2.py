@@ -146,6 +146,60 @@ def test_attachment_processing_is_concurrent(monkeypatch):
     assert warnings == []
 
 
+def test_plain_text_agent_prompt_uses_openai_string_content(monkeypatch):
+    captured = {}
+
+    def fake_llm(messages, *_args, **_kwargs):
+        captured["messages"] = messages
+        return "任务已完成"
+
+    monkeypatch.setattr(settings, "llm_api_key", "test-key")
+    monkeypatch.setattr(agent_core_module, "call_llm_messages", fake_llm)
+    result = asyncio.run(agent_core_module._ask_agent_llm(
+        "用 Python 写一个 Softmax 函数",
+        "先完成任务",
+        "Softmax 是归一化函数",
+        "入门学习者",
+        "",
+        [],
+        [],
+        [{"role": "user", "content": "用 Python 写一个 Softmax 函数"}],
+        600,
+    ))
+
+    assert result == "任务已完成"
+    assert isinstance(captured["messages"][1]["content"], str)
+    assert "用 Python 写一个 Softmax 函数" in captured["messages"][1]["content"]
+
+
+def test_image_agent_prompt_keeps_multimodal_content(monkeypatch):
+    captured = {}
+
+    def fake_llm(messages, *_args, **_kwargs):
+        captured["messages"] = messages
+        return "图片已分析"
+
+    monkeypatch.setattr(settings, "llm_api_key", "test-key")
+    monkeypatch.setattr(agent_core_module, "call_llm_messages", fake_llm)
+    result = asyncio.run(agent_core_module._ask_agent_llm(
+        "解释这张图",
+        "先看图",
+        "",
+        "入门学习者",
+        "",
+        [],
+        ["https://example.com/figure.png"],
+        [{"role": "user", "content": "解释这张图"}],
+        600,
+    ))
+
+    content = captured["messages"][1]["content"]
+    assert result == "图片已分析"
+    assert isinstance(content, list)
+    assert content[0]["type"] == "text"
+    assert content[1]["type"] == "image_url"
+
+
 def test_term_fast_path_skips_llm_and_records_agent_state(monkeypatch):
     def fail_llm(*_args, **_kwargs):
         raise AssertionError("term fast path should not call the LLM")

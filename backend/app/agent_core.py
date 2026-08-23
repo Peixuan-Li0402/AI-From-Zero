@@ -425,8 +425,14 @@ async def _ask_agent_llm(
         "\n\n论文证据：\n" + (evidence_text or "无") +
         "\n\n论文片段：\n" + paper_text[:12000]
     )
-    content: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
-    content.extend({"type": "image_url", "image_url": {"url": url}} for url in image_urls[:3])
+    user_content: str | list[dict[str, Any]] = prompt
+    if image_urls:
+        multimodal_content: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
+        multimodal_content.extend(
+            {"type": "image_url", "image_url": {"url": url}}
+            for url in image_urls[:3]
+        )
+        user_content = multimodal_content
     messages = [
         {
             "role": "system",
@@ -440,7 +446,7 @@ async def _ask_agent_llm(
                 "回答适合聊天窗口，通常控制在 3 到 7 个短段落。阅读器网址由系统添加，不要生成。"
             ),
         },
-        {"role": "user", "content": content},
+        {"role": "user", "content": user_content},
     ]
     result = await asyncio.to_thread(
         call_llm_messages,
