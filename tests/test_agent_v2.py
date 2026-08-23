@@ -330,6 +330,28 @@ def test_off_topic_turn_does_not_inherit_unrelated_term_sources(monkeypatch):
     assert "今天先把论文放下" in result.content
 
 
+def test_long_chat_history_is_not_misclassified_as_pasted_paper(monkeypatch):
+    captured = {}
+
+    async def fake_agent_llm(
+        _question, _local_answer, _knowledge, _profile, paper_text, *_args, **_kwargs
+    ):
+        captured["paper_text"] = paper_text
+        return "任务已完成"
+
+    monkeypatch.setattr(agent_core_module, "_ask_agent_llm", fake_agent_llm)
+    request = QingxiaodaChatRequest(messages=[
+        {"role": "user", "content": "Transformer 学习记录。" * 100},
+        {"role": "assistant", "content": "我们继续。"},
+        {"role": "user", "content": "帮我写一个简短的学习计划"},
+    ])
+
+    result = asyncio.run(agent_core_module.generate_agent_response(request))
+
+    assert result.content.startswith("任务已完成")
+    assert captured["paper_text"] == ""
+
+
 def test_term_fast_path_skips_llm_and_records_agent_state(monkeypatch):
     def fail_llm(*_args, **_kwargs):
         raise AssertionError("term fast path should not call the LLM")

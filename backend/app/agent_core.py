@@ -477,8 +477,8 @@ async def generate_agent_response(request: QingxiaodaChatRequest) -> AgentResult
     valid_image_urls = [url for url, _ in image_results if url]
     warnings.extend(warning for _, warning in image_results if warning)
     paper_text = "\n\n".join(document.text for document in documents)[:500_000]
-    if not paper_text and len(parsed.all_user_text) >= 1200:
-        paper_text = parsed.all_user_text[:500_000]
+    if not paper_text and len(parsed.latest_user_text) >= 1200:
+        paper_text = parsed.latest_user_text[:500_000]
     terms = select_terms(parsed.latest_user_text, paper_text, parsed.history, 20)
     evidence = _page_evidence(parsed.latest_user_text, documents)
     focus_term = _find_focus_term(parsed.latest_user_text, terms)
