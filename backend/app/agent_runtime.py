@@ -78,10 +78,16 @@ def _has_any(text: str, phrases: tuple[str, ...]) -> bool:
 
 
 def _clean_search_query(text: str) -> str:
+    value = re.sub(r"[【\[].{0,48}?[】\]]", " ", text)
+    value = re.sub(
+        r"(?:沿用|结合|基于|根据)?(?:当前|此前|之前|前面|上文)?(?:的)?(?:对话|上下文|背景|内容)[：:]?",
+        " ",
+        value,
+    )
     value = re.sub(
         r"(请|帮我|给我|一下|最新|最近|联网|搜索|查找|推荐|下一篇|论文|学习路径|学习路线|是什么)",
         " ",
-        text,
+        value,
         flags=re.IGNORECASE,
     )
     if any(word in text for word in ("最新", "最近", "今年", "当前", "实时")):

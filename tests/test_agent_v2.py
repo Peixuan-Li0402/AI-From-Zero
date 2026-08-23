@@ -35,6 +35,12 @@ def test_router_keeps_simple_terms_local_and_search_explicit(monkeypatch):
         has_focus_term=True,
     )
     assert detailed.search_query == "RAG"
+    contextual = route_agent_request(
+        "【复测】沿用当前对话背景：联网搜索 2026 年最新 RAG 论文，给出可访问链接",
+        has_documents=False,
+        has_focus_term=True,
+    )
+    assert contextual.search_query == "RAG"
 
 
 def test_router_treats_a_resolved_term_as_a_learning_request():
