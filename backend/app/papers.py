@@ -639,18 +639,19 @@ async def search_papers_realtime(
     *,
     timeout: float = 4.5,
     cache_ttl: float = _SEARCH_CACHE_TTL_SECONDS,
+    local_query: str = "",
 ) -> dict:
     """Run bounded concurrent scholarly search while preserving local results."""
     started = time.perf_counter()
     query = _clean(query)
     limit = max(1, min(int(limit or 8), 20))
-    local_payload = search_papers(query, limit, external=False)
+    local_payload = search_papers(_clean(local_query) or query, limit, external=False)
     if not query:
         local_payload["cached"] = False
         local_payload["latencyMs"] = round((time.perf_counter() - started) * 1000)
         return local_payload
 
-    cache_key = f"{query.lower()}::{limit}"
+    cache_key = f"{query.lower()}::{(_clean(local_query) or query).lower()}::{limit}"
     cached = _SEARCH_CACHE.get(cache_key)
     if cached and cached[0] > time.monotonic():
         payload = _copy_search_payload(cached[1])

@@ -96,7 +96,7 @@ def test_router_does_not_treat_a_learning_break_as_realtime_research(monkeypatch
         has_documents=False,
         has_focus_term=False,
     )
-    assert plan.intent == "general"
+    assert plan.intent == "learning_break"
     assert plan.realtime_search is False
     english = route_agent_request(
         "Plan a travel itinerary for Thailand",
@@ -189,6 +189,31 @@ def test_realtime_search_prioritizes_fresh_external_results_over_local_fallback(
     assert [paper["title"] for paper in payload["papers"]] == ["Fresh retrieval topic arXiv paper", "Classic retrieval topic paper"]
 
 
+def test_realtime_search_uses_unexpanded_query_for_local_fallback(monkeypatch):
+    papers_module._SEARCH_CACHE.clear()
+    papers_module._PROVIDER_COOLDOWN_UNTIL.clear()
+    seen_queries = []
+
+    def local_search(query, _limit):
+        seen_queries.append(query)
+        return [{"title": "Retrieval-Augmented Generation", "year": 2020, "url": "https://example.com/rag", "source": "local-kb"}]
+
+    monkeypatch.setattr(papers_module, "_local_paper_search", local_search)
+    monkeypatch.setattr(papers_module, "_canonical_for_query", lambda *_args: None)
+    monkeypatch.setattr(papers_module, "_arxiv_search", lambda *_args: [])
+    monkeypatch.setattr(papers_module, "_openalex_search", lambda *_args: [])
+    monkeypatch.setattr(papers_module, "_semantic_scholar_search", lambda *_args: [])
+
+    payload = asyncio.run(papers_module.search_papers_realtime(
+        "retrieval augmented generation",
+        2,
+        timeout=1.0,
+        local_query="RAG",
+    ))
+    assert seen_queries == ["RAG"]
+    assert payload["papers"][0]["title"] == "Retrieval-Augmented Generation"
+
+
 def test_attachment_processing_is_concurrent(monkeypatch):
     async def fake_process(item):
         await asyncio.sleep(0.1)
@@ -259,6 +284,21 @@ def test_image_agent_prompt_keeps_multimodal_content(monkeypatch):
     assert isinstance(content, list)
     assert content[0]["type"] == "text"
     assert content[1]["type"] == "image_url"
+
+
+def test_off_topic_turn_does_not_inherit_unrelated_term_sources(monkeypatch):
+    monkeypatch.setattr(settings, "llm_api_key", "test-key")
+    monkeypatch.setattr(agent_core_module, "call_llm_messages", lambda *_args, **_kwargs: "当然可以先休息，回来时我们再接着学。")
+    request = QingxiaodaChatRequest(messages=[
+        {"role": "user", "content": "我在学 Transformer 和 RAG"},
+        {"role": "assistant", "content": "我们可以从注意力机制开始。"},
+        {"role": "user", "content": "我今天不想学论文，想去旅行。"},
+    ])
+    result = asyncio.run(agent_core_module.generate_agent_response(request))
+    assert result.reader_context["agentState"]["intent"] == "learning_break"
+    assert result.reader_context["agentState"]["concepts"] == []
+    assert result.reader_context["agentState"]["sources"] == []
+    assert "今天先把论文放下" in result.content
 
 
 def test_term_fast_path_skips_llm_and_records_agent_state(monkeypatch):

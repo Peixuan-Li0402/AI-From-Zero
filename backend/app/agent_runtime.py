@@ -205,6 +205,13 @@ def route_agent_request(text: str, *, has_documents: bool, has_focus_term: bool)
             max_tokens=1100,
             progress="正在处理你的任务",
         )
+    if _has_any(lower, _LEARNING_NEGATIONS):
+        return AgentPlan(
+            intent="learning_break",
+            use_llm=False,
+            max_tokens=450,
+            progress="先让学习停一会儿",
+        )
     if _looks_like_off_topic(text):
         return AgentPlan(
             intent="general",
@@ -298,12 +305,14 @@ async def build_knowledge_packet(
         term_query = " ".join(
             str(term.get("termEn") or term.get("term") or "") for term in packet.terms[:3]
         ).strip()
-        query = _expand_scholarly_query(plan.search_query or term_query or question)
+        raw_query = plan.search_query or term_query or question
+        query = _expand_scholarly_query(raw_query)
         payload = await search_papers_realtime(
             query,
             6,
             timeout=settings.agent_search_timeout,
             cache_ttl=settings.agent_search_cache_ttl,
+            local_query=raw_query,
         )
         packet.papers = payload.get("papers", [])
         packet.search_status = payload.get("sourceStatus", {})
