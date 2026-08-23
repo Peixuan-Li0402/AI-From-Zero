@@ -619,6 +619,20 @@ def _cache_search(key: str, payload: dict, ttl_seconds: float) -> None:
     _SEARCH_CACHE[key] = (time.monotonic() + ttl_seconds, _copy_search_payload(payload))
 
 
+def _paper_matches_query(paper: dict, query: str) -> bool:
+    tokens = list(dict.fromkeys(
+        token.lower() for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9+.#-]{1,}|[\u4e00-\u9fff]{2,}", query)
+    ))
+    if not tokens:
+        return True
+    haystack = " ".join(
+        str(paper.get(field, ""))
+        for field in ("title", "shortDesc", "abstract", "whyRelated")
+    ).lower()
+    matched = sum(token in haystack for token in tokens)
+    return matched >= (1 if len(tokens) <= 2 else 2)
+
+
 async def search_papers_realtime(
     query: str,
     limit: int = 8,
@@ -631,7 +645,7 @@ async def search_papers_realtime(
     query = _clean(query)
     limit = max(1, min(int(limit or 8), 20))
     local_payload = search_papers(query, limit, external=False)
-    if not query or len(local_payload.get("papers", [])) >= limit:
+    if not query:
         local_payload["cached"] = False
         local_payload["latencyMs"] = round((time.perf_counter() - started) * 1000)
         return local_payload
@@ -651,7 +665,7 @@ async def search_papers_realtime(
         "openalex": _openalex_search,
         "semanticScholar": _semantic_scholar_search,
     }
-    remaining = max(1, limit - len(local_payload.get("papers", [])))
+    remaining = limit
     provider_timeout = max(1.0, min(float(timeout), 5.0))
 
     async def run_provider(name: str, function) -> tuple[str, list[dict], str]:
@@ -673,12 +687,14 @@ async def search_papers_realtime(
 
     tasks = [run_provider(name, function) for name, function in providers.items()]
     results = await asyncio.gather(*tasks)
-    papers = list(local_payload.get("papers", []))
-    seen = {_paper_key(item) for item in papers if _paper_key(item)}
+    papers: list[dict] = []
+    seen: set[str] = set()
     status = dict(local_payload.get("sourceStatus", {}))
     for name, items, provider_status in results:
         status[name] = provider_status
         for item in items:
+            if not _paper_matches_query(item, query):
+                continue
             key = _paper_key(item)
             if not key or key in seen:
                 continue
@@ -686,6 +702,24 @@ async def search_papers_realtime(
             papers.append(item)
             if len(papers) >= limit:
                 break
+
+    papers.sort(
+        key=lambda item: (
+            int(str(item.get("year", "0"))) if str(item.get("year", "")).isdigit() else 0,
+            int(item.get("citationCount") or 0),
+        ),
+        reverse=True,
+    )
+    for item in local_payload.get("papers", []):
+        if str(item.get("source", "")) not in {"curated"} and not _paper_matches_query(item, query):
+            continue
+        key = _paper_key(item)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        papers.append(item)
+        if len(papers) >= limit:
+            break
 
     payload = {
         "query": query,

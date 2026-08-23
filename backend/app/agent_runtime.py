@@ -54,6 +54,22 @@ _ACTION_WORDS = (
     "调试", "修复", "排查", "计算", "求解", "证明", "推导", "总结", "概括", "设计一个", "制定一", "转换成",
     "提取出", "列出代码", "补全代码", "重构", "执行这个任务",
 )
+_OFF_TOPIC_WORDS = (
+    "旅行", "旅游", "景点", "酒店", "美食", "电影", "游戏", "音乐", "健身", "恋爱", "天气", "购物",
+    "travel", "hotel", "restaurant", "movie", "game", "weather",
+)
+_LEARNING_NEGATIONS = ("不想学", "不想看论文", "不看论文", "先不学", "暂停学习", "休息一下")
+_TEACHING_WORDS = ("概念链", "讲给", "讲得让", "面向初学者", "适合初学者", "高中生能懂", "大一学生")
+_SCHOLARLY_QUERY_EXPANSIONS = {
+    "rag": "retrieval augmented generation",
+    "llm": "large language model",
+    "nlp": "natural language processing",
+    "rl": "reinforcement learning",
+    "gnn": "graph neural network",
+    "gan": "generative adversarial network",
+    "vae": "variational autoencoder",
+    "mdp": "Markov decision process",
+}
 
 
 def _has_any(text: str, phrases: tuple[str, ...]) -> bool:
@@ -68,6 +84,14 @@ def _clean_search_query(text: str) -> str:
         text,
         flags=re.IGNORECASE,
     )
+    if any(word in text for word in ("最新", "最近", "今年", "当前", "实时")):
+        value = re.sub(r"\b20\d{2}\s*年?", " ", value)
+    value = re.split(
+        r"[，,。；;]|(?:并|同时)(?:给出|说明|明确|附上|标注)",
+        value,
+        maxsplit=1,
+    )[0]
+    value = re.sub(r"(^|\s)的(?=\s|$)", " ", value)
     value = re.sub(r"https?://\S+", " ", value)
     value = re.sub(r"\s+", " ", value).strip(" ，。！？:：")
     return value[:160] or text[:160]
@@ -81,6 +105,33 @@ def _looks_like_action_task(text: str) -> bool:
         r"(?:write|implement|translate|debug|fix|calculate|solve|prove|derive|refactor|rewrite)\b",
         lower,
     ))
+
+
+def _looks_like_teaching_request(text: str) -> bool:
+    lower = text.lower()
+    return _has_any(lower, _TEACHING_WORDS) or bool(re.search(r"从.{1,30}到.{1,30}(?:概念|关系|链)", text))
+
+
+def _looks_like_off_topic(text: str) -> bool:
+    lower = text.lower()
+    if _has_any(lower, _LEARNING_NEGATIONS):
+        return True
+    learning_context = any(
+        word in lower for word in ("论文", "研究", "算法", "模型", "代码", "人工智能", "学习路径")
+    ) or bool(re.search(r"(?<![A-Za-z0-9_])ai(?![A-Za-z0-9_])", lower))
+    return _has_any(lower, _OFF_TOPIC_WORDS) and not learning_context
+
+
+def _expand_scholarly_query(query: str) -> str:
+    expanded = query
+    for acronym, full_name in _SCHOLARLY_QUERY_EXPANSIONS.items():
+        expanded = re.sub(
+            rf"(?<![A-Za-z0-9_]){re.escape(acronym)}(?![A-Za-z0-9_])",
+            full_name,
+            expanded,
+            flags=re.IGNORECASE,
+        )
+    return re.sub(r"\s+", " ", expanded).strip()
 
 
 def infer_learner_profile(history: list[dict], latest_text: str) -> LearnerProfile:
@@ -154,6 +205,13 @@ def route_agent_request(text: str, *, has_documents: bool, has_focus_term: bool)
             max_tokens=1100,
             progress="正在处理你的任务",
         )
+    if _looks_like_off_topic(text):
+        return AgentPlan(
+            intent="general",
+            use_llm=True,
+            max_tokens=600,
+            progress="正在回应你，也会保留学习的节奏",
+        )
     if has_documents and (_has_any(lower, _EVIDENCE_WORDS) or lower.endswith(("吗", "呢", "?", "？"))):
         return AgentPlan(
             intent="evidence_qa",
@@ -178,6 +236,13 @@ def route_agent_request(text: str, *, has_documents: bool, has_focus_term: bool)
             use_llm=True,
             max_tokens=900,
             progress="正在核对实时论文来源",
+        )
+    if _looks_like_teaching_request(text):
+        return AgentPlan(
+            intent="teaching",
+            use_llm=True,
+            max_tokens=900,
+            progress="正在把概念串成容易理解的学习链",
         )
     if has_focus_term:
         return AgentPlan(
@@ -233,7 +298,7 @@ async def build_knowledge_packet(
         term_query = " ".join(
             str(term.get("termEn") or term.get("term") or "") for term in packet.terms[:3]
         ).strip()
-        query = term_query or plan.search_query or question
+        query = _expand_scholarly_query(plan.search_query or term_query or question)
         payload = await search_papers_realtime(
             query,
             6,
@@ -290,7 +355,9 @@ def knowledge_packet_prompt(packet: KnowledgePacket) -> str:
 
 
 def wants_concept_bridge(text: str, term_count: int) -> bool:
-    return term_count >= 2 and any(word in text.lower() for word in ("区别", "关系", "对比", "联系", " vs ", "和", "与"))
+    return term_count >= 2 and any(
+        word in text.lower() for word in ("区别", "关系", "对比", "联系", "概念链", " vs ", "和", "与")
+    )
 
 
 def format_concept_bridge(terms: list[dict]) -> str:
@@ -324,6 +391,16 @@ def format_paper_results(packet: KnowledgePacket, profile: LearnerProfile) -> st
     if not packet.papers:
         lines.extend(["", "目前没有拿到可靠的公开论文链接。可以把方向说得更具体些，比如“RAG 检索优化”或“代码智能体”。"])
         return "\n".join(lines)
+    live_sources = {"arxiv", "openalex", "semantic-scholar"}
+    live_papers = [paper for paper in packet.papers if str(paper.get("source", "")) in live_sources]
+    external_attempted = any(
+        str(packet.search_status.get(name, "")).lower() not in {"", "skipped"}
+        for name in ("arxiv", "openalex", "semanticScholar")
+    )
+    if live_papers:
+        lines.extend(["", "已从公开学术源实时检索。年份来自论文元数据；若没有当年结果，我不会把旧论文冒充为最新论文。"])
+    elif external_attempted:
+        lines.extend(["", "实时学术源本次没有返回可核验的新结果。下面保留本地经典文献作为学习起点，但它们不代表最新进展。"])
     for index, paper in enumerate(packet.papers[:5], 1):
         title = paper.get("title", "推荐论文")
         url = paper.get("pdfUrl") or paper.get("openAccessUrl") or paper.get("url")
@@ -337,6 +414,8 @@ def format_paper_results(packet: KnowledgePacket, profile: LearnerProfile) -> st
             lines.append(f"   {desc[:180]}")
     if profile.level == "入门":
         lines.extend(["", "先读第 1 篇的摘要和引言，遇到术语直接点进阅读器里的概念链。"])
+    elif len(packet.papers) == 1:
+        lines.extend(["", "先读这篇的摘要、问题设定和方法图，再沿参考文献继续追踪。"])
     else:
         lines.extend(["", "先比较前两篇的问题设定、基线和消融实验，再决定是否深读。"])
     return "\n".join(lines)

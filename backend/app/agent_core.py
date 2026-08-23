@@ -492,7 +492,7 @@ async def generate_agent_response(request: QingxiaodaChatRequest) -> AgentResult
         local_answer = format_learning_paths(packet, profile)
     elif plan.intent in {"paper_search", "topic_research"}:
         local_answer = format_paper_results(packet, profile)
-    elif plan.intent == "term" and focus_term:
+    elif plan.intent in {"term", "teaching"} and focus_term:
         local_answer = (
             format_concept_bridge(terms)
             if wants_concept_bridge(parsed.latest_user_text, len(terms))

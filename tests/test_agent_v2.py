@@ -29,6 +29,12 @@ def test_router_keeps_simple_terms_local_and_search_explicit(monkeypatch):
     assert term.realtime_search is False
     assert search.intent == "paper_search"
     assert search.realtime_search is True
+    detailed = route_agent_request(
+        "请查找 2026 年最新的 RAG 论文，给出可访问链接，并说明实时来源",
+        has_documents=False,
+        has_focus_term=True,
+    )
+    assert detailed.search_query == "RAG"
 
 
 def test_router_treats_a_resolved_term_as_a_learning_request():
@@ -72,6 +78,39 @@ def test_router_treats_fresh_research_questions_as_realtime_search(monkeypatch):
     assert plan.realtime_search is True
 
 
+def test_router_keeps_structured_teaching_requests_out_of_single_term_fast_path(monkeypatch):
+    monkeypatch.setattr(settings, "agent_realtime_search", True)
+    plan = route_agent_request(
+        "请面向初学者串起概率、条件概率和因果图的概念链",
+        has_documents=False,
+        has_focus_term=True,
+    )
+    assert plan.intent == "teaching"
+    assert plan.use_llm is True
+
+
+def test_router_does_not_treat_a_learning_break_as_realtime_research(monkeypatch):
+    monkeypatch.setattr(settings, "agent_realtime_search", True)
+    plan = route_agent_request(
+        "我今天不想学论文，想休息一下",
+        has_documents=False,
+        has_focus_term=False,
+    )
+    assert plan.intent == "general"
+    assert plan.realtime_search is False
+    english = route_agent_request(
+        "Plan a travel itinerary for Thailand",
+        has_documents=False,
+        has_focus_term=False,
+    )
+    assert english.intent == "general"
+
+
+def test_scholarly_query_expands_ambiguous_ai_acronyms():
+    assert agent_runtime_module._expand_scholarly_query("RAG agent") == "retrieval augmented generation agent"
+    assert agent_runtime_module._expand_scholarly_query("GraphRAG") == "GraphRAG"
+
+
 def test_randomized_known_terms_keep_the_fast_learning_path():
     sample = random.Random(20260821).sample(terms, min(160, len(terms)))
     for term in sample:
@@ -109,7 +148,7 @@ def test_realtime_search_runs_providers_concurrently_and_caches(monkeypatch):
         def run(_query, _limit):
             calls.append(name)
             time.sleep(0.12)
-            return [{"title": f"{name} result", "url": f"https://example.com/{name}", "source": name}]
+            return [{"title": f"{name} held-out query result", "url": f"https://example.com/{name}", "source": name}]
         return run
 
     monkeypatch.setattr(papers_module, "_arxiv_search", provider("arxiv"))
@@ -126,6 +165,28 @@ def test_realtime_search_runs_providers_concurrently_and_caches(monkeypatch):
     assert len(first["papers"]) == 3
     assert second["cached"] is True
     assert len(calls) == 3
+
+
+def test_realtime_search_prioritizes_fresh_external_results_over_local_fallback(monkeypatch):
+    papers_module._SEARCH_CACHE.clear()
+    papers_module._PROVIDER_COOLDOWN_UNTIL.clear()
+
+    monkeypatch.setattr(
+        papers_module,
+        "_local_paper_search",
+        lambda *_args: [{"title": "Classic retrieval topic paper", "year": 2020, "url": "https://example.com/local", "source": "local-kb"}],
+    )
+    monkeypatch.setattr(papers_module, "_canonical_for_query", lambda *_args: None)
+    monkeypatch.setattr(
+        papers_module,
+        "_arxiv_search",
+        lambda *_args: [{"title": "Fresh retrieval topic arXiv paper", "year": 2026, "url": "https://example.com/fresh", "source": "arxiv"}],
+    )
+    monkeypatch.setattr(papers_module, "_openalex_search", lambda *_args: [])
+    monkeypatch.setattr(papers_module, "_semantic_scholar_search", lambda *_args: [])
+
+    payload = asyncio.run(papers_module.search_papers_realtime("held-out retrieval topic", 2, timeout=1.0))
+    assert [paper["title"] for paper in payload["papers"]] == ["Fresh retrieval topic arXiv paper", "Classic retrieval topic paper"]
 
 
 def test_attachment_processing_is_concurrent(monkeypatch):
