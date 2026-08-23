@@ -112,6 +112,17 @@ def test_router_does_not_treat_a_learning_break_as_realtime_research(monkeypatch
     assert english.intent == "general"
 
 
+def test_learning_break_has_priority_over_action_words():
+    plan = route_agent_request(
+        "今天不想学习了，想聊旅行。请先接住这个话题，不要修复或安排论文任务。",
+        has_documents=False,
+        has_focus_term=True,
+    )
+
+    assert plan.intent == "learning_break"
+    assert plan.use_llm is False
+
+
 def test_scholarly_query_expands_ambiguous_ai_acronyms():
     assert agent_runtime_module._expand_scholarly_query("RAG agent") == "retrieval augmented generation agent"
     assert agent_runtime_module._expand_scholarly_query("GraphRAG") == "GraphRAG"

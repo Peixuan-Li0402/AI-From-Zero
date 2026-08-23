@@ -203,6 +203,13 @@ def route_agent_request(text: str, *, has_documents: bool, has_focus_term: bool)
             max_tokens=1000,
             progress="正在匹配论文学习路线",
         )
+    if _has_any(lower, _LEARNING_NEGATIONS):
+        return AgentPlan(
+            intent="learning_break",
+            use_llm=False,
+            max_tokens=450,
+            progress="先让学习停一会儿",
+        )
     if _looks_like_action_task(text):
         return AgentPlan(
             intent="task",
@@ -210,13 +217,6 @@ def route_agent_request(text: str, *, has_documents: bool, has_focus_term: bool)
             use_llm=True,
             max_tokens=1100,
             progress="正在处理你的任务",
-        )
-    if _has_any(lower, _LEARNING_NEGATIONS):
-        return AgentPlan(
-            intent="learning_break",
-            use_llm=False,
-            max_tokens=450,
-            progress="先让学习停一会儿",
         )
     if _looks_like_off_topic(text):
         return AgentPlan(
