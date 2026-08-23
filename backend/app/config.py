@@ -146,7 +146,7 @@ def _discover_provider() -> str:
 
 class Settings:
     app_name = "AI From Zero"
-    app_version = "0.7.0"
+    app_version = "0.8.0"
 
     def __init__(self):
         self.reload()
@@ -177,12 +177,15 @@ class Settings:
         self.qxd_attachment_allowed_hosts = _get_csv("QXD_ATTACHMENT_ALLOWED_HOSTS")
         self.qxd_max_attachment_mb = max(1, _get_int("QXD_MAX_ATTACHMENT_MB", 25))
         self.qxd_max_concurrency = max(1, _get_int("QXD_MAX_CONCURRENCY", 4))
-        self.qxd_request_timeout = min(115.0, max(5.0, _get_float("QXD_REQUEST_TIMEOUT", 105.0)))
+        # Keep the whole request below Qingxiaoda's 90-second experience ceiling.
+        self.qxd_request_timeout = min(85.0, max(5.0, _get_float("QXD_REQUEST_TIMEOUT", 80.0)))
+        self.qxd_stream_heartbeat = min(15.0, max(2.0, _get_float("QXD_STREAM_HEARTBEAT", 6.0)))
         self.agent_llm_timeout = min(45.0, max(8.0, _get_float("AGENT_LLM_TIMEOUT", 28.0)))
         self.agent_max_tokens = min(1800, max(256, _get_int("AGENT_MAX_TOKENS", 1000)))
         self.agent_search_timeout = min(8.0, max(1.0, _get_float("AGENT_SEARCH_TIMEOUT", 4.5)))
         self.agent_search_cache_ttl = max(30, _get_int("AGENT_SEARCH_CACHE_TTL", 600))
         self.agent_realtime_search = _get_bool("AGENT_REALTIME_SEARCH", True)
+        self.paper_llm_concurrency = min(6, max(1, _get_int("PAPER_LLM_CONCURRENCY", 4)))
         self.qxd_artifact_ttl = max(300, _get_int("QXD_ARTIFACT_TTL", 1800))
         self.qxd_workspace_ttl = max(1800, _get_int("QXD_WORKSPACE_TTL", 604800))
         self.qxd_workspace_limit = min(500, max(12, _get_int("QXD_WORKSPACE_LIMIT", 100)))

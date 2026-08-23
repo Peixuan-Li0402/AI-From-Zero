@@ -969,6 +969,10 @@ body {
   color: var(--ink);
   border-bottom-right-radius: 4px;
 }
+.msg-pending .msg-bubble {
+  color: var(--muted);
+  background: var(--panel-soft);
+}
 
 .hoshino-input {
   padding: 12px;

@@ -275,6 +275,26 @@
 //  配置
 // ═════════════════════════════════
 const API_BASE = "";
+const _nativeFetch = window.fetch.bind(window);
+window.fetch = async (input, init = {}) => {
+  const requestUrl = String(input || "");
+  const paperRequest = /\/api\/(analyze|analyze-pdf)$/.test(requestUrl);
+  const longRequest = /\/(papers\/load|chat|case-study|explain|config\/test)/.test(requestUrl);
+  const timeoutMs = Number(init.timeoutMs || (paperRequest ? 240000 : (longRequest ? 85000 : 35000)));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const { timeoutMs: _ignored, ...requestInit } = init;
+  try {
+    return await _nativeFetch(input, { ...requestInit, signal: controller.signal });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(`请求超过 ${Math.round(timeoutMs / 1000)} 秒，已停止等待`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+};
 let _providers = [];
 let _chatHistory = [];
 let _activeReaderSessionToken = "";
@@ -333,6 +353,7 @@ function addChatMessage(text, from = "hoshino") {
   msg.innerHTML = `<div class="msg-bubble">${from === "sensei" ? escapeHtml(text) : text}</div>`;
   $("chatMessages").appendChild(msg);
   msg.scrollIntoView({ behavior: "smooth", block: "end" });
+  return msg;
 }
 
 function addChatMessageRaw(text, from = "hoshino") {
@@ -1642,13 +1663,15 @@ $("chatInput").addEventListener("keydown", (e) => {
 async function sendChat() {
   const input = $("chatInput");
   const text = input.value.trim();
-  if (!text) return;
+  if (!text || $("btnChatSend").disabled) return;
   input.value = "";
 
   addChatMessage(text, "sensei");
   _chatHistory.push({ role: "user", content: text });
   persistActiveReaderConversation();
   $("btnChatSend").disabled = true;
+  const pending = addChatMessage('<span class="loading-dots">正在整理回答</span>');
+  pending.classList.add("msg-pending");
 
   try {
     const evidence = await loadEvidenceForQuestion(text);
@@ -1668,6 +1691,7 @@ async function sendChat() {
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.detail || "伴学接口暂时不可用");
+    pending.remove();
     const prefix = data.llmStatus === "missing_key"
       ? `<div class="llm-mini">本地模式</div>`
       : (data.llmStatus === "error" ? `<div class="llm-mini error">模型暂不可用，已降级</div>` : "");
@@ -1681,9 +1705,11 @@ async function sendChat() {
     _chatHistory.push({ role: "assistant", content: data.reply || "" });
     persistActiveReaderConversation();
   } catch (err) {
-    addChatMessage(`伴学接口出错了：${escapeHtml(err.message)}<br>先试试问一个已高亮的术语，或者检查模型配置。`);
+    pending.remove();
+    addChatMessage(`这次没有及时拿到回答：${escapeHtml(err.message)}<br>可以直接重试，论文和学习记录不会丢失。`);
     persistActiveReaderConversation();
   } finally {
+    pending.remove();
     $("btnChatSend").disabled = false;
   }
 }

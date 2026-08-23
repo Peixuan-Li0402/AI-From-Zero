@@ -45,6 +45,33 @@ def test_router_treats_a_resolved_term_as_a_learning_request():
         assert plan.use_llm is False
 
 
+def test_router_does_not_confuse_term_mentions_with_user_tasks(monkeypatch):
+    monkeypatch.setattr(settings, "agent_realtime_search", True)
+    cases = (
+        "帮我写一个用 Python 实现 Softmax 的函数",
+        "请翻译这句话：Attention is all you need",
+        "总结 Transformer 的三项优点",
+        "帮我调试包含 Cache 的这段代码",
+    )
+    for question in cases:
+        matches = extract_terms_from_text(question)
+        assert matches
+        plan = route_agent_request(question, has_documents=False, has_focus_term=True)
+        assert plan.intent == "task", question
+        assert plan.use_llm is True
+
+
+def test_router_treats_fresh_research_questions_as_realtime_search(monkeypatch):
+    monkeypatch.setattr(settings, "agent_realtime_search", True)
+    plan = route_agent_request(
+        "今天 Agent 研究有哪些新进展",
+        has_documents=False,
+        has_focus_term=True,
+    )
+    assert plan.intent == "topic_research"
+    assert plan.realtime_search is True
+
+
 def test_randomized_known_terms_keep_the_fast_learning_path():
     sample = random.Random(20260821).sample(terms, min(160, len(terms)))
     for term in sample:
@@ -53,6 +80,13 @@ def test_randomized_known_terms_keep_the_fast_learning_path():
         plan = route_agent_request(question, has_documents=False, has_focus_term=bool(matches))
         assert matches, term["term"]
         assert plan.intent == "term", term["term"]
+
+
+def test_short_uppercase_aliases_do_not_match_common_lowercase_words():
+    matches = extract_terms_from_text("The method is trained in the lab and evaluated on the test set.")
+    names = {term["term"] for term in matches}
+    assert "InstanceNorm" not in names
+    assert "TLB" not in names
 
 
 def test_profile_is_inferred_without_forcing_a_questionnaire():

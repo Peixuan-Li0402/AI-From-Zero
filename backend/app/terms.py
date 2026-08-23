@@ -44,7 +44,8 @@ def _contains_alias(text: str, alias: str) -> bool:
     if not alias:
         return False
     if _is_ascii_word(alias):
-        return re.search(rf"(?<![A-Za-z0-9_]){re.escape(alias)}(?![A-Za-z0-9_])", text, re.IGNORECASE) is not None
+        flags = 0 if len(alias) <= 2 and alias.isupper() else re.IGNORECASE
+        return re.search(rf"(?<![A-Za-z0-9_]){re.escape(alias)}(?![A-Za-z0-9_])", text, flags) is not None
     return alias.lower() in text.lower()
 
 

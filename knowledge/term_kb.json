@@ -17003,32 +17003,34 @@
       "termEn": "TLB",
       "termZh": "快表",
       "fullName": "快表",
-      "fullNameEn": "TLB",
+      "fullNameEn": "Translation Lookaside Buffer",
       "fullNameZh": "快表",
       "category": "计算机系统",
       "difficulty": 2,
       "aliases": [
-        "Buffer",
-        "Lookaside",
-        "Translation",
+        "Translation Lookaside Buffer",
         "快表"
       ],
       "aliasesEn": [
-        "Buffer",
-        "Lookaside",
-        "Translation"
+        "Translation Lookaside Buffer"
       ],
       "aliasesZh": [
         "快表"
       ],
-      "explanation": "快表（TLB）是操作系统、并发、存储和性能工程里的常用概念。理解它有助于把论文中的方法、系统设计和工程取舍连接起来。",
-      "explanationZh": "快表（TLB）是操作系统、并发、存储和性能工程里的常用概念。阅读论文时可以从定义、解决的问题、典型用法、优缺点和评估方式五个角度理解它。",
-      "explanationEn": "TLB is a core concept in 计算机系统. It helps describe problems, methods, trade-offs, and evaluation criteria in research and engineering practice.",
-      "academicExplanationZh": "快表（TLB）在计算机系统中通常用于刻画问题建模、系统约束或算法机制。学习时应关注其形式化定义、适用假设、复杂度或成本、常见评估指标以及与相关概念的边界。",
-      "hoshinoNote": "快表这个词先抓住用途就好：它帮你看懂论文里到底在优化什么、牺牲什么、验证什么。",
-      "prerequisiteTerms": [],
+      "explanation": "快表（TLB）是处理器中的小型高速缓存，用来保存最近使用的虚拟地址到物理地址映射，避免每次访存都完整查询页表。",
+      "explanationZh": "快表（Translation Lookaside Buffer, TLB）缓存常用页表项。TLB 命中时可以快速完成地址转换；未命中时需要查询多级页表，因此 TLB 命中率会直接影响内存访问性能。",
+      "explanationEn": "A Translation Lookaside Buffer is a small hardware cache of recent virtual-to-physical address translations. It reduces the cost of page-table walks on memory accesses.",
+      "academicExplanationZh": "TLB 位于虚拟内存地址转换的关键路径，通常按页号索引并缓存页表项。分析系统论文时应关注覆盖范围、相联度、替换策略、页大小、命中率、未命中开销，以及多核场景下的 TLB shootdown。",
+      "hoshinoNote": "先把它看成地址翻译结果的高速缓存，再比较命中和未命中的代价。",
+      "prerequisiteTerms": [
+        "Virtual Memory",
+        "Page Table"
+      ],
       "landmarkPapers": [],
-      "relatedTerms": []
+      "relatedTerms": [
+        "Cache",
+        "Page Table"
+      ]
     },
     {
       "term": "Cache",

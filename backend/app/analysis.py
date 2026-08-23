@@ -1,5 +1,6 @@
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .config import settings
 from .llm import call_kimi
@@ -78,9 +79,7 @@ def translate_text_with_llm(text: str, title: str = "") -> dict:
 
     source_text = text[:TRANSLATION_CHAR_LIMIT]
     chunks = _chunk_text(source_text, TRANSLATION_CHUNK_SIZE)
-    translated_parts = []
-    translated_chars = 0
-    for idx, chunk in enumerate(chunks, 1):
+    def translate_chunk(idx: int, chunk: str) -> tuple[int, str, int, str]:
         prompt = f"""请把下面论文原文第 {idx}/{len(chunks)} 段完整翻译成中文。
 
 要求：
@@ -93,23 +92,45 @@ def translate_text_with_llm(text: str, title: str = "") -> dict:
 原文片段：
 {chunk}
 """
-        raw = call_kimi("你是严谨的论文全文翻译助手。只输出中文译文，绝不省略原文内容。", prompt, temperature=0.1)
+        raw = call_kimi(
+            "你是严谨的论文全文翻译助手。只输出中文译文，绝不省略原文内容。",
+            prompt,
+            temperature=0.1,
+            timeout=min(settings.llm_timeout, 28.0),
+            max_tokens=6000,
+        )
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError:
             parsed = {}
         if parsed.get("error"):
-            status = "partial_error" if translated_parts else ("missing_key" if parsed.get("error") == "missing_key" else "error")
-            return {
-                "translation": "\n\n".join(translated_parts),
-                "translationStatus": status,
-                "translationCoverage": round(translated_chars / max(total_chars, 1) * 100, 1),
-                "translatedChars": translated_chars,
-                "translationTotalChars": total_chars,
-                "translationMessage": str(parsed.get("error", "")),
-            }
-        translated_parts.append(f"【译文 {idx}/{len(chunks)}】\n{raw.strip()}")
-        translated_chars += len(chunk)
+            return idx, "", 0, str(parsed.get("error", ""))
+        return idx, f"【译文 {idx}/{len(chunks)}】\n{raw.strip()}", len(chunk), ""
+
+    translated: dict[int, tuple[str, int]] = {}
+    errors: list[str] = []
+    workers = min(settings.paper_llm_concurrency, max(1, len(chunks)))
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="paper-translate") as pool:
+        futures = [pool.submit(translate_chunk, idx, chunk) for idx, chunk in enumerate(chunks, 1)]
+        for future in as_completed(futures):
+            idx, translated_text, char_count, error = future.result()
+            if error:
+                errors.append(error)
+            else:
+                translated[idx] = (translated_text, char_count)
+
+    translated_parts = [translated[idx][0] for idx in sorted(translated)]
+    translated_chars = sum(translated[idx][1] for idx in translated)
+    if errors:
+        status = "partial_error" if translated_parts else ("missing_key" if "missing_key" in errors else "error")
+        return {
+            "translation": "\n\n".join(translated_parts),
+            "translationStatus": status,
+            "translationCoverage": round(translated_chars / max(total_chars, 1) * 100, 1),
+            "translatedChars": translated_chars,
+            "translationTotalChars": total_chars,
+            "translationMessage": errors[0],
+        }
 
     status = "ok" if total_chars <= TRANSLATION_CHAR_LIMIT else "partial_limit"
     return {
@@ -215,8 +236,8 @@ def analyze_long_paper_with_llm(text: str, title: str, known_terms: list, trunca
         return result
 
     chunks = _chunk_text(text[:PDF_LLM_CHAR_LIMIT])[:PDF_MAX_CHUNKS]
-    chunk_summaries = []
-    for idx, chunk in enumerate(chunks, 1):
+
+    def summarize_chunk(idx: int, chunk: str) -> tuple[int, dict]:
         prompt = f"""你是论文阅读助手。请总结 PDF 第 {idx}/{len(chunks)} 个片段，输出JSON。
 {{
   "summary": "这个片段的中文摘要",
@@ -229,14 +250,29 @@ def analyze_long_paper_with_llm(text: str, title: str, known_terms: list, trunca
 {chunk[:9000]}
 
 只输出JSON。"""
-        raw = call_kimi("你是一个严谨的论文片段总结助手。始终输出有效JSON。", prompt, 0.2)
+        raw = call_kimi(
+            "你是一个严谨的论文片段总结助手。始终输出有效JSON。",
+            prompt,
+            0.2,
+            timeout=min(settings.llm_timeout, 24.0),
+            max_tokens=1200,
+        )
         try:
             parsed = json.loads(re.sub(r"^```json\s*|\s*```$", "", raw.strip()))
         except json.JSONDecodeError:
             parsed = {"summary": raw[:500], "keyTerms": [], "innovations": []}
-        if parsed.get("error"):
-            return local_analysis_fallback(text, known_terms, "error", str(parsed.get("error", "")))
-        chunk_summaries.append(parsed)
+        return idx, parsed
+
+    summaries: dict[int, dict] = {}
+    workers = min(settings.paper_llm_concurrency, max(1, len(chunks)))
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="paper-summary") as pool:
+        futures = [pool.submit(summarize_chunk, idx, chunk) for idx, chunk in enumerate(chunks, 1)]
+        for future in as_completed(futures):
+            idx, parsed = future.result()
+            if parsed.get("error"):
+                return local_analysis_fallback(text, known_terms, "error", str(parsed.get("error", "")))
+            summaries[idx] = parsed
+    chunk_summaries = [summaries[idx] for idx in sorted(summaries)]
 
     combined = "\n".join(
         f"片段{i+1}: {item.get('summary', '')}\n术语: {', '.join(item.get('keyTerms', []))}\n创新点: {', '.join(item.get('innovations', []))}"

@@ -85,10 +85,10 @@ class QingxiaodaMessage(BaseModel):
 
 class QingxiaodaChatRequest(BaseModel):
     model: str | None = None
-    messages: list[QingxiaodaMessage] = Field(min_length=1)
+    messages: list[QingxiaodaMessage] = Field(min_length=1, max_length=100)
     stream: StrictBool = False
-    max_tokens: int | None = Field(default=None, ge=1)
-    temperature: float | None = None
+    max_tokens: int | None = Field(default=None, ge=1, le=8192)
+    temperature: float | None = Field(default=None, ge=0, le=2)
     user: str | None = None
 
     model_config = ConfigDict(extra="allow")

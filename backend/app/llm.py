@@ -79,8 +79,21 @@ def call_llm_messages(
         return json.dumps({"error": _sanitize_error(str(e), target_key), "fallback": True})
 
 
-def call_kimi(system_prompt: str, user_prompt: str, temperature: float = 0.3) -> str:
-    return call_llm(system_prompt, user_prompt, temperature)
+def call_kimi(
+    system_prompt: str,
+    user_prompt: str,
+    temperature: float = 0.3,
+    *,
+    timeout: float | None = None,
+    max_tokens: int = 8192,
+) -> str:
+    return call_llm(
+        system_prompt,
+        user_prompt,
+        temperature,
+        timeout=timeout,
+        max_tokens=max_tokens,
+    )
 
 
 def test_llm_config(provider: str, api_url: str, api_key: str, model: str, timeout: float) -> dict:

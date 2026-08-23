@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 import re
 
-import PyPDF2
+from pypdf import PdfReader
 import pdfplumber
 
 
@@ -67,10 +67,10 @@ def _extract_with_pdfplumber(path: Path) -> list[dict]:
     return pages
 
 
-def _extract_with_pypdf2(path: Path) -> list[dict]:
+def _extract_with_pypdf(path: Path) -> list[dict]:
     pages = []
     with path.open("rb") as f:
-        reader = PyPDF2.PdfReader(f)
+        reader = PdfReader(f)
         for page_num, page in enumerate(reader.pages, 1):
             page_text = page.extract_text() or ""
             pages.append({"page": page_num, "text": page_text, "length": len(page_text)})
@@ -92,9 +92,9 @@ def extract_pdf_pages(content: bytes) -> dict:
             pages = _extract_with_pdfplumber(tmp_path)
             engine = "pdfplumber"
         except Exception as e:
-            warnings.append(f"pdfplumber 解析失败，已切换到 PyPDF2：{e}")
-            pages = _extract_with_pypdf2(tmp_path)
-            engine = "PyPDF2"
+            warnings.append(f"pdfplumber 解析失败，已切换到 pypdf：{e}")
+            pages = _extract_with_pypdf(tmp_path)
+            engine = "pypdf"
 
         text = "\n\n".join(
             f"--- 第{page['page']}页 ---\n\n{page['text']}".strip()

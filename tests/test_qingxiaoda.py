@@ -211,6 +211,25 @@ def test_stream_answer_contains_reader_workspace_link(client, monkeypatch):
     assert client.get(f"/api/reader-sessions/{match.group(1)}").status_code == 200
 
 
+def test_stream_emits_progress_heartbeat_while_work_is_running(client, monkeypatch):
+    async def slow_agent(_request):
+        await asyncio.sleep(0.04)
+        return agent_core_module.AgentResult(content="完成")
+
+    monkeypatch.setattr(qingxiaoda_module, "generate_agent_response", slow_agent)
+    monkeypatch.setattr(settings, "qxd_stream_heartbeat", 0.01)
+    response = client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"stream": True, "messages": [{"role": "user", "content": "处理一个任务"}]},
+    )
+    payloads, done = parse_sse(response.text)
+    reasoning = [item["choices"][0]["delta"].get("reasoning") for item in payloads]
+    assert "仍在处理，马上回来" in reasoning
+    assert any(item["choices"][0]["delta"].get("content") == "完成" for item in payloads)
+    assert done is True
+
+
 def test_stream_must_be_json_boolean(client):
     response = client.post(
         "/v1/chat/completions",
@@ -218,6 +237,33 @@ def test_stream_must_be_json_boolean(client):
         json={"stream": "true", "messages": [{"role": "user", "content": "你好"}]},
     )
     assert response.status_code == 422
+
+
+def test_request_bounds_reject_pathological_history_and_output_size(client):
+    too_many_messages = [{"role": "user", "content": "x"} for _ in range(101)]
+    assert client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"messages": too_many_messages},
+    ).status_code == 422
+    assert client.post(
+        "/v1/chat/completions",
+        headers=auth_headers(),
+        json={"max_tokens": 9000, "messages": [{"role": "user", "content": "x"}]},
+    ).status_code == 422
+
+
+def test_long_history_keeps_the_latest_user_instruction():
+    from app.models import QingxiaodaChatRequest
+
+    request = QingxiaodaChatRequest(messages=[
+        {"role": "user", "content": "旧材料" * 150_000},
+        {"role": "assistant", "content": "收到"},
+        {"role": "user", "content": "请解释最后这个问题"},
+    ])
+    parsed = agent_core_module.parse_conversation(request)
+    assert parsed.latest_user_text == "请解释最后这个问题"
+    assert len(parsed.all_user_text) <= 500_000
 
 
 def test_tool_role_is_accepted_and_ignored_safely(client):

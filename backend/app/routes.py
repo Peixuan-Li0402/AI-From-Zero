@@ -1,5 +1,5 @@
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
 from .analysis import PDF_LLM_CHAR_LIMIT, analyze_case_study_text, build_analysis_response, build_pdf_analysis_response
 from .chat import chat_with_context
@@ -67,10 +67,12 @@ async def health():
         "publicBaseUrlConfigured": bool(settings.public_base_url),
         "attachmentLimitMb": settings.qxd_max_attachment_mb,
         "workspaceTtlSeconds": settings.qxd_workspace_ttl,
-        "agentRuntime": "hybrid-evidence-v2",
+        "agentRuntime": "hybrid-evidence-v3",
         "realtimeSearch": settings.agent_realtime_search,
         "agentSearchTimeoutSeconds": settings.agent_search_timeout,
         "agentLlmTimeoutSeconds": settings.agent_llm_timeout,
+        "agentRequestTimeoutSeconds": settings.qxd_request_timeout,
+        "streamHeartbeatSeconds": settings.qxd_stream_heartbeat,
         "agentMaxTokens": settings.agent_max_tokens,
         "hoshino": "AI-From-Zero ready",
     }
@@ -397,3 +399,8 @@ async def index():
     if index_path.exists():
         return HTMLResponse(index_path.read_text(encoding="utf-8"))
     return HTMLResponse("<h1>AI From Zero</h1><p>欢迎！请先构建前端。</p>")
+
+
+@router.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return Response(status_code=204)

@@ -63,9 +63,17 @@ def _limit_content(content: str, max_tokens: int | None) -> tuple[str, str]:
         link_end = content.find("\n\n")
         if link_end >= 0:
             max_chars = max(max_chars, link_end + 2)
+            if len(content) > max_chars and max_tokens <= 2:
+                return content[:link_end].rstrip(), "length"
     if len(content) <= max_chars:
         return content, "stop"
-    return content[:max_chars].rstrip(), "length"
+    suffix = "\n\n（内容已按平台长度上限截断，可继续追问。）"
+    cutoff = max(1, max_chars - len(suffix))
+    candidate = content[:cutoff]
+    newline = candidate.rfind("\n")
+    if newline >= max(0, cutoff - 240):
+        candidate = candidate[:newline]
+    return candidate.rstrip() + suffix, "length"
 
 
 def _usage(prompt: str, completion: str) -> dict:
@@ -160,12 +168,24 @@ async def _stream_completion(request: QingxiaodaChatRequest, completion_id: str,
             has_focus_term=bool(extract_terms_from_text(parsed.latest_user_text)),
         )
         yield _frame(completion_id, created, {"reasoning": quick_plan.progress})
+    task = asyncio.create_task(_run_agent(request))
+    heartbeat_count = 0
     try:
-        result = await _run_agent(request)
+        while not task.done():
+            done, _ = await asyncio.wait({task}, timeout=settings.qxd_stream_heartbeat)
+            if done:
+                break
+            heartbeat_count += 1
+            heartbeat = "仍在处理，马上回来" if heartbeat_count == 1 else "正在收束结果"
+            yield _frame(completion_id, created, {"reasoning": heartbeat})
+        result = await task
     except asyncio.TimeoutError:
         result = quick_fallback_response(request, "timeout")
     except Exception:
         result = quick_fallback_response(request, "error")
+    finally:
+        if not task.done():
+            task.cancel()
     workspace_content, workspace, prefix = _workspace_content(request, result)
     content, finish_reason = _limit_content(workspace_content, request.max_tokens)
     _finalize_workspace(request, result, workspace, content, prefix)

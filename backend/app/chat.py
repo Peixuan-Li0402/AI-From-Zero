@@ -44,7 +44,10 @@ def local_chat_response(request: ChatRequest) -> dict:
     elif names:
         answer = "先看：" + "、".join(names[:8]) + "。可继续问：它在方法里起什么作用？"
     else:
-        answer = "上传论文，或点一个术语。"
+        answer = (
+            "我先接住这个问题。当前是本地模式，术语解释、论文导读和学习路径可以直接完成；"
+            "需要开放式生成、翻译或计算时，配置模型后再试一次。"
+        )
 
     return {
         "reply": answer,

@@ -42,13 +42,18 @@ class KnowledgePacket:
 
 
 _REALTIME_WORDS = (
-    "最新", "最近", "今年", "当前", "进展", "趋势", "联网", "搜索", "查找",
+    "最新", "最近", "今天", "本周", "本月", "今年", "当前", "实时", "刚发布", "进展", "趋势", "联网", "搜索", "查找",
     "arxiv", "sota", "state of the art", "2025", "2026",
 )
 _TERM_WORDS = ("解释", "概念", "是什么", "含义", "区别", "关系", "term")
 _PATH_WORDS = ("学习路径", "学习路线", "怎么学", "从零学", "roadmap")
 _PAPER_WORDS = ("下一篇", "推荐论文", "找论文", "搜论文", "论文推荐", "paper recommendation")
 _EVIDENCE_WORDS = ("原文", "证据", "第几页", "依据", "论文里", "作者说", "实验", "消融", "结论")
+_ACTION_WORDS = (
+    "帮我写", "写一个", "写一段", "实现一个", "实现这", "生成一", "翻译", "改写", "润色",
+    "调试", "修复", "排查", "计算", "求解", "证明", "推导", "总结", "概括", "设计一个", "制定一", "转换成",
+    "提取出", "列出代码", "补全代码", "重构", "执行这个任务",
+)
 
 
 def _has_any(text: str, phrases: tuple[str, ...]) -> bool:
@@ -66,6 +71,16 @@ def _clean_search_query(text: str) -> str:
     value = re.sub(r"https?://\S+", " ", value)
     value = re.sub(r"\s+", " ", value).strip(" ，。！？:：")
     return value[:160] or text[:160]
+
+
+def _looks_like_action_task(text: str) -> bool:
+    lower = text.lower()
+    if _has_any(lower, _ACTION_WORDS):
+        return True
+    return bool(re.search(
+        r"(?:write|implement|translate|debug|fix|calculate|solve|prove|derive|refactor|rewrite)\b",
+        lower,
+    ))
 
 
 def infer_learner_profile(history: list[dict], latest_text: str) -> LearnerProfile:
@@ -131,6 +146,14 @@ def route_agent_request(text: str, *, has_documents: bool, has_focus_term: bool)
             max_tokens=1000,
             progress="正在匹配论文学习路线",
         )
+    if _looks_like_action_task(text):
+        return AgentPlan(
+            intent="task",
+            realtime_search=wants_realtime,
+            use_llm=True,
+            max_tokens=1100,
+            progress="正在处理你的任务",
+        )
     if has_documents and (_has_any(lower, _EVIDENCE_WORDS) or lower.endswith(("吗", "呢", "?", "？"))):
         return AgentPlan(
             intent="evidence_qa",
@@ -146,6 +169,15 @@ def route_agent_request(text: str, *, has_documents: bool, has_focus_term: bool)
             use_llm=True,
             max_tokens=1100,
             progress="正在生成论文阅读路线",
+        )
+    if wants_realtime and any(word in lower for word in ("论文", "研究", "进展", "趋势", "arxiv", "sota")):
+        return AgentPlan(
+            intent="topic_research",
+            search_query=_clean_search_query(text),
+            realtime_search=True,
+            use_llm=True,
+            max_tokens=900,
+            progress="正在核对实时论文来源",
         )
     if has_focus_term:
         return AgentPlan(
